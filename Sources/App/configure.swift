@@ -1,10 +1,11 @@
-//import FluentSQLite
+import FluentPostgresDriver
+import Fluent
 import Vapor
 
 /// Called before your application initializes.
 public func configure(_ services: inout Services) throws {
     // Register providers first
-//    try services.register(FluentSQLiteProvider())
+    services.provider(FluentProvider())
 
     // Register routes
     services.register(Routes.self, routes)
@@ -12,21 +13,16 @@ public func configure(_ services: inout Services) throws {
     // Register middleware
     services.register(MiddlewareConfiguration.self) { container in
         var middlewares = MiddlewareConfiguration()
-        // middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
         middlewares.use(ErrorMiddleware.default(environment: container.environment)) // Catches errors and converts to HTTP response
         return middlewares
     }
 
-    // Configure a SQLite database
-//    let sqlite = try SQLiteDatabase(storage: .memory)
-
-    // Register the configured SQLite database to the database config.
-//    var databases = DatabasesConfig()
-//    databases.add(database: sqlite, as: .sqlite)
-//    services.register(databases)
+    // Configure databases
+    services.register(Databases.self, databases)
+    services.register(Database.self) { container in
+        return try container.make(Databases.self).database(.psql)!
+    }
 
     // Configure migrations
-//    var migrations = MigrationConfig()
-//    migrations.add(model: Todo.self, database: .sqlite)
-//    services.register(migrations)
+    services.register(Migrations.self, migrations)
 }
