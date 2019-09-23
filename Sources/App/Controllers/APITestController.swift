@@ -40,10 +40,10 @@ final class APITestController {
 
             Self.prepOutputFolder(on: req.eventLoop, at: outPath)
                 .flatMap { descriptor.markBuilding().save(on: database) }
-                .transform(to: Self.openAPIDoc(on: req.eventLoop, from: source))
+                .flatMap { Self.openAPIDoc(on: req.eventLoop, from: source) }
                 .flatMap { openAPIDoc in Self.produceAPITestPackage(on: req.eventLoop, given: openAPIDoc, to: outPath) }
                 .flatMap { descriptor.markRunning().save(on: database) }
-                .transform(to: Self.runAPITestPackage(on: req.eventLoop, at: outPath))
+                .flatMap { Self.runAPITestPackage(on: req.eventLoop, at: outPath) }
                 .flatMap { descriptor.markPassed().save(on: database) }
                 .whenFailure { error in
                     req.logger.error("Failed to run tests",
