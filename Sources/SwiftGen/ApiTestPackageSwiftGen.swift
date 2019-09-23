@@ -118,7 +118,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                     .requestBody
                     .flatMap { try document(from: $0, logger: logger) }
             } catch let err {
-                logger?.error(context: "Parsing request document for \(httpVerb.rawValue) at \(path.rawValue)",
+                logger?.warning(context: "Parsing request document for \(httpVerb.rawValue) at \(path.rawValue)",
                     message: String(describing: err))
                 requestDocument = nil
             }
@@ -419,7 +419,7 @@ func documents(from responses: OpenAPI.Response.Map,
         do {
             example = try jsonResponse.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
         } catch let err {
-            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             example = nil
         }
@@ -440,7 +440,7 @@ func documents(from responses: OpenAPI.Response.Map,
                 testExampleFunc = nil
             }
         } catch let err {
-            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             testExampleFunc = nil
         }
@@ -458,7 +458,7 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                      example: example,
                                                                      testExampleFunc: testExampleFunc)
         } catch let err {
-            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             continue
         }
