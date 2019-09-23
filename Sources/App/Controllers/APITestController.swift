@@ -2,6 +2,7 @@ import Vapor
 import SwiftGen
 import OpenAPIKit
 import FluentPostgresDriver
+import struct Logging.Logger
 
 /// Controls basic CRUD operations on `Todo`s.
 final class APITestController {
@@ -18,17 +19,27 @@ final class APITestController {
         self.database = database
     }
 
-    /// Returns a list of all `Todo`s.
-//    func index(_ req: Request) throws -> Future<[Todo]> {
-//        return Todo.query(on: req).all()
+    /// Returns a list of all `APITestDescriptor`s.
+    func index(_ req: Request) throws -> EventLoopFuture<[APITestDescriptor]> {
+        return APITestDescriptor.query(on: database).with(\.$messages).all()
+    }
+
+//    func show(_ req: Request) throws -> EventLoopFuture<APITestDescriptor> {
+//
 //    }
 
+    /// Create an `APITestDescriptor` and run a new test suite.
     func create(_ req: Request) throws -> EventLoopFuture<Response> {
         let reqUUIDGuess = req
             .logger[metadataKey: "uuid"]
             .map { $0.description }
             .flatMap(UUID.init(uuidString:))
         let descriptor = APITestDescriptor(id: reqUUIDGuess ?? UUID())
+
+        let logger = Logger(systemLogger: req.logger,
+                            descriptor: descriptor,
+                            eventLoop: req.eventLoop,
+                            database: database)
 
         let savedDescriptor = descriptor.save(on: database)
 
@@ -41,9 +52,9 @@ final class APITestController {
             Self.prepOutputFolder(on: req.eventLoop, at: outPath)
                 .flatMap { descriptor.markBuilding().save(on: database) }
                 .flatMap { Self.openAPIDoc(on: req.eventLoop, from: source) }
-                .flatMap { openAPIDoc in Self.produceAPITestPackage(on: req.eventLoop, given: openAPIDoc, to: outPath) }
+                .flatMap { openAPIDoc in Self.produceAPITestPackage(on: req.eventLoop, given: openAPIDoc, to: outPath, logger: logger) }
                 .flatMap { descriptor.markRunning().save(on: database) }
-                .flatMap { Self.runAPITestPackage(on: req.eventLoop, at: outPath) }
+                .flatMap { Self.runAPITestPackage(on: req.eventLoop, at: outPath, logger: logger) }
                 .flatMap { descriptor.markPassed().save(on: database) }
                 .whenFailure { error in
                     req.logger.error("Failed to run tests",
@@ -142,12 +153,49 @@ extension APITestController {
 
     static func produceAPITestPackage(on loop: EventLoop,
                                       given openAPIDoc: OpenAPI.Document,
-                                      to outputPath: String) -> EventLoopFuture<Void> {
-        loop.submit { SwiftGen.produceAPITestPackage(from: openAPIDoc, outputTo: outputPath) }
+                                      to outputPath: String,
+                                      logger: Logger) -> EventLoopFuture<Void> {
+        loop.submit { SwiftGen.produceAPITestPackage(from: openAPIDoc, outputTo: outputPath, logger: logger) }
     }
 
     static func runAPITestPackage(on loop: EventLoop,
-                                  at outputPath: String) -> EventLoopFuture<Void> {
-        loop.submit { try SwiftGen.runAPITestPackage(at: outputPath) }
+                                  at outputPath: String,
+                                  logger: Logger) -> EventLoopFuture<Void> {
+        loop.submit { try SwiftGen.runAPITestPackage(at: outputPath, logger: logger) }
+    }
+}
+
+extension APITestController {
+    final class Logger: SwiftGen.Logger {
+        let systemLogger: Logging.Logger
+        let descriptor: APITestDescriptor
+        let eventLoop: EventLoop
+        let database: Database
+
+        init(systemLogger: Logging.Logger,
+             descriptor: APITestDescriptor,
+             eventLoop: EventLoop,
+             database: Database) {
+            self.systemLogger = systemLogger
+            self.descriptor = descriptor
+            self.eventLoop = eventLoop
+            self.database = database
+        }
+
+        public func error(context: String, message: String) {
+            systemLogger.error("\(message)", metadata: ["context": .string(context)])
+            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+                                              messageType: .error,
+                                              context: context.isEmpty ? nil : context,
+                                              message: message).save(on: self.database) }
+        }
+
+        public func warning(context: String, message: String) {
+            systemLogger.warning("\(message)", metadata: ["context": .string(context)])
+            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+                                                      messageType: .warning,
+                                                      context: context.isEmpty ? nil : context,
+                                                      message: message).save(on: self.database) }
+        }
     }
 }

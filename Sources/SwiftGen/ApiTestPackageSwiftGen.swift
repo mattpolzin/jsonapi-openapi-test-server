@@ -9,30 +9,40 @@ import Foundation
 import OpenAPIKit
 import JSONAPISwiftGen
 
+public protocol Logger {
+    func error(context: String, message: String)
+    func warning(context: String, message: String)
+}
+
 typealias HttpVerb = OpenAPI.HttpVerb
 
 public func produceAPITestPackage(from openAPIData: Data,
-                                  outputTo outPath: String) throws {
+                                  outputTo outPath: String,
+                                  logger: Logger? = nil) throws {
     let jsonDecoder = JSONDecoder()
 
     let openAPIStructure = try jsonDecoder.decode(OpenAPI.Document.self, from: openAPIData)
 
     produceAPITestPackage(from: openAPIStructure,
-                          outputTo: outPath)
+                          outputTo: outPath,
+                          logger: logger)
 }
 
 public func produceAPITestPackage(from openAPIDocument: OpenAPI.Document,
-                                  outputTo outPath: String) {
+                                  outputTo outPath: String,
+                                  logger: Logger? = nil) {
     let pathItems = openAPIDocument.paths
 
     produceAPITestPackage(for: pathItems,
                           originatingAt: openAPIDocument.servers.first!,
-                          outputTo: outPath)
+                          outputTo: outPath,
+                          logger: logger)
 }
 
 public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                                   originatingAt server: OpenAPI.Server,
-                                  outputTo outPath: String) {
+                                  outputTo outPath: String,
+                                  logger: Logger? = nil) {
 
     let testDir = outPath + "/Tests/GeneratedAPITests"
     let resourceObjDir = testDir + "/resourceObjects"
@@ -99,18 +109,17 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                                               for: httpVerb,
                                               at: path,
                                               on: server,
-                                              given: parameters.compactMap { $0.a })
+                                              given: parameters.compactMap { $0.a },
+                                              logger: logger)
 
             let requestDocument: DataDocumentSwiftGen?
             do {
                 try requestDocument = operation
                     .requestBody
-                    .flatMap { try document(from: $0) }
+                    .flatMap { try document(from: $0, logger: logger) }
             } catch let err {
-                print("===")
-                print("-> " + String(describing: err))
-                print("-- While parsing a request document for \(httpVerb.rawValue) at \(path.rawValue)")
-                print("===")
+                logger?.error(context: "Parsing request document for \(httpVerb.rawValue) at \(path.rawValue)",
+                    message: String(describing: err))
                 requestDocument = nil
             }
 
@@ -274,13 +283,6 @@ func apiDocumentsBlock<T: Sequence>(request: APIRequestTestSwiftGen?,
     return verbBlock
 }
 
-/*
- print("===")
- print("-> " + String(describing: error))
- print("-- While creating \(httpVerb.rawValue) example test function.")
- print("===")
- */
-
 extension Decl {
     func extending(namespace: String) -> Decl {
         return BlockTypeDecl.extension(typeName: namespace,
@@ -397,7 +399,8 @@ func documents(from responses: OpenAPI.Response.Map,
                for httpVerb: HttpVerb,
                at path: OpenAPI.PathComponents,
                on server: OpenAPI.Server,
-               given params: [OpenAPI.PathItem.Parameter]) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
+               given params: [OpenAPI.PathItem.Parameter],
+               logger: Logger?) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
     var responseDocuments = [OpenAPI.Response.StatusCode: DataDocumentSwiftGen]()
     for (statusCode, response) in responses {
 
@@ -416,10 +419,8 @@ func documents(from responses: OpenAPI.Response.Map,
         do {
             example = try jsonResponse.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
         } catch let err {
-            print("===")
-            print("-> " + String(describing: err))
-            print("-- While parsing a response document for \(httpVerb.rawValue) at \(path.rawValue)")
-            print("===")
+            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+                message: String(describing: err))
             example = nil
         }
 
@@ -439,15 +440,14 @@ func documents(from responses: OpenAPI.Response.Map,
                 testExampleFunc = nil
             }
         } catch let err {
-            print("===")
-            print("-> " + String(describing: err))
-            print("-- While parsing a response document for \(httpVerb.rawValue) at \(path.rawValue)")
-            print("===")
+            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+                message: String(describing: err))
             testExampleFunc = nil
         }
 
         guard case .object = responseSchema else {
-            print("Found non-object response schema root (expected JSON:API 'data' object). Skipping \(String(describing: responseSchema.jsonTypeFormat?.jsonType)).")
+            logger?.warning(context: "",
+                            message: "Found non-object response schema root (expected JSON:API 'data' object). Skipping \(String(describing: responseSchema.jsonTypeFormat?.jsonType)).")
             continue
         }
 
@@ -458,23 +458,23 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                      example: example,
                                                                      testExampleFunc: testExampleFunc)
         } catch let err {
-            print("===")
-            print("-> " + String(describing: err))
-            print("-- While parsing a response document for \(httpVerb.rawValue) at \(path.rawValue)")
-            print("===")
+            logger?.error(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+                message: String(describing: err))
             continue
         }
     }
     return responseDocuments
 }
 
-func document(from request: OpenAPI.Request) throws -> DataDocumentSwiftGen? {
+func document(from request: OpenAPI.Request,
+              logger: Logger?) throws -> DataDocumentSwiftGen? {
     guard let requestSchema = request.content[.json]?.schema.b else {
         return nil
     }
 
     guard case .object = requestSchema else {
-        print("Found non-object request schema root (expected JSON:API 'data' object). Skipping \(String(describing: requestSchema.jsonTypeFormat?.jsonType))")
+        logger?.warning(context: "",
+                        message: "Found non-object request schema root (expected JSON:API 'data' object). Skipping \(String(describing: requestSchema.jsonTypeFormat?.jsonType))")
         return nil
     }
 

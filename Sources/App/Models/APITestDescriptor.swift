@@ -4,6 +4,7 @@ import FluentKit
 import SQLKit
 
 final class APITestDescriptor: Model {
+    typealias IDValue = UUID
     static let schema = "api_test_descriptors"
 
     @ID(key: "id")

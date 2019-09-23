@@ -23,8 +23,11 @@ public func prepOutFolder(_ outPath: String) {
 //    }
 //}
 
-public func runAPITestPackage(at path: String) throws {
-    guard shell("cd '\(path)' && swift test > test.log 2>&1") == shellSuccessCode else {
+public func runAPITestPackage(at path: String, logger: Logger) throws {
+    let (exitCode, stdout) = shell("cd '\(path)' && swift test 2>&1")
+
+    guard exitCode == shellSuccessCode else {
+        logger.error(context: "Failed Testing Details", message: stdout)
         throw TestPackageSwiftError.executionFailed
     }
 }
@@ -37,18 +40,24 @@ public enum TestPackageSwiftError: Swift.Error {
 }
 
 @discardableResult
-func shell(_ command: String) -> Int32 {
+func shell(_ command: String) -> (Int32, String) {
     let task = Process()
     task.launchPath = "/bin/bash"
     task.arguments = ["-c", command]
 
-//    let pipe = Pipe()
-//    task.standardOutput = pipe
+    let pipe = Pipe()
+    task.standardOutput = pipe
     task.launch()
 
-//    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-//    let output: String = NSString(data: data, encoding: String.Encoding.utf8.rawValue)! as String
+    var data = Data()
+    var newData: Data
+    repeat {
+        newData = pipe.fileHandleForReading.availableData
+        data += newData
+    } while !newData.isEmpty
+
+    let output: String = String(data: data, encoding: .utf8)!
 
     task.waitUntilExit()
-    return task.terminationStatus
+    return (task.terminationStatus, output)
 }

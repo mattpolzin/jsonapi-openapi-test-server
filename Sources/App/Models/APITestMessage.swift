@@ -16,17 +16,21 @@ final class APITestMessage: Model {
     @Field(key: "message_type")
     var messageType: MessageType
 
+    @Field(key: "context")
+    var context: String?
+
     @Field(key: "message")
     var message: String
 
     @Parent(key: "api_test_descriptor_id")
     var apiTestDescriptor: APITestDescriptor
 
-    init(testDescriptor: APITestDescriptor, messageType: MessageType, message: String) {
+    init(testDescriptor: APITestDescriptor, messageType: MessageType, context: String?, message: String) throws {
         id = UUID()
         createdAt = Date()
-        apiTestDescriptor = testDescriptor
+        $apiTestDescriptor.id = try testDescriptor.requireID()
         self.messageType = messageType
+        self.context = context
         self.message = message
     }
 
@@ -58,6 +62,7 @@ struct InitAPITestMessageMigration: Migration {
             .field("id", .uuid, .identifier(auto: false))
             .field("created_at", .datetime, .required)
             .field("message_type", .string, .required)
+            .field("context", .string)
             .field("message", .string, .required)
             .field("api_test_descriptor_id", .uuid,
                    .custom(SQLColumnConstraint.references(APITestDescriptor.schema, "id",

@@ -19,6 +19,7 @@ public func routes(_ container: Container) throws -> Routes {
                                                    openAPISource: .detect(),
                                                    database: container.make())
         routes.post("api_test", use: testController.create)
+        routes.get("api_test", use: testController.index)
 
         // Example of configuring a controller
         //    let todoController = TodoController()
