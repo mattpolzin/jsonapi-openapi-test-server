@@ -1,4 +1,4 @@
-# You can set the Swift version to what you need for your app. Versions can be found here: https://hub.docker.com/_/swift
+
 FROM swift:5.1 as builder
 
 # For local build, add `--build-arg env=docker`
@@ -13,8 +13,11 @@ COPY . .
 RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
 RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
 
-# Production image
-FROM ubuntu:18.04
+# ------------------------------------------------------------------------------
+
+## Production image
+
+FROM swift:5.1
 ARG env
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \ 
@@ -23,10 +26,33 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 WORKDIR /app
 COPY --from=builder /build/bin/Run .
 COPY --from=builder /build/lib/* /usr/lib/
-# Uncomment the next line if you need to load resources from the `Public` directory
-#COPY --from=builder /app/Public ./Public
-# Uncomment the next line if you are using Leaf
-#COPY --from=builder /app/Resources ./Resources
+
+##
+## ENV vars
+##
+
 ENV ENVIRONMENT=$env
+
+# A local file from which to read the OpenAPI documentation.
+#   IMPORTANT: Only specify one of [API_TEST_IN_FILE, API_TEST_IN_URL]
+# ENV API_TEST_IN_FILE
+
+# A remote URL from which to read the OpenAPI documentation.
+#   IMPORTANT: Only specify one of [API_TEST_IN_FILE, API_TEST_IN_URL]
+# ENV API_TEST_IN_URL
+
+# Basic Auth credentials for API_TEST_IN_URL. Do not specify if no auth needed.
+# ENV API_TEST_USERNAME
+# ENV API_TEST_PASSWORD
+
+# Path on local filesystem to which to write generated API test files. Required.
+ENV API_TEST_OUT_PATH
+
+# Postgres Database URL. Required.
+ENV API_TEST_DATABASE_URL
+
+##
+## ENTRYPOINT
+##
 
 ENTRYPOINT ./Run serve --env $ENVIRONMENT --hostname 0.0.0.0 --port 80

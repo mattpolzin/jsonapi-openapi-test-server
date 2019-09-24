@@ -1,14 +1,16 @@
 import Vapor
 import Foundation
 import FluentKit
-import SQLKit
 
 final class APITestDescriptor: Model {
-    typealias IDValue = UUID
     static let schema = "api_test_descriptors"
 
+    // bit of a hacky way to track whether this resource
+    // was created fresh or loaded from the database.
+    private let isLoadedFromDb: Bool
+
     @ID(key: "id")
-    var id: UUID
+    var id: UUID?
 
     @Field(key: "created_at")
     var createdAt: Date
@@ -27,6 +29,7 @@ final class APITestDescriptor: Model {
     /// then logging related to the originating request can be easily tied
     /// to logging related to the separate testing tasks.
     init(id: UUID) {
+        isLoadedFromDb = false
         self.id = id
         createdAt = Date()
         finishedAt = nil
@@ -35,7 +38,9 @@ final class APITestDescriptor: Model {
 
     /// Used to construct Model from Database
     @available(*, deprecated, renamed: "init(id:)")
-    init() {}
+    init() {
+        isLoadedFromDb = true
+    }
 }
 
 extension APITestDescriptor {
@@ -80,23 +85,32 @@ extension APITestDescriptor {
     }
 }
 
-/// Allows `APITestDescriptor` to be encoded to and decoded from HTTP messages.
-extension APITestDescriptor: Content { }
+extension APITestDescriptor {
+    func serializable() throws -> (API.APITestDescriptor, [API.APITestMessage]) {
+        let relatives: [API.APITestMessage]
+
+        if isLoadedFromDb {
+            relatives = try $messages.eagerLoaded().map { try $0.serializable() }
+        } else {
+            relatives = []
+        }
+
+        let attributes = API.APITestDescriptor.Attributes(createdAt: .init(value: createdAt),
+                                                      finishedAt: .init(value: finishedAt),
+                                                      status: .init(value: status))
+
+        let relationships = API.APITestDescriptor.Relationships(messages: .init(resourceObjects: relatives))
+
+        return (
+            API.APITestDescriptor(id: .init(rawValue: try requireID()),
+                                  attributes: attributes,
+                                  relationships: relationships,
+                                  meta: .none,
+                                  links: .none),
+            relatives
+        )
+    }
+}
 
 /// Allows `APITestDescriptor` to be used as a dynamic parameter in route definitions.
 //extension APITestDescriptor: Parameter { }
-
-struct InitAPITestDescriptorMigration: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("api_test_descriptors")
-            .field("id", .uuid, .identifier(auto: false))
-            .field("created_at", .datetime, .required)
-            .field("finished_at", .datetime)
-            .field("status", .string, .required)
-            .create()
-    }
-
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("api_test_descriptors").delete()
-    }
-}

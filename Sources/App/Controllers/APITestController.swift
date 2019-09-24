@@ -3,6 +3,7 @@ import SwiftGen
 import OpenAPIKit
 import FluentPostgresDriver
 import struct Logging.Logger
+import JSONAPI
 
 /// Controls basic CRUD operations on `Todo`s.
 final class APITestController {
@@ -20,8 +21,9 @@ final class APITestController {
     }
 
     /// Returns a list of all `APITestDescriptor`s.
-    func index(_ req: Request) throws -> EventLoopFuture<[APITestDescriptor]> {
-        return APITestDescriptor.query(on: database).with(\.$messages).all()
+    func index(_ req: Request) throws -> EventLoopFuture<API.BatchAPITestDescriptorResponse> {
+        // TODO: only include if requested
+        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: database), includeMessages: true)
     }
 
 //    func show(_ req: Request) throws -> EventLoopFuture<APITestDescriptor> {
@@ -63,7 +65,15 @@ final class APITestController {
             }
         }
 
-        return savedDescriptor.flatMap { descriptor.encodeResponse(status: .accepted, for: req) }
+        return savedDescriptor.flatMapThrowing { _ in
+            API.SingleAPITestDescriptorResponse(
+                API.SingleDocument<API.APITestDescriptor, NoIncludes>(apiDescription: .none,
+                                                                      body: .init(resourceObject: try descriptor.serializable().0),
+                                                                      includes: .none,
+                                                                      meta: .none,
+                                                                      links: .none)
+            )
+        }.flatMap { $0.encodeResponse(status: .accepted, for: req) }
     }
 
     /// Deletes a parameterized `Todo`.
