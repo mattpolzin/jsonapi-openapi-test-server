@@ -55,7 +55,12 @@ extension Environment {
     /// Specify the location on the local file system where test files will be written.
     /// If not specified, `~/api_test` will be used.
     static var outPath: String {
-        Environment.get("API_TEST_OUT_PATH") ?? "~/api_test"
+        let defaultDir = FileManager.default
+            .homeDirectoryForCurrentUser
+            .appendingPathComponent("api_test")
+            .path
+
+        return Environment.get("API_TEST_OUT_PATH") ?? defaultDir
     }
 }
 
@@ -63,15 +68,16 @@ extension Environment {
 extension Environment {
     /// Required Postgres URL.
     static func dbConfig() throws -> PostgresConfiguration {
-        guard let config = Environment.get("API_TEST_DATABASE_URL")
+        let envVar = Environment.get("API_TEST_DATABASE_URL")
+        guard let config = envVar
             .flatMap(URL.init(string:))
             .flatMap(PostgresConfiguration.init(url:)) else {
-                throw DatabaseError.invalidUrl
+                throw DatabaseError.invalidUrl(envVar ?? "Not Set")
         }
         return config
     }
 
     enum DatabaseError: Swift.Error {
-        case invalidUrl
+        case invalidUrl(String)
     }
 }

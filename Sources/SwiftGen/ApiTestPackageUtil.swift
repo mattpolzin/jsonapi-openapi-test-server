@@ -7,13 +7,13 @@
 
 import Foundation
 
-public func prepOutFolder(_ outPath: String) {
+public func prepOutFolder(_ outPath: String, logger: Logger) throws {
     try? FileManager.default.removeItem(atPath: outPath + "/Tests/GeneratedAPITests")
 
     if !FileManager.default.fileExists(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects") {
-        try! FileManager.default.createDirectory(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",
-                                                 withIntermediateDirectories: true,
-                                                 attributes: nil)
+        try FileManager.default.createDirectory(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",
+                                                withIntermediateDirectories: true,
+                                                attributes: nil)
     }
 }
 

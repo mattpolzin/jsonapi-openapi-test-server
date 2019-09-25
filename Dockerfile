@@ -11,7 +11,17 @@ RUN apt-get -qq update && apt-get install -y \
 WORKDIR /app
 COPY . .
 RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
-RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
+
+##
+# RELEASE
+# RUN swift build -c release \
+#  && mv `swift build -c release --show-bin-path` /build/bin
+#
+##
+# DEBUG
+RUN swift build -c release -Xswiftc -g -Xswiftc -DDEBUG \
+  && mv `swift build -c release --show-bin-path` /build/bin
+##
 
 # ------------------------------------------------------------------------------
 
@@ -20,7 +30,7 @@ RUN swift build -c release && mv `swift build -c release --show-bin-path` /build
 FROM swift:5.1
 ARG env
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \ 
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libatomic1 libicu60 libxml2 libcurl4 libz-dev libbsd0 tzdata \
   && rm -r /var/lib/apt/lists/*
 WORKDIR /app
@@ -45,14 +55,21 @@ ENV ENVIRONMENT=$env
 # ENV API_TEST_USERNAME
 # ENV API_TEST_PASSWORD
 
-# Path on local filesystem to which to write generated API test files. Required.
-ENV API_TEST_OUT_PATH
+# Path on local filesystem to which to write generated API test files.
+# Optional. If not specified, defaults to ~/api_test
+# ENV API_TEST_OUT_PATH
 
 # Postgres Database URL. Required.
-ENV API_TEST_DATABASE_URL
+# ENV API_TEST_DATABASE_URL
 
 ##
-## ENTRYPOINT
+## Serve (default command)
 ##
 
-ENTRYPOINT ./Run serve --env $ENVIRONMENT --hostname 0.0.0.0 --port 80
+# --env
+# The environment to start up in. anything is valid, but 'production', 'development', and 'testing' have special meaning.
+
+# --log
+# The log-level. One of case "trace", "debug", "info", "notice", "warning", "error", "critical"
+
+CMD ./Run serve --env $ENVIRONMENT --hostname 0.0.0.0 --port 80

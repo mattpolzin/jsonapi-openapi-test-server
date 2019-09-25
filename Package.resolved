@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "9d2b16ab8d47b3e640679cc8f6b41d2c7c5d2d8d",
+          "revision": "0c8da80aaddf563c11c5e62d82cb76e17ad091b9",
           "version": null
         }
       },
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-kit.git",
         "state": {
           "branch": null,
-          "revision": "74d49fd4dcd9e2e47bb56f63ebaf27ea60706a6b",
-          "version": "2.0.0-alpha.2"
+          "revision": "2cdd00a798430625f403d5ea38d25a75f3333267",
+          "version": "2.0.0-alpha.2.1"
         }
       },
       {
@@ -221,9 +221,9 @@
         "package": "SourceKitten",
         "repositoryURL": "https://github.com/jpsim/SourceKitten.git",
         "state": {
-          "branch": null,
-          "revision": "35c9e0e437592661a51b160d80a4feaa5d4630d1",
-          "version": "0.24.0"
+          "branch": "swift-5.1",
+          "revision": "27d3b393c299d47bab4a815a9938a966f49f3f19",
+          "version": null
         }
       },
       {
@@ -233,6 +233,15 @@
           "branch": null,
           "revision": "354c843f7868eaf93a84b766d652fac8b61d86dd",
           "version": "3.0.0-alpha.1.3"
+        }
+      },
+      {
+        "package": "swift-backtrace",
+        "repositoryURL": "https://github.com/ianpartridge/swift-backtrace.git",
+        "state": {
+          "branch": null,
+          "revision": "eaf2cef011c0c23d1701aa60b364def8015dc3c7",
+          "version": "1.1.1"
         }
       },
       {
@@ -321,8 +330,8 @@
         "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
         "state": {
           "branch": null,
-          "revision": "f43166a8e18fdd0857f29e303b1bb79a5428bca0",
-          "version": "4.9.0"
+          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
+          "version": "5.0.1"
         }
       },
       {

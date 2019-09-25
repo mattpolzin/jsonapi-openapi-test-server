@@ -11,6 +11,7 @@ final class APITestController {
     let outputPath: String
     let openAPISource: OpenAPISource
     let database: Database
+    let testEventLoopGroup: MultiThreadedEventLoopGroup
 
     init(outputPath: String,
          openAPISource: OpenAPISource,
@@ -18,6 +19,11 @@ final class APITestController {
         self.outputPath = outputPath
         self.openAPISource = openAPISource
         self.database = database
+        self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    }
+
+    deinit {
+        try! testEventLoopGroup.syncShutdownGracefully()
     }
 
     /// Returns a list of all `APITestDescriptor`s.
@@ -29,6 +35,10 @@ final class APITestController {
 //    func show(_ req: Request) throws -> EventLoopFuture<APITestDescriptor> {
 //
 //    }
+
+    private func testEventLoop() -> EventLoop {
+        return testEventLoopGroup.next()
+    }
 
     /// Create an `APITestDescriptor` and run a new test suite.
     func create(_ req: Request) throws -> EventLoopFuture<Response> {
@@ -49,18 +59,21 @@ final class APITestController {
 
             guard let source = self?.openAPISource,
                 let database = self?.database,
-                let outPath = self?.outputPath else { return }  // this just happens if the controller has been released from memory
+                let outPath = self?.outputPath,
+                let eventLoop = self?.testEventLoop() else { return }  // this just happens if the controller has been released from memory
 
-            Self.prepOutputFolder(on: req.eventLoop, at: outPath)
+            Self.prepOutputFolder(on: eventLoop, at: outPath, logger: logger)
                 .flatMap { descriptor.markBuilding().save(on: database) }
-                .flatMap { Self.openAPIDoc(on: req.eventLoop, from: source) }
-                .flatMap { openAPIDoc in Self.produceAPITestPackage(on: req.eventLoop, given: openAPIDoc, to: outPath, logger: logger) }
+                .flatMap { Self.openAPIDoc(on: eventLoop, from: source) }
+                .flatMap { openAPIDoc in Self.produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: outPath, logger: logger) }
                 .flatMap { descriptor.markRunning().save(on: database) }
-                .flatMap { Self.runAPITestPackage(on: req.eventLoop, at: outPath, logger: logger) }
+                .flatMap { Self.runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
                 .flatMap { descriptor.markPassed().save(on: database) }
                 .whenFailure { error in
                     req.logger.error("Failed to run tests",
                                      metadata: ["error": .stringConvertible(String(describing: error))])
+                    // following is tmp to workaround above metadata not being dumped to console with previous call:
+                    req.logger.error("\(String(describing: error))")
                     let _ = descriptor.markFailed().save(on: database)
             }
         }
@@ -116,9 +129,10 @@ extension APITestController {
 
 extension APITestController {
     static func prepOutputFolder(on loop: EventLoop,
-                                 at outputPath: String) -> EventLoopFuture<Void> {
+                                 at outputPath: String,
+                                 logger: Logger) -> EventLoopFuture<Void> {
 
-        loop.submit { prepOutFolder(outputPath) }
+        loop.submit { try prepOutFolder(outputPath, logger: logger) }
     }
 
     static func openAPIDoc(on loop: EventLoop,
