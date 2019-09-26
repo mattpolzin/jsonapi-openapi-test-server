@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/swift-server/async-http-client.git",
         "state": {
           "branch": null,
-          "revision": "1b31c5a4e381f0a7119c9a41d814cf8f3183a9f7",
-          "version": "1.0.0-alpha.3"
+          "revision": "d84a1da59e0fa879cde27e01cdf9f079208cc0cc",
+          "version": "1.0.0-alpha.4"
         }
       },
       {
@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "0c8da80aaddf563c11c5e62d82cb76e17ad091b9",
+          "revision": "d8315ff3c4bc8c0571ad75e3709233199272e115",
           "version": null
         }
       },
@@ -221,8 +221,8 @@
         "package": "SourceKitten",
         "repositoryURL": "https://github.com/jpsim/SourceKitten.git",
         "state": {
-          "branch": "swift-5.1",
-          "revision": "27d3b393c299d47bab4a815a9938a966f49f3f19",
+          "branch": "master",
+          "revision": "3660bae30cdfd81af4e0577d17145bab81a23694",
           "version": null
         }
       },
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/apple/swift-llbuild.git",
         "state": {
           "branch": null,
-          "revision": "f1c9ad9a253cdf1aa89a7f5c99c30b4513b06ddb",
-          "version": "0.1.1"
+          "revision": "f73b84bc1525998e5e267f9d830c1411487ac65e",
+          "version": "0.2.0"
         }
       },
       {
@@ -312,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-package-manager.git",
         "state": {
           "branch": null,
-          "revision": "8656a25cb906c1896339f950ac960ee1b4fe8034",
-          "version": "0.4.0"
+          "revision": "9abcc2260438177cecd7cf5185b144d13e74122b",
+          "version": "0.5.0"
         }
       },
       {
