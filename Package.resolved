@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
         "state": {
           "branch": null,
-          "revision": "7824bd8f686762d47eafa3fed6df810d5b13c7fd",
-          "version": "1.0.0"
+          "revision": "7e28cd26069ab7082616b7aae8041f7af747587c",
+          "version": "2.1.0"
         }
       },
       {
@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "d8315ff3c4bc8c0571ad75e3709233199272e115",
+          "revision": "07b672c732d5ef1488ce4c8572c90d7fbc74ad71",
           "version": null
         }
       },
@@ -221,9 +221,9 @@
         "package": "SourceKitten",
         "repositoryURL": "https://github.com/jpsim/SourceKitten.git",
         "state": {
-          "branch": "master",
-          "revision": "3660bae30cdfd81af4e0577d17145bab81a23694",
-          "version": null
+          "branch": null,
+          "revision": "cc1f16acc70630d27498e81078789f5fa55d7463",
+          "version": "0.26.0"
         }
       },
       {

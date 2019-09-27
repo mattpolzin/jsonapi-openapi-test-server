@@ -17,14 +17,27 @@ public func prepOutFolder(_ outPath: String, logger: Logger) throws {
     }
 }
 
-//public func compileAPITestPackage(at path: String) throws {
-//    guard shell("cd '\(path)' && swift build > build.log 2>&1") == shellSuccessCode else {
-//        throw TestPackageSwiftError.compilationFailed
-//    }
-//}
-
 public func runAPITestPackage(at path: String, logger: Logger) throws {
     let (exitCode, stdout) = shell("cd '\(path)' && swift test 2>&1")
+
+    do {
+        try stdout.write(toFile: path + "/api_tests.log",
+                     atomically: true,
+                     encoding: .utf8)
+    } catch let error {
+        logger.warning(context: "While writing test logs to file", message: String(describing: error))
+    }
+
+    let testOutput = stdout.split(separator: "\n")
+
+    let failedTestLines = testOutput.filter { $0.contains(" failed: ") }
+
+    guard failedTestLines.count == 0 else {
+        for line in failedTestLines {
+            logger.error(context: "Test Case Failed", message: String(line))
+        }
+        throw TestPackageSwiftError.testsFailed
+    }
 
     guard exitCode == shellSuccessCode else {
         logger.error(context: "Failed Testing Details", message: stdout)
@@ -37,6 +50,7 @@ let shellSuccessCode: Int32 = 0
 public enum TestPackageSwiftError: Swift.Error {
 //    case compilationFailed
     case executionFailed
+    case testsFailed
 }
 
 @discardableResult

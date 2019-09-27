@@ -57,10 +57,11 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
 
     // write test helper to file
     let testHelperContents = try! [
-        Import(module: "Foundation") as Decl,
-        Import(module: "JSONAPI") as Decl,
-        Import(module: "AnyCodable") as Decl,
-        Import(module: "XCTest") as Decl,
+        Import.Foundation as Decl,
+        Import.JSONAPI as Decl,
+        Import.AnyCodable as Decl,
+        Import.XCTest as Decl,
+        Import.FoundationNetworking,
         APIRequestTestSwiftGen.testFuncDecl
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
@@ -306,10 +307,10 @@ func writeAPIFile<T: Sequence>(toPath path: String,
         .extending(namespace: namespace)
 
     let outputFileContents = try! [
-        Import(module: "Foundation") as Decl,
-        Import(module: "JSONAPI") as Decl,
-        Import(module: "AnyCodable") as Decl,
-        Import(module: "XCTest") as Decl,
+        Import.Foundation as Decl,
+        Import.JSONAPI as Decl,
+        Import.AnyCodable as Decl,
+        Import.XCTest as Decl,
         apiDecl
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
@@ -331,7 +332,7 @@ func writeFile<T: TypedSwiftGenerator>(toPath path: String,
                                        resourceObject.decls)
 
     let outputFileContents = try! ([
-        Import(module: "JSONAPI"),
+        Import.JSONAPI,
         decl
         ] as [Decl])
         .map { try $0.formattedSwiftCode() }
@@ -425,8 +426,13 @@ func documents(from responses: OpenAPI.Response.Map,
         }
 
         let testExampleFunc: OpenAPIExampleTestSwiftGen?
-        do {
-            if let parameterValues = jsonResponse.vendorExtensions["x-testParameters"]?.value as? OpenAPI.PathItem.Parameter.ValueMap,
+        parseExample: do {
+            guard let paramatersExtension = jsonResponse.vendorExtensions["x-testParameters"]?.value else {
+                testExampleFunc = nil
+                break parseExample
+            }
+
+            if let parameterValues = paramatersExtension as? OpenAPI.PathItem.Parameter.ValueMap,
                 example != nil {
 
                 testExampleFunc = try OpenAPIExampleTestSwiftGen(server: server,
@@ -437,6 +443,7 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                  responseBodyType: .def(.init(name: responseBodyTypeName)),
                                                                  expectedHttpStatus: statusCode)
             } else {
+                logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)", message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary.")
                 testExampleFunc = nil
             }
         } catch let err {
@@ -495,7 +502,7 @@ let package = Package(
     products: [],
     dependencies: [
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "1.0.0"))
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "2.0.0"))
     ],
     targets: [
         .testTarget(

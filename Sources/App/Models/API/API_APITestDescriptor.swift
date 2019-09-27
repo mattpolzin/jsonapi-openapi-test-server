@@ -9,6 +9,7 @@ import Foundation
 import JSONAPI
 import Poly
 import Fluent
+import Vapor
 
 extension API {
     struct APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
@@ -76,19 +77,38 @@ extension API {
         }
     }
 
-//    static func singleAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorResponse> {
-//
-//        // ensure the messages are preloaded because that is necessary just to get relationship Ids.
-//        // Note this loses some efficiency for loading all related messages into swift objects instead
-//        // of just snagging the Ids as integers. That efficiency is not worth addressing until it is.
-//        let primaryFuture = query.with(\.$messages).all()
-//
-//        
-//
-//        return .init(apiDescription: .none,
-//                     body: .init(resourceObject: primary),
-//                     includes: .none,
-//                     meta: .none,
-//                     links: .none)
-//    }
+    /// Pass a query builder where the first result will be used.
+    static func singleAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorResponse> {
+
+        let primaryFuture = query.with(\.$messages).first()
+
+        let resourceFuture = primaryFuture
+            .flatMapThrowing {
+                try $0?.serializable()
+        }.unwrap(or: Abort(.notFound))
+
+        let responseFuture = resourceFuture
+            .map { resource in
+                SingleDocument<APITestDescriptor, NoIncludes>(apiDescription: .none,
+                                                              body: .init(resourceObject: resource.0),
+                                                              includes: .none,
+                                                              meta: .none,
+                                                              links: .none)
+        }
+
+        guard includeMessages else {
+            return responseFuture
+                .map(SingleAPITestDescriptorResponse.init)
+        }
+
+        let includesFuture = resourceFuture
+            .map { resource in
+                Includes(values: resource.1.map { Include1($0) })
+        }
+
+        return responseFuture.and(includesFuture)
+            .map { (response, includes) in
+                SingleAPITestDescriptorResponse(response.including(includes))
+        }
+    }
 }

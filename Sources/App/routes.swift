@@ -1,31 +1,25 @@
 import Vapor
 import FluentPostgresDriver
 
+extension UUID: LosslessStringConvertible {
+    public init?(_ description: String) {
+        guard let value = UUID(uuidString: description) else {
+            return nil
+        }
+        self = value
+    }
+}
+
 /// Register your application's routes here.
 public func routes(_ container: Container) throws -> Routes {
-        let routes = Routes(eventLoop: container.eventLoop)
+    let routes = Routes(eventLoop: container.eventLoop)
 
-        // Basic "It works" example
-        //    routes.get { req in
-        //        return "It works!"
-        //    }
+    let testController = try APITestController(outputPath: Environment.outPath,
+                                               openAPISource: .detect(),
+                                               database: container.make())
+    routes.post("api_test", use: testController.create)
+    routes.get("api_test", use: testController.index)
+    routes.get("api_test", ":id", use: testController.show)
 
-        // Basic "Hello, world!" example
-        //    routes.get("hello") { req in
-        //        return "Hello, world!"
-        //    }
-
-        let testController = try APITestController(outputPath: Environment.outPath,
-                                                   openAPISource: .detect(),
-                                                   database: container.make())
-        routes.post("api_test", use: testController.create)
-        routes.get("api_test", use: testController.index)
-
-        // Example of configuring a controller
-        //    let todoController = TodoController()
-        //    router.get("todos", use: todoController.index)
-        //    router.post("todos", use: todoController.create)
-        //    router.delete("todos", Todo.parameter, use: todoController.delete)
-
-        return routes
+    return routes
 }

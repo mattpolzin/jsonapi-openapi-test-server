@@ -29,12 +29,23 @@ final class APITestController {
     /// Returns a list of all `APITestDescriptor`s.
     func index(_ req: Request) throws -> EventLoopFuture<API.BatchAPITestDescriptorResponse> {
         // TODO: only include if requested
-        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: database), includeMessages: true)
+        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: database),
+                                                  includeMessages: true)
     }
 
-//    func show(_ req: Request) throws -> EventLoopFuture<APITestDescriptor> {
-//
-//    }
+    func show(_ req: Request) throws -> EventLoopFuture<API.SingleAPITestDescriptorResponse> {
+        let id = req.parameters.get("id", as: UUID.self)
+
+        // ideally this would be APITestDescriptor.find() but that does
+        // not currently allow eager loading of relatives. It also would
+        // be nice if filtering by ID were supported more directly, but
+        // at the moment the best support is just for filtering Fields.
+        let query = APITestDescriptor.query(on: database)
+            .filter(DatabaseQuery.Filter.basic(.field(path: ["id"], schema: nil, alias: nil), .equal, .bind(id)))
+
+        return API.singleAPITestDescriptorResponse(query: query,
+                                                   includeMessages: true)
+    }
 
     private func testEventLoop() -> EventLoop {
         return testEventLoopGroup.next()
