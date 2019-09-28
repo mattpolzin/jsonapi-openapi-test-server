@@ -221,6 +221,7 @@ extension APITestController {
             systemLogger.error("\(message)", metadata: ["context": .string(context)])
             let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
                                                           messageType: .error,
+                                                          path: path,
                                                           context: context.isEmpty ? nil : context,
                                                           message: message).save(on: self.database) }
         }
@@ -229,6 +230,7 @@ extension APITestController {
             systemLogger.warning("\(message)", metadata: ["context": .string(context)])
             let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
                                                           messageType: .warning,
+                                                          path: path,
                                                           context: context.isEmpty ? nil : context,
                                                           message: message).save(on: self.database) }
         }

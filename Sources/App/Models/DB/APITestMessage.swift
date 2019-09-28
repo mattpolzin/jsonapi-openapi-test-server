@@ -29,11 +29,12 @@ final class APITestMessage: Model {
     @Parent(key: "api_test_descriptor_id")
     var apiTestDescriptor: APITestDescriptor
 
-    init(testDescriptor: APITestDescriptor, messageType: MessageType, context: String?, message: String) throws {
+    init(testDescriptor: APITestDescriptor, messageType: MessageType, path: String?, context: String?, message: String) throws {
         id = UUID()
         createdAt = Date()
         $apiTestDescriptor.id = try testDescriptor.requireID()
         self.messageType = messageType
+        self.path = path
         self.context = context
         self.message = message
     }
