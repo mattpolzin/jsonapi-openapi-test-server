@@ -25,7 +25,7 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
                      atomically: true,
                      encoding: .utf8)
     } catch let error {
-        logger.warning(context: "While writing test logs to file", message: String(describing: error))
+        logger.warning(path: path, context: "While writing test logs to file", message: String(describing: error))
     }
 
     let testOutput = stdout.split(separator: "\n")
@@ -34,13 +34,13 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
 
     guard failedTestLines.count == 0 else {
         for line in failedTestLines {
-            logger.error(context: "Test Case Failed", message: String(line))
+            logger.error(path: path, context: "Test Case Failed", message: String(line))
         }
         throw TestPackageSwiftError.testsFailed
     }
 
     guard exitCode == shellSuccessCode else {
-        logger.error(context: "Failed Testing Details", message: stdout)
+        logger.error(path: path, context: "Failed Testing Details", message: stdout)
         throw TestPackageSwiftError.executionFailed
     }
 }

@@ -17,6 +17,9 @@ final class APITestMessage: Model {
     @Field(key: "message_type")
     var messageType: MessageType
 
+    @Field(key: "path")
+    var path: String?
+
     @Field(key: "context")
     var context: String?
 
@@ -54,6 +57,7 @@ extension APITestMessage {
     func serializable() throws -> API.APITestMessage {
         let attributes = API.APITestMessage.Attributes(createdAt: .init(value: createdAt),
                                                        messageType: .init(value: messageType),
+                                                       path: .init(value: path),
                                                        context: .init(value: context),
                                                        message: .init(value: message))
         let relationships = API.APITestMessage.Relationships(apiTestDescriptor: .init(id: .init(rawValue: $apiTestDescriptor.id)))

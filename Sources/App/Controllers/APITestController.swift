@@ -217,20 +217,20 @@ extension APITestController {
             self.database = database
         }
 
-        public func error(context: String, message: String) {
+        public func error(path: String?, context: String, message: String) {
             systemLogger.error("\(message)", metadata: ["context": .string(context)])
             let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
-                                              messageType: .error,
-                                              context: context.isEmpty ? nil : context,
-                                              message: message).save(on: self.database) }
+                                                          messageType: .error,
+                                                          context: context.isEmpty ? nil : context,
+                                                          message: message).save(on: self.database) }
         }
 
-        public func warning(context: String, message: String) {
+        public func warning(path: String?, context: String, message: String) {
             systemLogger.warning("\(message)", metadata: ["context": .string(context)])
             let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
-                                                      messageType: .warning,
-                                                      context: context.isEmpty ? nil : context,
-                                                      message: message).save(on: self.database) }
+                                                          messageType: .warning,
+                                                          context: context.isEmpty ? nil : context,
+                                                          message: message).save(on: self.database) }
         }
     }
 }

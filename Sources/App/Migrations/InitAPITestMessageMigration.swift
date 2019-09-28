@@ -15,6 +15,7 @@ struct InitAPITestMessageMigration: Migration {
             .field("id", .uuid, .identifier(auto: false))
             .field("created_at", .datetime, .required)
             .field("message_type", .string, .required)
+            .field("path", .string)
             .field("context", .string)
             .field("message", .string, .required)
             .field("api_test_descriptor_id", .uuid, .required)

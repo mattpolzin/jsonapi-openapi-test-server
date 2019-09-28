@@ -15,6 +15,7 @@ extension API {
         public struct Attributes: JSONAPI.Attributes {
             public let createdAt: Attribute<Date>
             public let messageType: Attribute<App.APITestMessage.MessageType>
+            public let path: Attribute<String?>
             public let context: Attribute<String?>
             public let message: Attribute<String>
         }
