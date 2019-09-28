@@ -62,7 +62,9 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         Import.AnyCodable as Decl,
         Import.XCTest as Decl,
         Import.FoundationNetworking,
-        APIRequestTestSwiftGen.testFuncDecl
+        APIRequestTestSwiftGen.testFuncDecl,
+        DataDocumentSwiftGen.defaultErrorDecl,
+        DataDocumentSwiftGen.basicErrorDecl
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
     write(contents: testHelperContents,
@@ -117,7 +119,9 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
             do {
                 try requestDocument = operation
                     .requestBody
-                    .flatMap { try document(from: $0, logger: logger) }
+                    .flatMap { try document(from: $0,
+                                            at: path,
+                                            logger: logger) }
             } catch let err {
                 logger?.warning(context: "Parsing request document for \(httpVerb.rawValue) at \(path.rawValue)",
                     message: String(describing: err))
@@ -420,7 +424,7 @@ func documents(from responses: OpenAPI.Response.Map,
         do {
             example = try jsonResponse.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
         } catch let err {
-            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             example = nil
         }
@@ -443,17 +447,18 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                  responseBodyType: .def(.init(name: responseBodyTypeName)),
                                                                  expectedHttpStatus: statusCode)
             } else {
-                logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)", message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary.")
+                logger?.warning(context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue) at \(path.rawValue)",
+                    message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary.")
                 testExampleFunc = nil
             }
         } catch let err {
-            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             testExampleFunc = nil
         }
 
         guard case .object = responseSchema else {
-            logger?.warning(context: "",
+            logger?.warning(context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue) at \(path.rawValue)",
                             message: "Found non-object response schema root (expected JSON:API 'data' object). Skipping \(String(describing: responseSchema.jsonTypeFormat?.jsonType)).")
             continue
         }
@@ -465,7 +470,7 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                      example: example,
                                                                      testExampleFunc: testExampleFunc)
         } catch let err {
-            logger?.warning(context: "Parsing response document for \(httpVerb.rawValue) at \(path.rawValue)",
+            logger?.warning(context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue) at \(path.rawValue)",
                 message: String(describing: err))
             continue
         }
@@ -474,13 +479,14 @@ func documents(from responses: OpenAPI.Response.Map,
 }
 
 func document(from request: OpenAPI.Request,
+              at path: OpenAPI.PathComponents,
               logger: Logger?) throws -> DataDocumentSwiftGen? {
     guard let requestSchema = request.content[.json]?.schema.b else {
         return nil
     }
 
     guard case .object = requestSchema else {
-        logger?.warning(context: "",
+        logger?.warning(context: "Parsing the request document at \(path.rawValue)",
                         message: "Found non-object request schema root (expected JSON:API 'data' object). Skipping \(String(describing: requestSchema.jsonTypeFormat?.jsonType))")
         return nil
     }
