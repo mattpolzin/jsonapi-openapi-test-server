@@ -45,6 +45,8 @@ public final class APITestCommand: Command {
         let source = openAPISource
         let path = outPath
 
+        context.console.print()
+
         try prepOutputFolder(on: eventLoop, at: path, logger: logger)
 //            .flatMap { descriptor.markBuilding().save(on: database) }
             .flatMap { openAPIDoc(on: eventLoop, from: source) }
@@ -69,7 +71,6 @@ public final class APITestCommand: Command {
         }
 
         public func error(path: String?, context: String, message: String) {
-            console.print()
             console.error("-> \(message)")
             console.print("-- \(context)")
             if let path = path {
@@ -81,12 +82,22 @@ public final class APITestCommand: Command {
         }
 
         public func warning(path: String?, context: String, message: String) {
-            console.print()
             console.warning("-> \(message)")
             console.print("-- \(context)")
             if let path = path {
                 console.print("-- at [", newLine: false)
                 console.warning(path, newLine:  false)
+                console.print("]")
+            }
+            console.print()
+        }
+
+        public func success(path: String?, context: String, message: String) {
+            console.success("-> \(message)")
+            console.print("-- \(context)")
+            if let path = path {
+                console.print("-- at [", newLine: false)
+                console.success(path, newLine:  false)
                 console.print("]")
             }
             console.print()

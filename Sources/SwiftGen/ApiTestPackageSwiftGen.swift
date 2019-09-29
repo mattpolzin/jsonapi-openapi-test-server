@@ -12,6 +12,7 @@ import JSONAPISwiftGen
 public protocol Logger {
     func error(path: String?, context: String, message: String)
     func warning(path: String?, context: String, message: String)
+    func success(path: String?, context: String, message: String)
 }
 
 typealias HttpVerb = OpenAPI.HttpVerb

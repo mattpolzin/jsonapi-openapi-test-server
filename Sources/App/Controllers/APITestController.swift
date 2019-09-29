@@ -143,5 +143,14 @@ extension APITestController {
                                                           context: context.isEmpty ? nil : context,
                                                           message: message).save(on: self.database) }
         }
+
+        public func success(path: String?, context: String, message: String) {
+            systemLogger.info("\(message)", metadata: ["context": .string(context)])
+            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+                                                          messageType: .success,
+                                                          path: path,
+                                                          context: context.isEmpty ? nil : context,
+                                                          message: message).save(on: self.database) }
+        }
     }
 }

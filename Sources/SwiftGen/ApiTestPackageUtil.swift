@@ -32,6 +32,18 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
     let testOutput = stdout.split(separator: "\n")
 
     let failedTestLines = testOutput.filter { $0.contains(": error:") }
+    let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
+
+    for line in succeededTestLines {
+        let pathParseAttempt = line
+            .components(separatedBy: "__")
+            .dropFirst()
+            .first
+
+        logger.success(path: pathParseAttempt ?? path,
+                       context: "Test Case Passed",
+                       message: String(line))
+    }
 
     guard failedTestLines.count == 0 else {
         for line in failedTestLines {
