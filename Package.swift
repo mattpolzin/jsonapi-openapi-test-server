@@ -37,6 +37,7 @@ let package = Package(
         ]),
 
         .target(name: "Run", dependencies: ["App"]),
+        .target(name: "APITest", dependencies: ["APITesting", "Vapor"]),
 
         .target(name: "SwiftGen", dependencies: ["JSONAPIOpenAPI", "OpenAPIKit", "JSONAPISwiftGen"])
     ]

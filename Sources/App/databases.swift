@@ -2,8 +2,6 @@
 import Vapor
 import FluentPostgresDriver
 
-public func databases(_ container: Container) throws -> Databases {
-    var databases = Databases(on: container.eventLoop)
+public func databases(_ databases: inout Databases, _ container: Container) throws {
     try databases.postgres(config: Environment.dbConfig())
-    return databases
 }

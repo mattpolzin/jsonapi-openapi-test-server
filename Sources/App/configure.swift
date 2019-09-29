@@ -19,19 +19,11 @@ public func configure(_ services: inout Services) throws {
     }
 
     // Configure databases
-    services.register(Databases.self, databases)
+    services.extend(Databases.self, databases)
     services.register(Database.self) { container in
         return try container.make(Databases.self).database(.psql)!
     }
 
     // Configure migrations
     services.register(Migrations.self, migrations)
-
-    // Commands
-    services.register(APITestCommand.self) { _ in
-        return try .init()
-    }
-    services.extend(CommandConfiguration.self) { commands, container in
-        try commands.use(container.make(APITestCommand.self), as: "test")
-    }
 }

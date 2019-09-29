@@ -7,7 +7,6 @@
 
 import Foundation
 import Vapor
-import PostgresKit
 
 // MARK: - OpenAPI Documentation Vars
 public extension Environment {
@@ -61,23 +60,5 @@ public extension Environment {
             .path
 
         return Environment.get("API_TEST_OUT_PATH") ?? defaultDir
-    }
-}
-
-// MARK: - Database Vars
-public extension Environment {
-    /// Required Postgres URL.
-    static func dbConfig() throws -> PostgresConfiguration {
-        let envVar = Environment.get("API_TEST_DATABASE_URL")
-        guard let config = envVar
-            .flatMap(URL.init(string:))
-            .flatMap(PostgresConfiguration.init(url:)) else {
-                throw DatabaseError.invalidUrl(envVar ?? "Not Set")
-        }
-        return config
-    }
-
-    enum DatabaseError: Swift.Error {
-        case invalidUrl(String)
     }
 }
