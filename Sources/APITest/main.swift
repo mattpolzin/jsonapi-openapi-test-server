@@ -13,8 +13,10 @@ func configure(_ services: inout Services) {
     services.register(APITestCommand.self) { _ in
         return try .init()
     }
-    services.extend(CommandConfiguration.self) { commands, container in
-        try commands.use(container.make(APITestCommand.self), as: "test", isDefault: true)
+    services.register(CommandConfiguration.self) { container in
+        var commandConfig = CommandConfiguration()
+        try commandConfig.use(container.make(APITestCommand.self), as: "test", isDefault: true)
+        return commandConfig
     }
 }
 
