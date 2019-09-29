@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OpenAPIKit
 
 public func prepOutFolder(_ outPath: String, logger: Logger) throws {
     try? FileManager.default.removeItem(atPath: outPath + "/Tests/GeneratedAPITests")
@@ -30,11 +31,19 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
 
     let testOutput = stdout.split(separator: "\n")
 
-    let failedTestLines = testOutput.filter { $0.contains(" failed: ") }
+    let failedTestLines = testOutput.filter { $0.contains(": error:") }
 
     guard failedTestLines.count == 0 else {
         for line in failedTestLines {
-            logger.error(path: path, context: "Test Case Failed", message: String(line))
+
+            let pathParseAttempt = line
+                .components(separatedBy: "__")
+                .dropFirst()
+                .first
+
+            logger.error(path: pathParseAttempt ?? path,
+                         context: "Test Case Failed",
+                         message: String(line))
         }
         throw TestPackageSwiftError.testsFailed
     }

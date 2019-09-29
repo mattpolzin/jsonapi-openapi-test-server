@@ -10,7 +10,7 @@ import Vapor
 import PostgresKit
 
 // MARK: - OpenAPI Documentation Vars
-extension Environment {
+public extension Environment {
 
     /// Use one of [inFile, inUrl] depending on whether you want to load the OpenAPI Documentaion from
     /// the local filesystem or a remote URL.
@@ -51,7 +51,7 @@ extension Environment {
 }
 
 // MARK: - Filesystem Vars
-extension Environment {
+public extension Environment {
     /// Specify the location on the local file system where test files will be written.
     /// If not specified, `~/api_test` will be used.
     static var outPath: String {
@@ -65,7 +65,7 @@ extension Environment {
 }
 
 // MARK: - Database Vars
-extension Environment {
+public extension Environment {
     /// Required Postgres URL.
     static func dbConfig() throws -> PostgresConfiguration {
         let envVar = Environment.get("API_TEST_DATABASE_URL")

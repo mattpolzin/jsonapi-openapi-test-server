@@ -3,13 +3,12 @@ import Foundation
 import FluentKit
 import SQLKit
 import PostgresKit
-import JSONAPI
 
-final class APITestMessage: Model {
-    static let schema = "api_test_messages"
+public final class APITestMessage: Model {
+    public static let schema = "api_test_messages"
 
     @ID(key: "id")
-    var id: UUID?
+    public var id: UUID?
 
     @Field(key: "created_at")
     var createdAt: Date
@@ -29,7 +28,7 @@ final class APITestMessage: Model {
     @Parent(key: "api_test_descriptor_id")
     var apiTestDescriptor: APITestDescriptor
 
-    init(testDescriptor: APITestDescriptor, messageType: MessageType, path: String?, context: String?, message: String) throws {
+    public init(testDescriptor: APITestDescriptor, messageType: MessageType, path: String?, context: String?, message: String) throws {
         id = UUID()
         createdAt = Date()
         $apiTestDescriptor.id = try testDescriptor.requireID()
@@ -41,10 +40,10 @@ final class APITestMessage: Model {
 
     /// Used to construct Model from Database
     @available(*, deprecated, renamed: "init(testDescriptor:messageType:message:)")
-    init() {}
+    public init() {}
 }
 
-extension APITestMessage {
+public extension APITestMessage {
     enum MessageType: String, Codable {
         case debug
         case info

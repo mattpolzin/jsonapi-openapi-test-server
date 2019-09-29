@@ -8,8 +8,8 @@
 import Fluent
 import SQLKit
 
-struct InitAPITestMessageMigration: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
+public struct InitAPITestMessageMigration: Migration {
+    public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
         return database.schema(APITestMessage.schema)
             .field("id", .uuid, .identifier(auto: false))
@@ -30,7 +30,7 @@ struct InitAPITestMessageMigration: Migration {
         }.transform(to: ())
     }
 
-    func revert(on database: Database) -> EventLoopFuture<Void> {
+    public func revert(on database: Database) -> EventLoopFuture<Void> {
         return database.schema(APITestMessage.schema).delete()
     }
 }

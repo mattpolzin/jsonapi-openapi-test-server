@@ -26,9 +26,15 @@ let package = Package(
 
           "Backtrace",
 
-          "SwiftGen", "JSONAPI"
+          "SwiftGen", "APITesting", "JSONAPI"
         ]),
         .testTarget(name: "AppTests", dependencies: ["App"]),
+
+        .target(name: "APITesting", dependencies: [
+            "Vapor",
+
+            "SwiftGen"
+        ]),
 
         .target(name: "Run", dependencies: ["App"]),
 

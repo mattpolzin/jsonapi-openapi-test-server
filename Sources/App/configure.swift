@@ -1,6 +1,7 @@
 import FluentPostgresDriver
 import Fluent
 import Vapor
+import APITesting
 
 /// Called before your application initializes.
 public func configure(_ services: inout Services) throws {
@@ -25,4 +26,12 @@ public func configure(_ services: inout Services) throws {
 
     // Configure migrations
     services.register(Migrations.self, migrations)
+
+    // Commands
+    services.register(APITestCommand.self) { _ in
+        return try .init()
+    }
+    services.extend(CommandConfiguration.self) { commands, container in
+        try commands.use(container.make(APITestCommand.self), as: "test")
+    }
 }

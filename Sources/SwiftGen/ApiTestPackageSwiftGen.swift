@@ -430,33 +430,31 @@ func documents(from responses: OpenAPI.Response.Map,
             example = nil
         }
 
-        let testExampleFunc: OpenAPIExampleTestSwiftGen?
-        parseExample: do {
-            guard let paramatersExtension = jsonResponse.vendorExtensions["x-testParameters"]?.value else {
-                testExampleFunc = nil
-                break parseExample
+        let testExampleFunc: SwiftFunctionGenerator?
+        do {
+            testExampleFunc = try example.map { _ in
+                try exampleTest(server: server,
+                                pathComponents: path,
+                                parameters: params,
+                                jsonResponse: jsonResponse,
+                                exampleResponseDataPropName: examplePropName,
+                                responseBodyType: .init(.init(name: responseBodyTypeName)),
+                                expectedHttpStatus: statusCode)
             }
-
-            if let parameterValues = paramatersExtension as? OpenAPI.PathItem.Parameter.ValueMap,
-                example != nil {
-
-                testExampleFunc = try OpenAPIExampleTestSwiftGen(server: server,
-                                                                 pathComponents: path,
-                                                                 parameters: params,
-                                                                 parameterValues: parameterValues,
-                                                                 exampleResponseDataPropName: examplePropName,
-                                                                 responseBodyType: .def(.init(name: responseBodyTypeName)),
-                                                                 expectedHttpStatus: statusCode)
-            } else {
+        } catch let err as ExampleTestGenError {
+            switch err {
+            case .incorrectTestParameterFormat:
                 logger?.warning(path: path.rawValue,
                                 context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
                     message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary.")
-                testExampleFunc = nil
             }
+
+            testExampleFunc = nil
         } catch let err {
             logger?.warning(path: path.rawValue,
                             context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
                 message: String(describing: err))
+
             testExampleFunc = nil
         }
 
@@ -481,6 +479,37 @@ func documents(from responses: OpenAPI.Response.Map,
         }
     }
     return responseDocuments
+}
+
+func exampleTest(server: OpenAPI.Server,
+                 pathComponents: OpenAPI.PathComponents,
+                 parameters: [OpenAPI.PathItem.Parameter],
+                 jsonResponse: OpenAPI.Content,
+                 exampleResponseDataPropName: String,
+                 responseBodyType: SwiftTypeRep,
+                 expectedHttpStatus: OpenAPI.Response.StatusCode) throws -> SwiftFunctionGenerator {
+
+    guard let paramatersExtension = jsonResponse.vendorExtensions["x-testParameters"]?.value else {
+        return try OpenAPIExampleParseTestSwiftGen(exampleResponseDataPropName: exampleResponseDataPropName,
+                                                   responseBodyType: responseBodyType,
+                                                   exampleHttpStatusCode: expectedHttpStatus)
+    }
+
+    guard let parameterValues = paramatersExtension as? OpenAPI.PathItem.Parameter.ValueMap else {
+        throw ExampleTestGenError.incorrectTestParameterFormat
+    }
+
+    return try OpenAPIExampleRequestTestSwiftGen(server: server,
+                                                 pathComponents: pathComponents,
+                                                 parameters: parameters,
+                                                 parameterValues: parameterValues,
+                                                 exampleResponseDataPropName: exampleResponseDataPropName,
+                                                 responseBodyType: responseBodyType,
+                                                 expectedHttpStatus: expectedHttpStatus)
+}
+
+enum ExampleTestGenError: Swift.Error {
+    case incorrectTestParameterFormat
 }
 
 func document(from request: OpenAPI.Request,

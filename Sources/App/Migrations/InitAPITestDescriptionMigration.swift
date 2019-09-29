@@ -7,8 +7,8 @@
 
 import Fluent
 
-struct InitAPITestDescriptorMigration: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
+public struct InitAPITestDescriptorMigration: Migration {
+    public func prepare(on database: Database) -> EventLoopFuture<Void> {
         return database.schema(APITestDescriptor.schema)
             .field("id", .uuid, .identifier(auto: false))
             .field("created_at", .datetime, .required)
@@ -17,7 +17,7 @@ struct InitAPITestDescriptorMigration: Migration {
             .create()
     }
 
-    func revert(on database: Database) -> EventLoopFuture<Void> {
+    public func revert(on database: Database) -> EventLoopFuture<Void> {
         return database.schema(APITestDescriptor.schema).delete()
     }
 }

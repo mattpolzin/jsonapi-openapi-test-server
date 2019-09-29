@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgresDriver
+import APITesting
 
 extension UUID: LosslessStringConvertible {
     public init?(_ description: String) {

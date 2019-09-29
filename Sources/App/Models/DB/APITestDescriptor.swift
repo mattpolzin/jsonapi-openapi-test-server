@@ -2,15 +2,15 @@ import Vapor
 import Foundation
 import FluentKit
 
-final class APITestDescriptor: Model {
-    static let schema = "api_test_descriptors"
+public final class APITestDescriptor: Model {
+    public static let schema = "api_test_descriptors"
 
     // bit of a hacky way to track whether this resource
     // was created fresh or loaded from the database.
-    private let isLoadedFromDb: Bool
+    public let isLoadedFromDb: Bool
 
     @ID(key: "id")
-    var id: UUID?
+    public var id: UUID?
 
     @Field(key: "created_at")
     var createdAt: Date
@@ -28,7 +28,7 @@ final class APITestDescriptor: Model {
     /// the id be set to that of the originating API request because
     /// then logging related to the originating request can be easily tied
     /// to logging related to the separate testing tasks.
-    init(id: UUID) {
+    public init(id: UUID) {
         isLoadedFromDb = false
         self.id = id
         createdAt = Date()
@@ -38,13 +38,13 @@ final class APITestDescriptor: Model {
 
     /// Used to construct Model from Database
     @available(*, deprecated, renamed: "init(id:)")
-    init() {
+    public init() {
         isLoadedFromDb = true
     }
 }
 
 extension APITestDescriptor {
-    enum Status: String, Codable {
+    public enum Status: String, Codable {
         case pending
         case building
         case running
@@ -96,8 +96,8 @@ extension APITestDescriptor {
         }
 
         let attributes = API.APITestDescriptor.Attributes(createdAt: .init(value: createdAt),
-                                                      finishedAt: .init(value: finishedAt),
-                                                      status: .init(value: status))
+                                                          finishedAt: .init(value: finishedAt),
+                                                          status: .init(value: status))
 
         let relationships = API.APITestDescriptor.Relationships(messages: .init(resourceObjects: relatives))
 
