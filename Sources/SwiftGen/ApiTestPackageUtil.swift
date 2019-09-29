@@ -57,21 +57,31 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
                          context: "Test Case Failed",
                          message: String(line))
         }
-        throw TestPackageSwiftError.testsFailed
+        throw TestPackageSwiftError.testsFailed(succeeded: succeededTestLines.count,
+                                                failed: failedTestLines.count)
     }
 
     guard exitCode == shellSuccessCode else {
-        logger.error(path: path, context: "Failed Testing Details", message: stdout)
-        throw TestPackageSwiftError.executionFailed
+        throw TestPackageSwiftError.executionFailed(stdout: stdout)
     }
 }
 
 let shellSuccessCode: Int32 = 0
 
-public enum TestPackageSwiftError: Swift.Error {
+public enum TestPackageSwiftError: Swift.Error, CustomStringConvertible {
 //    case compilationFailed
-    case executionFailed
-    case testsFailed
+    case executionFailed(stdout: String)
+    case testsFailed(succeeded: Int, failed: Int)
+
+    public var description: String {
+        switch self {
+        case .executionFailed(stdout: let stdout):
+            return "Failed to build & run tests with output:\n\(stdout)\n"
+
+        case .testsFailed(succeeded: let succeeded, failed: let failed):
+            return "\(failed)/\(succeeded + failed) Tests Failed."
+        }
+    }
 }
 
 @discardableResult

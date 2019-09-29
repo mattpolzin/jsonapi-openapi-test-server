@@ -35,6 +35,7 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   && rm -r /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /build/bin/Run .
+COPY --from=builder /build/bin/APITest .
 COPY --from=builder /build/lib/* /usr/lib/
 
 ##
