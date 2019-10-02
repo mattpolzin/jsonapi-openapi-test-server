@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "cbbc27526674ec0bc99dd70cf0a14ff50e5e4510",
+          "revision": "6a3ace95d2fff9566fcab923270c0c18c95d101a",
           "version": null
         }
       },
@@ -348,8 +348,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "17c5ca37a4d70cde7c23b7eb2f7037724fa28899",
-          "version": "4.0.0-alpha.3.1.1"
+          "revision": "4efc07f4f5b7cf6e2e5126792dc4032864f1c464",
+          "version": "4.0.0-alpha.3.2"
         }
       },
       {

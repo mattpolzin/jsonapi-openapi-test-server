@@ -4,7 +4,7 @@ import Vapor
 import APITesting
 
 /// Called before your application initializes.
-public func configure(_ services: inout Services) throws {
+public func configure(_ services: inout Services) {
     // Register providers first
     services.provider(FluentProvider())
 
