@@ -31,6 +31,16 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
 
     let testOutput = stdout.split(separator: "\n")
 
+    func context<S>(for line: S) -> String where S: StringProtocol {
+        if line.contains("test_example_parse") {
+            return "Parse Example Test Case"
+
+        } else if line.contains("test_example_request") {
+            return "Request Example Test Case"
+        }
+        return "Test Case"
+    }
+
     let failedTestLines = testOutput.filter { $0.contains(": error:") }
     let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
 
@@ -41,7 +51,7 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
             .first
 
         logger.success(path: pathParseAttempt ?? path,
-                       context: "Test Case Passed",
+                       context: "\(context(for: line)) Passed",
                        message: String(line))
     }
 
@@ -54,7 +64,7 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
                 .first
 
             logger.error(path: pathParseAttempt ?? path,
-                         context: "Test Case Failed",
+                         context: "\(context(for: line)) Failed",
                          message: String(line))
         }
         throw TestPackageSwiftError.testsFailed(succeeded: succeededTestLines.count,
