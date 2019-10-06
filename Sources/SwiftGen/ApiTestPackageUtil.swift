@@ -48,9 +48,10 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
         let pathParseAttempt = line
             .components(separatedBy: "__")
             .dropFirst()
-            .first
+            .dropLast()
+            .joined(separator: ", ")
 
-        logger.success(path: pathParseAttempt ?? path,
+        logger.success(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
                        context: "\(context(for: line)) Passed",
                        message: String(line))
     }
@@ -61,11 +62,16 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
             let pathParseAttempt = line
                 .components(separatedBy: "__")
                 .dropFirst()
-                .first
+                .dropLast()
+                .joined(separator: ", ")
 
-            logger.error(path: pathParseAttempt ?? path,
+            let isolatedError = line
+                .components(separatedBy: "] : ")
+                .last
+
+            logger.error(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
                          context: "\(context(for: line)) Failed",
-                         message: String(line))
+                         message: isolatedError ?? String(line))
         }
         throw TestPackageSwiftError.testsFailed(succeeded: succeededTestLines.count,
                                                 failed: failedTestLines.count)
