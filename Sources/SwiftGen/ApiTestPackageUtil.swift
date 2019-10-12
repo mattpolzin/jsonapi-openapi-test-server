@@ -45,33 +45,40 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
     let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
 
     for line in succeededTestLines {
-        let pathParseAttempt = line
+
+        let pathAndTiming = Optional(line
+            .components(separatedBy: "]' passed "))
+            .flatMap { zip($0.first, $0.last) }
+
+        let pathParseAttempt = (pathAndTiming?.0 ?? "")
             .components(separatedBy: "__")
             .dropFirst()
-            .dropLast()
             .joined(separator: ", ")
 
+        let isolatedTiming = pathAndTiming?.1 ?? String(line)
+
         logger.success(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
-                       context: "\(context(for: line)) Passed",
-                       message: String(line))
+                       context: isolatedTiming,
+                       message: "\(context(for: line)) Passed")
     }
 
     guard failedTestLines.count == 0 else {
         for line in failedTestLines {
 
-            let pathParseAttempt = line
+            let pathAndError = Optional(line
+                .components(separatedBy: "] : "))
+                .flatMap { zip($0.first, $0.last) }
+
+            let pathParseAttempt = (pathAndError?.0 ?? "")
                 .components(separatedBy: "__")
                 .dropFirst()
-                .dropLast()
                 .joined(separator: ", ")
 
-            let isolatedError = line
-                .components(separatedBy: "] : ")
-                .last
+            let isolatedError = pathAndError?.1 ?? String(line)
 
             logger.error(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
-                         context: "\(context(for: line)) Failed",
-                         message: isolatedError ?? String(line))
+                         context: isolatedError,
+                         message: "\(context(for: line)) Failed")
         }
         throw TestPackageSwiftError.testsFailed(succeeded: succeededTestLines.count,
                                                 failed: failedTestLines.count)

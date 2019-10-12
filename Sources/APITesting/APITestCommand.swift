@@ -72,6 +72,7 @@ public final class APITestCommand: Command {
 
         public func error(path: String?, context: String, message: String) {
             console.error("-> \(message)")
+            console.print("--")
             console.print("-- \(context)")
             if let path = path {
                 console.print("-- at [", newLine: false)
@@ -79,10 +80,12 @@ public final class APITestCommand: Command {
                 console.print("]")
             }
             console.print()
+            console.print()
         }
 
         public func warning(path: String?, context: String, message: String) {
             console.warning("-> \(message)")
+            console.print("--")
             console.print("-- \(context)")
             if let path = path {
                 console.print("-- at [", newLine: false)
@@ -90,16 +93,19 @@ public final class APITestCommand: Command {
                 console.print("]")
             }
             console.print()
+            console.print()
         }
 
         public func success(path: String?, context: String, message: String) {
             console.success("-> \(message)")
+            console.print("--")
             console.print("-- \(context)")
             if let path = path {
                 console.print("-- at [", newLine: false)
                 console.success(path, newLine:  false)
                 console.print("]")
             }
+            console.print()
             console.print()
         }
     }
