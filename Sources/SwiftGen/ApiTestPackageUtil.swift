@@ -41,13 +41,21 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
         return "Test Case"
     }
 
+    func dropBracket(_ inString: String) -> String {
+        if inString.last == "]" {
+            return String(inString.dropLast())
+        }
+        return inString
+    }
+
     let failedTestLines = testOutput.filter { $0.contains(": error:") }
     let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
 
     for line in succeededTestLines {
 
         let pathAndTiming = Optional(line
-            .components(separatedBy: "]' passed "))
+            .components(separatedBy: "' passed ")
+            .map(dropBracket))
             .flatMap { zip($0.first, $0.last) }
 
         let pathParseAttempt = (pathAndTiming?.0 ?? "")
@@ -66,7 +74,8 @@ public func runAPITestPackage(at path: String, logger: Logger) throws {
         for line in failedTestLines {
 
             let pathAndError = Optional(line
-                .components(separatedBy: "] : "))
+                .components(separatedBy: " : ")
+                .map(dropBracket))
                 .flatMap { zip($0.first, $0.last) }
 
             let pathParseAttempt = (pathAndError?.0 ?? "")
