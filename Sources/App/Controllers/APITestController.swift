@@ -48,10 +48,6 @@ final class APITestController {
                                                    includeMessages: true)
     }
 
-    private func testEventLoop() -> EventLoop {
-        return testEventLoopGroup.next()
-    }
-
     /// Create an `APITestDescriptor` and run a new test suite.
     func create(_ req: Request) throws -> EventLoopFuture<Response> {
         let reqUUIDGuess = req
@@ -101,12 +97,9 @@ final class APITestController {
         }.flatMap { $0.encodeResponse(status: .accepted, for: req) }
     }
 
-    /// Deletes a parameterized `Todo`.
-//    func delete(_ req: Request) throws -> Future<HTTPStatus> {
-//        return try req.parameters.next(Todo.self).flatMap { todo in
-//            return todo.delete(on: req)
-//        }.transform(to: .ok)
-//    }
+    private func testEventLoop() -> EventLoop {
+        return testEventLoopGroup.next()
+    }
 }
 
 extension APITestController {
