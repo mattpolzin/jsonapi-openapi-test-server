@@ -19,6 +19,13 @@ public struct InitAPITestMessageMigration: Migration {
             .field("context", .string)
             .field("message", .string, .required)
             .field("api_test_descriptor_id", .uuid, .required)
+//                   .foreignKey(parentTable: APITestDescriptor.schema,
+//                               parentField: .string("id"),
+//                               updateAction: .cascade,
+//                               deleteAction: .cascade))
+//            .foreignKey("api_test_descriptor_id",
+//                        references: (table: APITestDescriptor.schema, field: "id"),
+//                        onUpdate: .cascade, onDelete: .cascade)
             .create()
             .map { _ -> SQLDatabase? in database as? SQLDatabase }
             .optionalFlatMap { sqlDb in

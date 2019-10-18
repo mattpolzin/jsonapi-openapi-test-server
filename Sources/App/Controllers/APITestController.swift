@@ -35,14 +35,12 @@ final class APITestController {
     }
 
     func show(_ req: Request) throws -> EventLoopFuture<API.SingleAPITestDescriptorResponse> {
-        let id = req.parameters.get("id", as: UUID.self)
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            return req.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "Test ID not specified in path."))
+        }
 
-        // ideally this would be APITestDescriptor.find() but that does
-        // not currently allow eager loading of relatives. It also would
-        // be nice if filtering by ID were supported more directly, but
-        // at the moment the best support is just for filtering Fields.
         let query = APITestDescriptor.query(on: database)
-            .filter(DatabaseQuery.Filter.basic(.field(path: ["id"], schema: nil, alias: nil), .equal, .bind(id)))
+            .filter(\APITestDescriptor.$id == id)
 
         return API.singleAPITestDescriptorResponse(query: query,
                                                    includeMessages: true)
