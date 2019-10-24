@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "00ce1abaac919593897b6c60cecdbd4d6290b1f9",
-          "version": "4.0.0-alpha.2.1"
+          "revision": "62c3896613362eb5448e7e096daa5005c67b4dd0",
+          "version": "4.0.0-alpha.3"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
         "state": {
           "branch": null,
-          "revision": "00945abac615e5203701be0f090ed0e2d2ff15bf",
-          "version": "0.2.0"
+          "revision": "0eb888b85ca08c7ce85c8a6a459c94d7f282c1bb",
+          "version": "0.2.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
         "state": {
           "branch": null,
-          "revision": "dbbacab105a46af08c386137331ce4bf73ff3de2",
-          "version": "2.4.0"
+          "revision": "eb8562037968800396d50d53e01597f8195f7783",
+          "version": "2.5.0"
         }
       },
       {
@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "26a74a20e2ed2fd5ebacd78f2e2bdbc5809a7892",
+          "revision": "789611e6dcbacde6f6db50e4e7ea7d7f7845f884",
           "version": null
         }
       },
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "f85d06405c8d957b3dd35b9b8064363731d81c13",
-          "version": "0.5.2"
+          "revision": "dc00f1173ddf0ec221a6caa7e610e113ddbb8c52",
+          "version": "0.5.4"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-nio.git",
         "state": {
           "branch": null,
-          "revision": "13ae95552f4e0ef1af09925f4d61c7ef798d4ba3",
-          "version": "1.0.0-alpha.1.4"
+          "revision": "1fc1c201588ee5f0b1272887b18b69caba67edaa",
+          "version": "1.0.0-alpha.1.6"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "66f9a509ed3cc56b6eb367515e421beca4a0af53",
-          "version": "1.2.0"
+          "revision": "0584020dcacfa932f66b00cfbf87588ead76a528",
+          "version": "1.3.0"
         }
       },
       {

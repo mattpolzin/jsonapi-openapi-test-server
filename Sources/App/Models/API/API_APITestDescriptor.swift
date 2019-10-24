@@ -12,36 +12,50 @@ import Fluent
 import Vapor
 
 extension API {
-    struct APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
+    public struct APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
         public static let jsonType: String = "api_test_descriptor"
 
         public struct Attributes: JSONAPI.Attributes {
             public let createdAt: Attribute<Date>
             public let finishedAt: Attribute<Date?>
             public let status: Attribute<App.APITestDescriptor.Status>
+
+            public init(createdAt: Date,
+                        finishedAt: Date?,
+                        status: App.APITestDescriptor.Status) {
+                self.createdAt = .init(value: createdAt)
+                self.finishedAt = .init(value: finishedAt)
+                self.status = .init(value: status)
+            }
         }
 
         public struct Relationships: JSONAPI.Relationships {
             public let messages: ToManyRelationship<APITestMessage, NoMetadata, NoLinks>
+
+            public init(messages: [APITestMessage]) {
+                self.messages = .init(resourceObjects: messages)
+            }
+
+            public init(messages: APITestMessage.Pointers) {
+                self.messages = messages
+            }
+
+            public init(messageIds: [APITestMessage.Id]) {
+                self.messages = .init(ids: messageIds)
+            }
         }
     }
 
-    typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
+    public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
 
-    typealias SingleDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, UnknownJSONAPIError>
-    typealias BatchDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, UnknownJSONAPIError>
+    public typealias SingleDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+    public typealias BatchDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
 
-    typealias BatchAPITestDescriptorResponse = Either<
-        BatchDocument<APITestDescriptor, Include1<APITestMessage>>,
-        BatchDocument<APITestDescriptor, NoIncludes>
-    >
+    public typealias BatchAPITestDescriptorResponse = BatchDocument<APITestDescriptor, Include1<APITestMessage>>
 
-    typealias SingleAPITestDescriptorResponse = Either<
-        SingleDocument<APITestDescriptor, Include1<APITestMessage>>,
-        SingleDocument<APITestDescriptor, NoIncludes>
-    >
+    public typealias SingleAPITestDescriptorResponse = SingleDocument<APITestDescriptor, Include1<APITestMessage>>
 
-    static func batchAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorResponse> {
+    static func batchAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorResponse.SuccessDocument> {
 
         // ensure the messages are preloaded because that is necessary just to get relationship Ids.
         // Note this loses some efficiency for loading all related messages into swift objects instead
@@ -57,28 +71,32 @@ extension API {
         }
 
         let responseFuture = resourcesFuture.map { resources in
-            BatchDocument<APITestDescriptor, NoIncludes>(apiDescription: .none,
-                                                         body: .init(resourceObjects: resources.map { $0.0 }),
-                                                         includes: .none,
-                                                         meta: .none,
-                                                         links: .none)
+            BatchAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                                                           body: .init(resourceObjects: resources.map { $0.0 }),
+                                                           includes: .none,
+                                                           meta: .none,
+                                                           links: .none)
         }
 
         guard includeMessages else {
-            return responseFuture.map(BatchAPITestDescriptorResponse.init)
+            return responseFuture
         }
 
         let includesFuture = resourcesFuture.map { resources in
             Includes(values: resources.flatMap { $0.1 }.map { Include1($0) })
         }
 
-        return responseFuture.and(includesFuture).map { (response, includes) in
-            BatchAPITestDescriptorResponse(response.including(includes))
+        return resourcesFuture.and(includesFuture).map { (resources, includes) in
+            BatchAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                                                           body: .init(resourceObjects: resources.map { $0.0 }),
+                                                           includes: includes,
+                                                           meta: .none,
+                                                           links: .none)
         }
     }
 
     /// Pass a query builder where the first result will be used.
-    static func singleAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorResponse> {
+    static func singleAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorResponse.SuccessDocument> {
 
         let primaryFuture = query.with(\.$messages).first()
 
@@ -89,16 +107,15 @@ extension API {
 
         let responseFuture = resourceFuture
             .map { resource in
-                SingleDocument<APITestDescriptor, NoIncludes>(apiDescription: .none,
-                                                              body: .init(resourceObject: resource.0),
-                                                              includes: .none,
-                                                              meta: .none,
-                                                              links: .none)
+                SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                                                                body: .init(resourceObject: resource.0),
+                                                                includes: .none,
+                                                                meta: .none,
+                                                                links: .none)
         }
 
         guard includeMessages else {
             return responseFuture
-                .map(SingleAPITestDescriptorResponse.init)
         }
 
         let includesFuture = resourceFuture
@@ -106,9 +123,13 @@ extension API {
                 Includes(values: resource.1.map { Include1($0) })
         }
 
-        return responseFuture.and(includesFuture)
-            .map { (response, includes) in
-                SingleAPITestDescriptorResponse(response.including(includes))
+        return resourceFuture.and(includesFuture)
+            .map { (resource, includes) in
+                SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                                                                body: .init(resourceObject: resource.0),
+                                                                includes: includes,
+                                                                meta: .none,
+                                                                links: .none)
         }
     }
 }

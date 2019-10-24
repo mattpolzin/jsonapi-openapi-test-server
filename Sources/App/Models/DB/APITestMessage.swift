@@ -55,12 +55,12 @@ public extension APITestMessage {
 
 extension APITestMessage {
     func serializable() throws -> API.APITestMessage {
-        let attributes = API.APITestMessage.Attributes(createdAt: .init(value: createdAt),
-                                                       messageType: .init(value: messageType),
-                                                       path: .init(value: path),
-                                                       context: .init(value: context),
-                                                       message: .init(value: message))
-        let relationships = API.APITestMessage.Relationships(apiTestDescriptor: .init(id: .init(rawValue: $apiTestDescriptor.id)))
+        let attributes = API.APITestMessage.Attributes(createdAt: createdAt,
+                                                       messageType: messageType,
+                                                       path: path,
+                                                       context: context,
+                                                       message: message)
+        let relationships = API.APITestMessage.Relationships(apiTestDescriptorId: .init(rawValue: $apiTestDescriptor.id))
 
         return API.APITestMessage(id: .init(rawValue: try requireID()),
                                   attributes: attributes,

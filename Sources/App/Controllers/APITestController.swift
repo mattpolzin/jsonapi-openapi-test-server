@@ -28,26 +28,35 @@ final class APITestController {
     }
 
     /// Returns a list of all `APITestDescriptor`s.
-    func index(_ req: Request) throws -> EventLoopFuture<API.BatchAPITestDescriptorResponse> {
+    func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
         // TODO: only include if requested
         return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: database),
                                                   includeMessages: true)
+            .flatMap { req.response.success.encode($0) }
+            .flatMapError { _ in req.response.serverError }
     }
 
-    func show(_ req: Request) throws -> EventLoopFuture<API.SingleAPITestDescriptorResponse> {
+    func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
-            return req.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "Test ID not specified in path."))
+            return req.response.badRequest
         }
 
         let query = APITestDescriptor.query(on: database)
             .filter(\APITestDescriptor.$id == id)
 
-        return API.singleAPITestDescriptorResponse(query: query,
-                                                   includeMessages: true)
+        return API.singleAPITestDescriptorResponse(query: query, includeMessages: true)
+            .flatMap { req.response.success.encode($0) }
+            .flatMapError { error in
+                guard let abortError = error as? Abort,
+                    abortError.status == .notFound else {
+                        return req.response.serverError
+                }
+                return req.response.notFound
+        }
     }
 
     /// Create an `APITestDescriptor` and run a new test suite.
-    func create(_ req: Request) throws -> EventLoopFuture<Response> {
+    func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
         let reqUUIDGuess = req
             .logger[metadataKey: "uuid"]
             .map { $0.description }
@@ -85,18 +94,125 @@ final class APITestController {
         }
 
         return savedDescriptor.flatMapThrowing { _ in
-            API.SingleAPITestDescriptorResponse(
-                API.SingleDocument<API.APITestDescriptor, NoIncludes>(apiDescription: .none,
-                                                                      body: .init(resourceObject: try descriptor.serializable().0),
-                                                                      includes: .none,
-                                                                      meta: .none,
-                                                                      links: .none)
-            )
-        }.flatMap { $0.encodeResponse(status: .accepted, for: req) }
+            API.SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                                                                body: .init(resourceObject: try descriptor.serializable().0),
+                                                                includes: .none,
+                                                                meta: .none,
+                                                                links: .none)
+        }
+        .flatMap { req.response.success.encode($0) }
+        .flatMapError { _ in
+            return req.response.serverError
+        }
     }
 
     private func testEventLoop() -> EventLoop {
         return testEventLoopGroup.next()
+    }
+
+    // MARK: - Contexts
+
+    struct CreateContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
+            .init { response in
+                response.status = .accepted
+        }
+
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .internalServerError,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.SingleAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
+                        ]
+                    )
+                ))
+            )
+        )
+
+        init() {}
+    }
+
+    struct IndexContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let success: ResponseContext<API.BatchAPITestDescriptorResponse.SuccessDocument> =
+            .init { response in
+                response.status = .ok
+        }
+
+        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .internalServerError,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.BatchAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
+                        ]
+                    )
+                    ))
+                )
+        )
+
+        init() {}
+    }
+
+    struct ShowContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
+            .init { response in
+                response.status = .ok
+        }
+
+        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .notFound,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.SingleAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Not Found", detail: "The requested tests were not found"))
+                        ]
+                    )
+                ))
+            )
+        )
+
+        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .badRequest,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.SingleAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Bad Request", detail: "Test ID not specified in path"))
+                        ]
+                    )
+                ))
+            )
+        )
+
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .internalServerError,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.SingleAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
+                        ]
+                    )
+                ))
+            )
+        )
+
+        init() {}
     }
 }
 

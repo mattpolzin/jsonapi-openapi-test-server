@@ -8,6 +8,7 @@ let package = Package(
     ],
     products: [
         .library(name: "jsonapi-openapi-test-server", targets: ["App"]),
+        .library(name: "jsonapi-openapi-test-lib", targets: ["APITesting"]),
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-alpha.3"),
@@ -21,6 +22,7 @@ let package = Package(
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "2.0.0")
     ],
     targets: [
+        /// MARK: Server App library
         .target(name: "App", dependencies: [
           "Vapor", "Fluent", "FluentPostgresDriver",
 
@@ -30,15 +32,22 @@ let package = Package(
         ]),
         .testTarget(name: "AppTests", dependencies: ["App"]),
 
+        /// MARK: Terminal App library
         .target(name: "APITesting", dependencies: [
             "Vapor",
 
             "SwiftGen"
         ]),
 
+        /// MARK: Server API Documentation library
+        .target(name: "AppAPIDocumentation", dependencies: ["App", "JSONAPIOpenAPI"]),
+
+        /// MARK: Executables
         .target(name: "Run", dependencies: ["App"]),
         .target(name: "APITest", dependencies: ["APITesting", "Vapor"]),
+        .target(name: "GenAPIDocumentation", dependencies: ["AppAPIDocumentation"]),
 
+        /// MARK: Swift Generation interface
         .target(name: "SwiftGen", dependencies: ["JSONAPIOpenAPI", "OpenAPIKit", "JSONAPISwiftGen"])
     ]
 )

@@ -95,11 +95,11 @@ extension APITestDescriptor {
             relatives = []
         }
 
-        let attributes = API.APITestDescriptor.Attributes(createdAt: .init(value: createdAt),
-                                                          finishedAt: .init(value: finishedAt),
-                                                          status: .init(value: status))
+        let attributes = API.APITestDescriptor.Attributes(createdAt: createdAt,
+                                                          finishedAt: finishedAt,
+                                                          status: status)
 
-        let relationships = API.APITestDescriptor.Relationships(messages: .init(resourceObjects: relatives))
+        let relationships = API.APITestDescriptor.Relationships(messages: relatives)
 
         return (
             API.APITestDescriptor(id: .init(rawValue: try requireID()),
