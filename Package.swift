@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "jsonapi-openapi-test-server",
     platforms: [
-        .macOS(.v10_12)
+        .macOS(.v10_14)
     ],
     products: [
         .library(name: "jsonapi-openapi-test-server", targets: ["App"]),

@@ -2,36 +2,23 @@ import Vapor
 import FluentPostgresDriver
 import APITesting
 
-extension UUID: LosslessStringConvertible {
-    public init?(_ description: String) {
-        guard let value = UUID(uuidString: description) else {
-            return nil
-        }
-        self = value
-    }
-}
-
 /// Register your application's routes here.
-public func routes(_ container: Container) throws -> Routes {
-    let routes = Routes(eventLoop: container.eventLoop)
-
+public func routes(_ app: Application) throws {
     let testController = try APITestController(outputPath: Environment.outPath,
                                                openAPISource: .detect(),
-                                               database: container.make())
+                                               database: app.make())
 
-    routes.post("api_test", use: testController.create)
+    app.post("api_test", use: testController.create)
         .tags("Testing")
         .summary("Run tests")
 
-    routes.get("api_test", use: testController.index)
+    app.get("api_test", use: testController.index)
         .tags("Status")
         .summary("Retrieve all test results")
 
-    routes.get("api_test", ":id", use: testController.show)
+    app.get("api_test", ":id", use: testController.show)
         .tags("Status")
         .summary("Retrieve a single test result")
-
-    return routes
 }
 
 extension Route {

@@ -123,13 +123,9 @@ extension API {
                 Includes(values: resource.1.map { Include1($0) })
         }
 
-        return resourceFuture.and(includesFuture)
-            .map { (resource, includes) in
-                SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
-                                                                body: .init(resourceObject: resource.0),
-                                                                includes: includes,
-                                                                meta: .none,
-                                                                links: .none)
+        return responseFuture.and(includesFuture)
+            .map { (response, includes) in
+                response.including(includes)
         }
     }
 }

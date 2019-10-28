@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/swift-server/async-http-client.git",
         "state": {
           "branch": null,
-          "revision": "d84a1da59e0fa879cde27e01cdf9f079208cc0cc",
-          "version": "1.0.0-alpha.4"
+          "revision": "51dc885a30ca704b02fa803099b0a9b5b38067b6",
+          "version": "1.0.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/async-kit.git",
         "state": {
           "branch": null,
-          "revision": "b5742bfbbe2d60f3b77465a0907777261e418f23",
-          "version": "1.0.0-alpha.1"
+          "revision": "d9fd2be441af6d1428b62ab694848396e7072a14",
+          "version": "1.0.0-beta.1"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "62c3896613362eb5448e7e096daa5005c67b4dd0",
-          "version": "4.0.0-alpha.3"
+          "revision": "5b91c2dc93781e4b36cb4c667972670eac90e6e7",
+          "version": "4.0.0-beta.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "1670384e5dd128b8fe1f9353d2bb518ca2ae8e4c",
-          "version": "4.0.0-alpha.2.1"
+          "revision": "96f2ab8599b0507ba593da80ba2c56101932679b",
+          "version": "4.0.0-beta.1"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "bd98d1ac7b73a18f77838d96b6e3ccfaf1f55b7f",
-          "version": "1.0.0-alpha.3.1"
+          "revision": "2907bfd11743909c63ccde89cb2c66b1c8d1d645",
+          "version": "1.0.0-beta.1"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
         "state": {
           "branch": null,
-          "revision": "61bf446b256af37e2bdf86a253afdfb48ba795c6",
-          "version": "2.0.0-alpha.3"
+          "revision": "cc9d712aa6f4c2b667170a982c7c3020c03ef08a",
+          "version": "2.0.0-beta.1.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
         "state": {
           "branch": null,
-          "revision": "eb8562037968800396d50d53e01597f8195f7783",
-          "version": "2.5.0"
+          "revision": "1a15ab6f9de9f75c4eab398f19701878ca1e70f1",
+          "version": "2.5.1"
         }
       },
       {
@@ -116,6 +116,15 @@
           "branch": "feature/gen-swift",
           "revision": "789611e6dcbacde6f6db50e4e7ea7d7f7845f884",
           "version": null
+        }
+      },
+      {
+        "package": "multipart-kit",
+        "repositoryURL": "https://github.com/vapor/multipart-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "a941d7a1d685c83df09077f6190808ff2a7f4dce",
+          "version": "4.0.0-beta.1"
         }
       },
       {
@@ -159,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-kit.git",
         "state": {
           "branch": null,
-          "revision": "2cdd00a798430625f403d5ea38d25a75f3333267",
-          "version": "2.0.0-alpha.2.1"
+          "revision": "b264d62a5dde67dd2e71745fbe70161d733e417f",
+          "version": "2.0.0-beta.1"
         }
       },
       {
@@ -231,8 +240,8 @@
         "repositoryURL": "https://github.com/vapor/sql-kit.git",
         "state": {
           "branch": null,
-          "revision": "510b23e3b459efae3d521d3dd49663026031ab4c",
-          "version": "3.0.0-alpha.1.4"
+          "revision": "2a05245bd3b1a27acc83597dca25ac52358073e5",
+          "version": "3.0.0-beta.1"
         }
       },
       {
@@ -276,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "9201908b54578aa33f1d1826a5a680aca8991843",
-          "version": "2.8.0"
+          "revision": "8066b0f581604e3711979307a4377457e2b0f007",
+          "version": "2.9.0"
         }
       },
       {
@@ -285,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "0584020dcacfa932f66b00cfbf87588ead76a528",
-          "version": "1.3.0"
+          "revision": "ed97628fa310c314c4a5cd8038445054b2991f07",
+          "version": "1.3.1"
         }
       },
       {
@@ -303,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "bd235c580bd4e76beeefdefd86b86e08bd267d49",
-          "version": "2.4.2"
+          "revision": "e5c1af45ac934ac0a6117b2927a51d845cf4f705",
+          "version": "2.4.3"
         }
       },
       {
@@ -348,8 +357,17 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "4efc07f4f5b7cf6e2e5126792dc4032864f1c464",
-          "version": "4.0.0-alpha.3.2"
+          "revision": "3d8bbd5eb2b556debbb51da8ac7357f34b7b0a8e",
+          "version": "4.0.0-beta.1"
+        }
+      },
+      {
+        "package": "websocket-kit",
+        "repositoryURL": "https://github.com/vapor/websocket-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "66c0ea58398f055b5a0d92b0d5f4c32ef0c02eeb",
+          "version": "2.0.0-beta.1"
         }
       },
       {

@@ -7,7 +7,7 @@ private let migrationList: [Migration] = [
     InitAPITestMessageMigration()
 ]
 
-public func migrations(_ container: Container) -> Migrations {
+public func migrations(_ app: Application) -> Migrations {
     var migrations = Migrations()
 
     for migration in migrationList {

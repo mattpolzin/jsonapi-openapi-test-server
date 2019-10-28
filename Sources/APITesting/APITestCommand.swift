@@ -129,9 +129,19 @@ public func openAPIDoc(on loop: EventLoop,
             headers.add(name: .authorization, value: HTTPClient.Authorization.basic(username: username, password: password).headerValue)
         }
 
-        return client.get(url, headers: headers).flatMapThrowing {
+        let request: HTTPClient.Request
+        do {
+            request = try HTTPClient.Request(url: url.string,
+                                         method: .GET,
+                                         headers: headers)
+        } catch {
+            return loop.makeFailedFuture(Abort(.badRequest))
+        }
+
+        return client.execute(request: request).flatMapThrowing { response in
             try client.syncShutdown()
-            return try $0.content.decode(OpenAPI.Document.self)
+            return try ClientResponse(status: response.status, headers: response.headers, body: response.body)
+                .content.decode(OpenAPI.Document.self)
         }
     }
 

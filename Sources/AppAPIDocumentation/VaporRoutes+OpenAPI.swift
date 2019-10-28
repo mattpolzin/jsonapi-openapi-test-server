@@ -11,7 +11,7 @@ import Vapor
 
 extension Vapor.Routes {
     func openAPIPathItems(using encoder: JSONEncoder) throws -> OpenAPI.PathItem.Map {
-        let operations = try routes
+        let operations = try all
             .map { try $0.openAPIPathOperation(using: encoder) }
 
         let operationsByPath = Dictionary(

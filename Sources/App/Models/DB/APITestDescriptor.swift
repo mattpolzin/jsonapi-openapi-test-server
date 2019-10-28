@@ -21,7 +21,7 @@ public final class APITestDescriptor: Model {
     @Field(key: "status")
     var status: Status
 
-    @Children(from: \.$apiTestDescriptor)
+    @Children(for: \.$apiTestDescriptor)
     var messages: [APITestMessage]
 
     /// Create a new test descriptor. It is strongly recommended that

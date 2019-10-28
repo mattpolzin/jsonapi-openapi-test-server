@@ -4,26 +4,24 @@ import Vapor
 import APITesting
 
 /// Called before your application initializes.
-public func configure(_ services: inout Services) {
+public func configure(_ app: Application) throws {
     // Register providers first
-    services.provider(FluentProvider())
-
-    // Register routes
-    services.register(Routes.self, routes)
+    app.provider(FluentProvider())
 
     // Register middleware
-    services.register(MiddlewareConfiguration.self) { container in
-        var middlewares = MiddlewareConfiguration()
-        middlewares.use(ErrorMiddleware.default(environment: container.environment)) // Catches errors and converts to HTTP response
-        return middlewares
+    app.register(extension: MiddlewareConfiguration.self) { middlewares, app in
+        middlewares.use(ErrorMiddleware.default(environment: app.environment))
     }
 
     // Configure databases
-    services.extend(Databases.self, databases)
-    services.register(Database.self) { container in
-        return try container.make(Databases.self).database(.psql)!
+    app.register(extension: Databases.self, databases)
+    app.register(Database.self) { app in
+        return app.make(Databases.self).database(.psql)!
     }
 
     // Configure migrations
-    services.register(Migrations.self, migrations)
+    app.register(Migrations.self, migrations)
+
+    // Register routes
+    try routes(app)
 }

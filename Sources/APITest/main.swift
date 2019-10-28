@@ -8,20 +8,21 @@
 import APITesting
 import Vapor
 
-func configure(_ services: inout Services) {
+func configure(_ app: Application) {
     // Commands
-    services.register(APITestCommand.self) { _ in
+    app.register(APITestCommand.self) { _ in
         return try .init()
     }
-    services.register(CommandConfiguration.self) { container in
+    app.register(CommandConfiguration.self) { container in
         var commandConfig = CommandConfiguration()
-        try commandConfig.use(container.make(APITestCommand.self), as: "test", isDefault: true)
+        commandConfig.use(container.make(APITestCommand.self), as: "test", isDefault: true)
         return commandConfig
     }
 }
 
-let app = Application(environment: try .detect(),
-                      configure: configure)
+let app = Application(environment: try .detect())
+
+configure(app)
 
 try app.boot()
 try app.run()
