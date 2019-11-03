@@ -92,12 +92,12 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
     fullyQualifiedTestFuncNames: [String]
     )]
     results = HttpVerb.allCases.flatMap { httpVerb in
-        return pathItems.compactMap { (path, pathItem) in
-            guard case let .operations(operations) = pathItem else {
+        return pathItems.compactMap { (path, pathItemOrReference) in
+            guard case let .b(pathItem) = pathItemOrReference else {
                 return nil
             }
 
-            guard let operation = operations.for(httpVerb) else {
+            guard let operation = pathItem.for(httpVerb) else {
                 return nil
             }
 

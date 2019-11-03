@@ -50,8 +50,8 @@ extension Vapor.Routes {
                 }
             }
 
-            return OpenAPI.PathItem.operations(
-                .init(
+            return .init(
+                OpenAPI.PathItem(
                     get: get,
                     put: put,
                     post: post,
