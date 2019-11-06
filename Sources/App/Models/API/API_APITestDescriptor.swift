@@ -48,8 +48,8 @@ extension API {
 
     public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
 
-    public typealias SingleDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
-    public typealias BatchDocument<R: PrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+    public typealias SingleDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+    public typealias BatchDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
 
     public typealias BatchAPITestDescriptorResponse = BatchDocument<APITestDescriptor, Include1<APITestMessage>>
 

@@ -208,10 +208,7 @@ extension Vapor.PathComponent {
             return .init(
                 name: name,
                 parameterLocation: .path,
-                schema: .init(
-                    schemaReference: .internal(.node(\.schemas, named: "path_\(name)")),
-                    style: .default(for: .path)
-                )
+                schema: .string
             )
         default:
             return nil

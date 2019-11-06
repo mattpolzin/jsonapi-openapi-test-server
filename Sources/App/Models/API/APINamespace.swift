@@ -16,11 +16,11 @@ extension UUID: JSONAPI.CreatableRawIdType {
     }
 }
 
-extension JSONAPI.Document: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: ResourceBody, IncludeType: Decodable {}
+extension JSONAPI.Document: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: CodableResourceBody, IncludeType: Decodable {}
 
-extension JSONAPI.Document.ErrorDocument: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: ResourceBody, IncludeType: Decodable {}
+extension JSONAPI.Document.ErrorDocument: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: CodableResourceBody, IncludeType: Decodable {}
 
-extension JSONAPI.Document.SuccessDocument: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: ResourceBody, IncludeType: Decodable {}
+extension JSONAPI.Document.SuccessDocument: Content, RequestDecodable, ResponseEncodable where PrimaryResourceBody: CodableResourceBody, IncludeType: Decodable {}
 
 extension Either: Content, RequestDecodable, ResponseEncodable where A: Content, B: Content {}
 

@@ -21,7 +21,7 @@ public struct ResponseBuilder<Context: RouteContext> {
     }
 
     public init(request: TypedRequest<Context>) {
-        context = .init()
+        context = .build()
         self.request = request
     }
 

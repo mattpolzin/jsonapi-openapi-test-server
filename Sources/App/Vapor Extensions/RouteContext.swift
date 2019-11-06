@@ -17,14 +17,18 @@ public protocol AbstractRouteContext {
 public protocol RouteContext: AbstractRouteContext {
     associatedtype RequestBodyType: Decodable
 
-    init()
+    static var builder: () -> Self { get }
+}
+
+extension RouteContext {
+    public static func build() -> Self { return .builder() }
 }
 
 extension RouteContext {
     public var requestBodyType: Any.Type { return RequestBodyType.self }
 
     public static var responseBodyTuples: [(statusCode: Int, responseBodyType: Any.Type)] {
-        let context = Self()
+        let context = Self.build()
 
         let mirror = Mirror(reflecting: context)
 

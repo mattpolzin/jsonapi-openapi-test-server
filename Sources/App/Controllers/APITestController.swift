@@ -134,7 +134,7 @@ final class APITestController {
             )
         )
 
-        init() {}
+        static let builder = { return Self() }
     }
 
     struct IndexContext: RouteContext {
@@ -159,7 +159,7 @@ final class APITestController {
                 )
         )
 
-        init() {}
+        static let builder = { return Self() }
     }
 
     struct ShowContext: RouteContext {
@@ -212,7 +212,7 @@ final class APITestController {
             )
         )
 
-        init() {}
+        static let builder = { return Self() }
     }
 }
 
