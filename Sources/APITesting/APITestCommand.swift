@@ -56,7 +56,7 @@ public final class APITestCommand: Command {
 //            .flatMap { descriptor.markPassed().save(on: database) }
             .recover { err in
                 logger.error(path: nil,
-                             context: "Failed to run tests",
+                             context: "Testing Failed",
                              message: String(describing: err))
                 //                let _ = descriptor.markFailed().save(on: database)
             }

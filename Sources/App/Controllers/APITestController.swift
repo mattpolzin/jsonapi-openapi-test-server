@@ -85,7 +85,7 @@ final class APITestController {
                 .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
                 .flatMap { descriptor.markPassed().save(on: database) }
                 .whenFailure { error in
-                    req.logger.error("Failed to run tests",
+                    req.logger.error("Testing Failed",
                                      metadata: ["error": .stringConvertible(String(describing: error))])
                     // following is tmp to workaround above metadata not being dumped to console with previous call:
                     req.logger.error("\(String(describing: error))")
