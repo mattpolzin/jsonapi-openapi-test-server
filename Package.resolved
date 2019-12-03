@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
         "state": {
           "branch": null,
-          "revision": "19636a47f0e3fa3db112e24f1fa0bbb7853d83aa",
-          "version": "3.0.0-alpha.3"
+          "revision": "6ab4237c97e27ab0b5e3e1fe34738fa031a8dab9",
+          "version": "3.0.0"
         }
       },
       {
@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "a89af05a34d52b12d03e1961b95d3043380a8c48",
+          "revision": "515e7a6d6bc04689805874b2377caae866d967d8",
           "version": null
         }
       },
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Poly.git",
         "state": {
           "branch": null,
-          "revision": "18cd995be5c28c4dfdc1464e54ee0efb03e215bf",
-          "version": "2.3.0"
+          "revision": "0c9c08204142babc480938d704a23513d11420e5",
+          "version": "2.3.1"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "8066b0f581604e3711979307a4377457e2b0f007",
-          "version": "2.9.0"
+          "revision": "ff01888051cd7efceb1bf8319c1dd3986c4bf6fc",
+          "version": "2.10.1"
         }
       },
       {
@@ -294,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "ed97628fa310c314c4a5cd8038445054b2991f07",
-          "version": "1.3.1"
+          "revision": "53808818c2015c45247cad74dc05c7a032c96a2f",
+          "version": "1.3.2"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "994c319e038e013817a21d4679fa2d73b838a703",
-          "version": "1.7.0"
+          "revision": "7cc32a9a41e348230a4a452b25b7308cae1f3652",
+          "version": "1.7.1"
         }
       },
       {
@@ -312,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "e5c1af45ac934ac0a6117b2927a51d845cf4f705",
-          "version": "2.4.3"
+          "revision": "ccf96bbe65ecc7c1558ab0dba7ffabdea5c1d31f",
+          "version": "2.4.4"
         }
       },
       {

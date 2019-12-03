@@ -19,7 +19,7 @@ let package = Package(
 
         .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
         .package(url: "https://github.com/mattpolzin/OpenAPI.git", from: "0.8.0"),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "3.0.0-alpha.2")
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0"))
     ],
     targets: [
         /// MARK: Server App library
