@@ -19,6 +19,10 @@ public func routes(_ app: Application) throws {
     app.get("api_test", ":id", use: testController.show)
         .tags("Status")
         .summary("Retrieve a single test result")
+
+    app.get("api_test", ":id", "files", use: testController.files)
+        .tags("Test Files")
+        .summary("Retrieve the test files for the given test.")
 }
 
 extension Route {

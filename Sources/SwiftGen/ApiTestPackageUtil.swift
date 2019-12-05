@@ -10,12 +10,18 @@ import OpenAPIKit
 
 public func prepOutFolder(_ outPath: String, logger: Logger) throws {
     try? FileManager.default.removeItem(atPath: outPath + "/Tests/GeneratedAPITests")
+    try? FileManager.default.removeItem(atPath: outPath + "/api_tests.log")
+    try? FileManager.default.removeItem(atPath: outPath + "/.build")
 
     if !FileManager.default.fileExists(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects") {
         try FileManager.default.createDirectory(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",
                                                 withIntermediateDirectories: true,
                                                 attributes: nil)
     }
+}
+
+public func cleanupOutFolder(_ outPath: String, logger: Logger) throws {
+    try FileManager.default.removeItem(atPath: outPath)
 }
 
 public func runAPITestPackage(at path: String, logger: Logger) throws {

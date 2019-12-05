@@ -8,6 +8,13 @@
 import Vapor
 
 public struct EmptyRequestBody: Decodable {}
+public struct EmptyResponseBody: Encodable {}
+
+extension EmptyResponseBody: ResponseEncodable {
+    public func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
+        return "".encodeResponse(for: request)
+    }
+}
 
 public protocol AbstractRouteContext {
     var requestBodyType: Any.Type { get }

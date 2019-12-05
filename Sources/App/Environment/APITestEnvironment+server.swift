@@ -1,5 +1,5 @@
 //
-//  APITestEnvironment+database.swift
+//  APITestEnvironment+server.swift
 //  App
 //
 //  Created by Mathew Polzin on 9/28/19.
@@ -24,5 +24,13 @@ public extension Environment {
 
     enum DatabaseError: Swift.Error {
         case invalidUrl(String)
+    }
+}
+
+// MARK: - Archive Vars
+public extension Environment {
+    /// Optional Archives path (folder location in which zip archives will be stored).
+    static var archivesPath: String {
+        return Environment.get("API_TEST_ARCHIVES_PATH") ?? "/app/archives/"
     }
 }
