@@ -71,9 +71,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         Import.XCTest as Decl,
         Import.FoundationNetworking,
         APIRequestTestSwiftGen.testFuncDecl,
-        OpenAPIExampleParseTestSwiftGen.testFuncDecl,
-        DataDocumentSwiftGen.defaultErrorDecl,
-        DataDocumentSwiftGen.basicErrorDecl
+        OpenAPIExampleParseTestSwiftGen.testFuncDecl
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
     try! write(contents: testHelperContents,
