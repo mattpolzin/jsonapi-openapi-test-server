@@ -13,6 +13,12 @@ import OpenAPIKit
 public final class APITestCommand: Command {
     public struct Signature: CommandSignature {
 
+        @Flag(
+            name: "dump-files",
+            help: "Dump produced test files in a zipped file at the current working directory."
+        )
+        var dumpFiles: Bool
+
         public init() {}
     }
 
@@ -47,10 +53,14 @@ public final class APITestCommand: Command {
 
         context.console.print()
 
+        let cwd = FileManager.default.currentDirectoryPath
+
+        let zipToArg = signature.dumpFiles ? cwd + "/api_test_files.zip" : nil
+
         try prepOutputFolder(on: eventLoop, at: path, logger: logger)
 //            .flatMap { descriptor.markBuilding().save(on: database) }
             .flatMap { openAPIDoc(on: eventLoop, from: source) }
-            .flatMap { openAPIDoc in produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: path, logger: logger) }
+            .flatMap { openAPIDoc in produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: path, zipToPath: zipToArg, logger: logger) }
 //            .flatMap { descriptor.markRunning().save(on: database) }
             .flatMap { runAPITestPackage(on: eventLoop, at: path, logger: logger) }
 //            .flatMap { descriptor.markPassed().save(on: database) }
@@ -169,16 +179,29 @@ public func openAPIDoc(on loop: EventLoop,
 }
 
 public func produceAPITestPackage(on loop: EventLoop,
-                                         given openAPIDoc: OpenAPI.Document,
-                                         to outputPath: String,
-                                         logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
-    loop.submit { SwiftGen.produceAPITestPackage(from: openAPIDoc, outputTo: outputPath, logger: logger) }
+                                  given openAPIDoc: OpenAPI.Document,
+                                  to outputPath: String,
+                                  zipToPath: String? = nil,
+                                  logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+    loop.submit {
+        SwiftGen.produceAPITestPackage(
+            from: openAPIDoc,
+            outputTo: outputPath,
+            zipToPath: zipToPath,
+            logger: logger
+        )
+    }
 }
 
 public func runAPITestPackage(on loop: EventLoop,
-                                     at outputPath: String,
-                                     logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
-    loop.submit { try SwiftGen.runAPITestPackage(at: outputPath, logger: logger) }
+                              at outputPath: String,
+                              logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+    loop.submit {
+        try SwiftGen.runAPITestPackage(
+            at: outputPath,
+            logger: logger
+        )
+    }
 }
 
 

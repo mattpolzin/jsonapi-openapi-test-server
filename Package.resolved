@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "Chalk",
+        "repositoryURL": "https://github.com/mxcl/Chalk.git",
+        "state": {
+          "branch": null,
+          "revision": "9aa9f348b86db3cf6702a3e43c081ecec80cf3c7",
+          "version": "0.4.0"
+        }
+      },
+      {
         "package": "Commandant",
         "repositoryURL": "https://github.com/Carthage/Commandant.git",
         "state": {
@@ -69,8 +78,8 @@
         "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
         "state": {
           "branch": null,
-          "revision": "0eb888b85ca08c7ce85c8a6a459c94d7f282c1bb",
-          "version": "0.2.1"
+          "revision": "9ed91cc30a1a325d989fac117f3f3065a16b9f76",
+          "version": "0.2.3"
         }
       },
       {
@@ -191,15 +200,6 @@
         }
       },
       {
-        "package": "Rainbow",
-        "repositoryURL": "https://github.com/onevcat/Rainbow.git",
-        "state": {
-          "branch": null,
-          "revision": "9c52c1952e9b2305d4507cf473392ac2d7c9b155",
-          "version": "3.1.5"
-        }
-      },
-      {
         "package": "Result",
         "repositoryURL": "https://github.com/antitypical/Result.git",
         "state": {
@@ -254,15 +254,6 @@
         }
       },
       {
-        "package": "llbuild",
-        "repositoryURL": "https://github.com/apple/swift-llbuild.git",
-        "state": {
-          "branch": null,
-          "revision": "f73b84bc1525998e5e267f9d830c1411487ac65e",
-          "version": "0.2.0"
-        }
-      },
-      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
@@ -303,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "7cc32a9a41e348230a4a452b25b7308cae1f3652",
-          "version": "1.7.1"
+          "revision": "867259332c45d5405efed844f7b3997ebfa94167",
+          "version": "1.7.2"
         }
       },
       {
@@ -326,12 +317,12 @@
         }
       },
       {
-        "package": "SwiftPM",
-        "repositoryURL": "https://github.com/apple/swift-package-manager.git",
+        "package": "swift-tools-support-core",
+        "repositoryURL": "https://github.com/apple/swift-tools-support-core.git",
         "state": {
           "branch": null,
-          "revision": "9abcc2260438177cecd7cf5185b144d13e74122b",
-          "version": "0.5.0"
+          "revision": "693aba4c4c9dcc4767cc853a0dd38bf90ad8c258",
+          "version": "0.0.1"
         }
       },
       {
@@ -377,6 +368,15 @@
           "branch": null,
           "revision": "c947a306d2e80ecb2c0859047b35c73b8e1ca27f",
           "version": "2.0.0"
+        }
+      },
+      {
+        "package": "ZIPFoundation",
+        "repositoryURL": "https://github.com/weichsel/ZIPFoundation/",
+        "state": {
+          "branch": null,
+          "revision": "3f38d518c5e41f1cf25ff6a1d28c46db5e79a0b9",
+          "version": "0.9.10"
         }
       }
     ]

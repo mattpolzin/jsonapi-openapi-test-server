@@ -14,6 +14,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-alpha.3"),
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-alpha.3"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-alpha.2.1"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
 
         .package(url: "https://github.com/ianpartridge/swift-backtrace.git", from: "1.1.1"),
 
@@ -48,6 +49,6 @@ let package = Package(
         .target(name: "GenAPIDocumentation", dependencies: ["AppAPIDocumentation"]),
 
         /// MARK: Swift Generation interface
-        .target(name: "SwiftGen", dependencies: ["JSONAPIOpenAPI", "OpenAPIKit", "JSONAPISwiftGen"])
+        .target(name: "SwiftGen", dependencies: ["JSONAPIOpenAPI", "OpenAPIKit", "JSONAPISwiftGen", "ZIPFoundation"])
     ]
 )

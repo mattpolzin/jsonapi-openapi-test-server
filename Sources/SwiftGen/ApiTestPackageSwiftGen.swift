@@ -8,6 +8,7 @@
 import Foundation
 import OpenAPIKit
 import JSONAPISwiftGen
+import ZIPFoundation
 
 public protocol Logger {
     func error(path: String?, context: String, message: String)
@@ -19,6 +20,7 @@ typealias HttpVerb = OpenAPI.HttpVerb
 
 public func produceAPITestPackage(from openAPIData: Data,
                                   outputTo outPath: String,
+                                  zipToPath: String? = nil,
                                   logger: Logger? = nil) throws {
     let jsonDecoder = JSONDecoder()
 
@@ -26,23 +28,27 @@ public func produceAPITestPackage(from openAPIData: Data,
 
     produceAPITestPackage(from: openAPIStructure,
                           outputTo: outPath,
+                          zipToPath: zipToPath,
                           logger: logger)
 }
 
 public func produceAPITestPackage(from openAPIDocument: OpenAPI.Document,
                                   outputTo outPath: String,
+                                  zipToPath: String? = nil,
                                   logger: Logger? = nil) {
     let pathItems = openAPIDocument.paths
 
     produceAPITestPackage(for: pathItems,
                           originatingAt: openAPIDocument.servers.first!,
                           outputTo: outPath,
+                          zipToPath: zipToPath,
                           logger: logger)
 }
 
 public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                                   originatingAt server: OpenAPI.Server,
                                   outputTo outPath: String,
+                                  zipToPath: String? = nil,
                                   logger: Logger? = nil) {
 
     let testDir = outPath + "/Tests/GeneratedAPITests"
@@ -52,7 +58,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
     let contents = try! namespaceDecls(for: pathItems)
         .map { try $0.enumDecl.formattedSwiftCode() }
         .joined(separator: "\n\n")
-    write(contents: contents,
+    try! write(contents: contents,
           toFileAt: testDir + "/",
           named: "Namespaces.swift")
 
@@ -70,17 +76,17 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         DataDocumentSwiftGen.basicErrorDecl
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
-    write(contents: testHelperContents,
-          toFileAt: testDir + "/",
-          named: "TestHelpers.swift")
+    try! write(contents: testHelperContents,
+               toFileAt: testDir + "/",
+               named: "TestHelpers.swift")
 
-    write(contents: packageFile,
-          toFileAt: outPath + "/",
-          named: "Package.swift")
+    try! write(contents: packageFile,
+               toFileAt: outPath + "/",
+               named: "Package.swift")
 
-    write(contents: linuxMainFile,
-          toFileAt: outPath + "/Tests/",
-          named: "LinuxMain.swift")
+    try! write(contents: linuxMainFile,
+               toFileAt: outPath + "/Tests/",
+               named: "LinuxMain.swift")
 
     let results: [(
     httpVerb: HttpVerb,
@@ -165,31 +171,43 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
     }
 
     for result in results {
-        writeResourceObjectFiles(toPath: resourceObjDir + "/\(result.documentFileNameString)_response_",
+        try! writeResourceObjectFiles(
+            toPath: resourceObjDir + "/\(result.documentFileNameString)_response_",
             for: result.responseDocuments.values,
-            extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Response"])))
+            extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Response"]))
+        )
 
         if let reqDoc = result.requestDocument {
-            writeResourceObjectFiles(toPath: resourceObjDir + "/\(result.documentFileNameString)_request_",
+            try! writeResourceObjectFiles(
+                toPath: resourceObjDir + "/\(result.documentFileNameString)_request_",
                 for: [reqDoc],
-                extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Request"])))
+                extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Request"]))
+            )
         }
 
         // write API file
-        writeAPIFile(toPath: testDir + "/\(result.documentFileNameString)_",
+        try! writeAPIFile(
+            toPath: testDir + "/\(result.documentFileNameString)_",
             for: result.apiRequestTest,
             reqDoc: result.requestDocument,
             respDocs: result.responseDocuments.values,
             httpVerb: result.httpVerb,
-            extending: namespace(for: result.path))
+            extending: namespace(for: result.path)
+        )
     }
 
     let testClassFileContents = XCTestClassSwiftGen(className: "GeneratedTests",
                                                     importNames: [],
                                                     forwardingFullyQualifiedTestNames: results.flatMap { $0.fullyQualifiedTestFuncNames })
-    write(contents: try! testClassFileContents.formattedSwiftCode(),
-          toFileAt: testDir + "/",
-          named: "GeneratedTests.swift")
+    try! write(
+        contents: try! testClassFileContents.formattedSwiftCode(),
+        toFileAt: testDir + "/",
+        named: "GeneratedTests.swift"
+    )
+
+    if let zipToPath = zipToPath {
+        try! archive(from: outPath, to: zipToPath)
+    }
 }
 
 enum HttpDirection: String {
@@ -220,7 +238,7 @@ func documentTypeName(path: OpenAPI.PathComponents,
 
 func writeResourceObjectFiles<T: Sequence>(toPath path: String,
                                            for documents: T,
-                                           extending namespace: String) where T.Element == DataDocumentSwiftGen {
+                                           extending namespace: String) throws where T.Element == DataDocumentSwiftGen {
     for document in documents {
 
         let resourceObjectGenerators = document.resourceObjectGenerators
@@ -228,24 +246,24 @@ func writeResourceObjectFiles<T: Sequence>(toPath path: String,
         let definedResourceObjectNames = Set(resourceObjectGenerators
             .flatMap { $0.exportedSwiftTypeNames })
 
-        resourceObjectGenerators
+        try resourceObjectGenerators
             .forEach { resourceObjectGen in
 
-                resourceObjectGen
+                try resourceObjectGen
                     .relationshipStubGenerators
                     .filter { !definedResourceObjectNames.contains($0.resourceTypeName) }
                     .forEach { stubGen in
 
                         // write relationship stub files
-                        writeFile(toPath: path,
-                                  for: stubGen,
-                                  extending: namespace)
+                        try writeFile(toPath: path,
+                                      for: stubGen,
+                                      extending: namespace)
                 }
 
                 // write resource object files
-                writeFile(toPath: path,
-                          for: resourceObjectGen,
-                          extending: namespace)
+                try writeFile(toPath: path,
+                              for: resourceObjectGen,
+                              extending: namespace)
         }
     }
 }
@@ -315,7 +333,7 @@ func writeAPIFile<T: Sequence>(toPath path: String,
                                reqDoc: DataDocumentSwiftGen?,
                                respDocs: T,
                                httpVerb: HttpVerb,
-                               extending namespace: String) where T.Element == DataDocumentSwiftGen {
+                               extending namespace: String) throws where T.Element == DataDocumentSwiftGen {
 
     let apiDecl = apiDocumentsBlock(request: request,
                                     requestDoc: reqDoc,
@@ -332,14 +350,14 @@ func writeAPIFile<T: Sequence>(toPath path: String,
         ].map { try $0.formattedSwiftCode() }
         .joined(separator: "")
 
-    write(contents: outputFileContents,
-          toFileAt: path,
-          named: "API.swift")
+    try write(contents: outputFileContents,
+              toFileAt: path,
+              named: "API.swift")
 }
 
 func writeFile<T: ResourceTypeSwiftGenerator>(toPath path: String,
                                        for resourceObject: T,
-                                       extending namespace: String) {
+                                       extending namespace: String) throws {
 
     let swiftTypeName = resourceObject.resourceTypeName
 
@@ -356,16 +374,29 @@ func writeFile<T: ResourceTypeSwiftGenerator>(toPath path: String,
         .map { try $0.formattedSwiftCode() }
         .joined(separator: "\n")
 
-    write(contents: outputFileContents,
-          toFileAt: path,
-          named: "\(swiftTypeName).swift")
+    try write(contents: outputFileContents,
+              toFileAt: path,
+              named: "\(swiftTypeName).swift")
 }
 
-func write(contents: String, toFileAt path: String, named name: String) {
-    try! contents
+func write(contents: String, toFileAt path: String, named name: String) throws {
+    try contents
         .write(toFile: path + name,
                atomically: true,
                encoding: .utf8)
+}
+
+func archive(from sourcePath: String, to archivePath: String) throws {
+    let fileManager = FileManager.default
+
+    if fileManager.fileExists(atPath: archivePath) {
+        try fileManager.removeItem(atPath: archivePath)
+    }
+
+    let source = URL(fileURLWithPath: sourcePath)
+    let destination = URL(fileURLWithPath: archivePath)
+
+    try fileManager.zipItem(at: source, to: destination)
 }
 
 struct DeclNode: Equatable {
