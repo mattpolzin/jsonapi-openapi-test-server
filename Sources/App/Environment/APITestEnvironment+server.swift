@@ -31,6 +31,11 @@ public extension Environment {
 public extension Environment {
     /// Optional Archives path (folder location in which zip archives will be stored).
     static var archivesPath: String {
-        return Environment.get("API_TEST_ARCHIVES_PATH") ?? "/app/archives/"
+        let defaultDir = FileManager.default
+            .homeDirectoryForCurrentUser
+            .appendingPathComponent("api_test_archives")
+            .path
+
+        return Environment.get("API_TEST_ARCHIVES_PATH") ?? defaultDir
     }
 }

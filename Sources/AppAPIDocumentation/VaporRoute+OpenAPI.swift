@@ -38,6 +38,8 @@ extension AbstractRouteContext {
 
                 let schema = try (responseTuple.responseBodyType as? OpenAPIEncodedNodeType.Type)?.openAPINode(using: encoder)
 
+                // TODO: support additional content types -- binary file types will not even have a schema so they are gimmes.
+
                 return schema
                     .map {
                         OpenAPI.Response(

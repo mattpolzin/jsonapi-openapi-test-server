@@ -60,6 +60,10 @@ ENV ENVIRONMENT=$env
 # Optional. If not specified, defaults to ~/api_test
 # ENV API_TEST_OUT_PATH
 
+# Path on local filesystem to which to write zipped generated API test files.
+# Optional. If not specified, defaults to ~/api_test_archives
+# ENV API_TEST_ARCHIVES_PATH
+
 # Postgres Database URL. Required.
 # ENV API_TEST_DATABASE_URL
 

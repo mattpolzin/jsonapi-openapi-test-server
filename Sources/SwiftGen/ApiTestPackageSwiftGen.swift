@@ -384,15 +384,27 @@ func write(contents: String, toFileAt path: String, named name: String) throws {
                encoding: .utf8)
 }
 
-func archive(from sourcePath: String, to archivePath: String) throws {
+func archive(from sourcePath: String, to archiveFilePath: String) throws {
     let fileManager = FileManager.default
 
-    if fileManager.fileExists(atPath: archivePath) {
-        try fileManager.removeItem(atPath: archivePath)
+    let source = URL(fileURLWithPath: sourcePath)
+    let destination = URL(fileURLWithPath: archiveFilePath)
+
+    let archiveFolderPath = destination
+        .deletingLastPathComponent()
+        .path
+
+    // create the directory if needed
+    if !fileManager.fileExists(atPath: archiveFolderPath) {
+        try fileManager.createDirectory(atPath: archiveFolderPath,
+                                        withIntermediateDirectories: true,
+                                        attributes: nil)
     }
 
-    let source = URL(fileURLWithPath: sourcePath)
-    let destination = URL(fileURLWithPath: archivePath)
+    // delete a previously generated archive if needed
+    if fileManager.fileExists(atPath: archiveFilePath) {
+        try fileManager.removeItem(atPath: archiveFilePath)
+    }
 
     try fileManager.zipItem(at: source, to: destination)
 }
