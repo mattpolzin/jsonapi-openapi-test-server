@@ -4,7 +4,7 @@ import AppAPIDocumentation
 import Foundation
 import Yams
 
-let dummyApp = try app(.detect())
+let dummyApp = try app(.detect(), hobbled: true)
 
 let routes = dummyApp.routes
 

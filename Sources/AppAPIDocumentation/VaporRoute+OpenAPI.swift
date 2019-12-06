@@ -157,7 +157,7 @@ extension Vapor.Route {
 
         let responseTuples = [
             successResponse.map{ (OpenAPI.Response.StatusCode(200), $0) }
-            ].compactMap { $0 }
+        ].compactMap { $0 }
 
         return Dictionary(
             responseTuples,

@@ -11,16 +11,13 @@ final class APITestController {
 
     static let zipPathPrefix = Environment.archivesPath
     let outputPath: String
-    let openAPISource: OpenAPISource
-    let database: Database
+    let defaultOpenAPISource: OpenAPISource?
     let testEventLoopGroup: MultiThreadedEventLoopGroup
 
     init(outputPath: String,
-         openAPISource: OpenAPISource,
-         database: Database) {
+         openAPISource: OpenAPISource?) {
         self.outputPath = outputPath
-        self.openAPISource = openAPISource
-        self.database = database
+        self.defaultOpenAPISource = openAPISource
         self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
 
@@ -31,7 +28,7 @@ final class APITestController {
     /// Returns a list of all `APITestDescriptor`s.
     func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
         // TODO: only include if requested
-        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: database),
+        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: req.db),
                                                   includeMessages: true)
             .flatMap { req.response.success.encode($0) }
             .flatMapError { _ in req.response.serverError }
@@ -42,7 +39,7 @@ final class APITestController {
             return req.response.badRequest
         }
 
-        let query = APITestDescriptor.query(on: database)
+        let query = APITestDescriptor.query(on: req.db)
             .filter(\APITestDescriptor.$id == id)
 
         return API.singleAPITestDescriptorResponse(query: query, includeMessages: true)
@@ -61,7 +58,7 @@ final class APITestController {
             return req.response.badRequest
         }
 
-        let query = APITestDescriptor.query(on: database)
+        let query = APITestDescriptor.query(on: req.db)
             .filter(\APITestDescriptor.$id == id)
 
         return query.first()
@@ -88,9 +85,15 @@ final class APITestController {
         let logger = Logger(systemLogger: req.logger,
                             descriptor: descriptor,
                             eventLoop: req.eventLoop,
-                            database: database)
+                            database: req.db)
 
-        let savedDescriptor = descriptor.save(on: database)
+        let savedDescriptor = descriptor.save(on: req.db)
+
+        guard let source = defaultOpenAPISource else {
+            // eventually want to accept source as argument to endpoint
+            // and just fall back to default
+            return req.response.serverError
+        }
 
         savedDescriptor.whenSuccess { [weak self] in
 
@@ -99,8 +102,6 @@ final class APITestController {
             // and independent of the API request completion.
             guard let self = self else { return }
 
-            let source = self.openAPISource
-            let database = self.database
             let outPath = self.outPath(for: descriptor)
             let zipPath = self.zipPath(for: descriptor)
             let eventLoop = self.testEventLoop()
@@ -108,12 +109,12 @@ final class APITestController {
             req.logger.info("Running tests in \(outPath)")
 
             prepOutputFolder(on: eventLoop, at: outPath, logger: logger)
-                .flatMap { descriptor.markBuilding().save(on: database) }
+                .flatMap { descriptor.markBuilding().save(on: req.db) }
                 .flatMap { openAPIDoc(on: eventLoop, from: source) }
                 .flatMap { openAPIDoc in produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: outPath, zipToPath: zipPath, logger: logger) }
-                .flatMap { descriptor.markRunning().save(on: database) }
+                .flatMap { descriptor.markRunning().save(on: req.db) }
                 .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
-                .flatMap { descriptor.markPassed().save(on: database) }
+                .flatMap { descriptor.markPassed().save(on: req.db) }
                 .always { _ in
                     try? cleanupOutFolder(outPath, logger: logger)
                     req.logger.info("Cleaning up tests in \(outPath)")
@@ -123,7 +124,7 @@ final class APITestController {
                                      metadata: ["error": .stringConvertible(String(describing: error))])
                     // following is tmp to workaround above metadata not being dumped to console with previous call:
                     req.logger.error("\(String(describing: error))")
-                    let _ = descriptor.markFailed().save(on: database)
+                    let _ = descriptor.markFailed().save(on: req.db)
             }
         }
 
@@ -163,6 +164,20 @@ final class APITestController {
             .init { response in
                 response.status = .accepted
         }
+
+        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
+            .init(response: Response(
+                status: .badRequest,
+                body: .init(data: try! JSONEncoder().encode(
+                    API.SingleAPITestDescriptorResponse.ErrorDocument(
+                        apiDescription: .none,
+                        errors: [
+                            .error(.init(id: nil, title: "Bad Request", detail: "No OpenAPI Document was specified."))
+                        ]
+                    )
+                ))
+            )
+        )
 
         let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
             .init(response: Response(

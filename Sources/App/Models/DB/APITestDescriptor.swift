@@ -44,7 +44,7 @@ public final class APITestDescriptor: Model {
 }
 
 extension APITestDescriptor {
-    public enum Status: String, Codable {
+    public enum Status: String, Codable, CaseIterable {
         case pending
         case building
         case running

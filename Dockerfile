@@ -1,31 +1,41 @@
 
 FROM swift:5.1 as builder
 
+#
 # For local build, add `--build-arg env=docker`
-# In your application, you can use `Environment.custom(name: "docker")` to check if you're in this env
+#
 ARG env
 
 RUN apt-get -qq update && apt-get install -y \
   libssl-dev zlib1g-dev \
   && rm -r /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY . .
 RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
 
-##
+#########
 # RELEASE
 # RUN swift build -c release \
 #  && mv `swift build -c release --show-bin-path` /build/bin
 #
-##
+#########
 # DEBUG
 RUN swift build -c release -Xswiftc -g -Xswiftc -DDEBUG \
   && mv `swift build -c release --show-bin-path` /build/bin
-##
+#
+#########
+
+#
+# Generate API Documentation
+#
+RUN /build/bin/GenAPIDocumentation > ./Public/openapi.yml
 
 # ------------------------------------------------------------------------------
 
+#
 ## Production image
+#
 
 FROM swift:5.1
 ARG env
@@ -33,9 +43,11 @@ ARG env
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libatomic1 libicu60 libxml2 libcurl4 libz-dev libbsd0 tzdata zlib1g \
   && rm -r /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=builder /build/bin/Run .
 COPY --from=builder /build/bin/APITest .
+COPY --from=builder /app/Public ./Public
 COPY --from=builder /build/lib/* /usr/lib/
 
 ##
