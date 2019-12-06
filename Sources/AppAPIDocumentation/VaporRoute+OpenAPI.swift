@@ -36,18 +36,30 @@ extension AbstractRouteContext {
                     code: responseTuple.statusCode
                 )
 
-                let schema = try (responseTuple.responseBodyType as? OpenAPIEncodedNodeType.Type)?.openAPINode(using: encoder)
+                let responseReason = HTTPStatus(statusCode: responseTuple.statusCode)
+                    .reasonPhrase
 
-                // TODO: support additional content types -- binary file types will not even have a schema so they are gimmes.
+                let contentType = responseTuple.contentType?.openAPIContentType
 
-                return schema
-                    .map {
+                if let schema = try (responseTuple.responseBodyType as? OpenAPIEncodedNodeType.Type)?.openAPINode(using: encoder) {
+                    return (
+                        statusCode,
                         OpenAPI.Response(
-                            description: HTTPStatus.init(statusCode: responseTuple.statusCode).reasonPhrase,
+                            description: responseReason,
                             content: [
-                                .json: .init(schema: .init($0))
+                                (contentType ?? .json): .init(schema: .init(schema))
                             ]
                         )
+                    )
+                }
+
+                return contentType.map {
+                    OpenAPI.Response(
+                        description: responseReason,
+                        content: [
+                            $0: .init(schema: .init(.string(format: .binary)))
+                        ]
+                    )
                 }.map { (statusCode, $0) }
         }
 
@@ -219,5 +231,11 @@ extension Vapor.PathComponent {
 
     enum OpenAPIPathComponentError: Swift.Error {
         case unsupportedPathComponent(String)
+    }
+}
+
+extension HTTPMediaType {
+    var openAPIContentType: OpenAPI.ContentType? {
+        return OpenAPI.ContentType(rawValue: "\(self.type)/\(self.subType)")
     }
 }

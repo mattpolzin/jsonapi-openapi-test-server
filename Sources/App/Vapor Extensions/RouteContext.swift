@@ -18,7 +18,7 @@ extension EmptyResponseBody: ResponseEncodable {
 
 public protocol AbstractRouteContext {
     var requestBodyType: Any.Type { get }
-    static var responseBodyTuples: [(statusCode: Int, responseBodyType: Any.Type)] { get }
+    static var responseBodyTuples: [(statusCode: Int, contentType: HTTPMediaType?, responseBodyType: Any.Type)] { get }
 }
 
 public protocol RouteContext: AbstractRouteContext {
@@ -34,7 +34,7 @@ extension RouteContext {
 extension RouteContext {
     public var requestBodyType: Any.Type { return RequestBodyType.self }
 
-    public static var responseBodyTuples: [(statusCode: Int, responseBodyType: Any.Type)] {
+    public static var responseBodyTuples: [(statusCode: Int, contentType: HTTPMediaType?, responseBodyType: Any.Type)] {
         let context = Self.build()
 
         let mirror = Mirror(reflecting: context)
@@ -49,9 +49,11 @@ extension RouteContext {
                 responseContext.configure(&dummyResponse)
 
                 let statusCode = Int(dummyResponse.status.code)
+                let contentType = dummyResponse.headers.contentType
 
                 return (
                     statusCode: statusCode,
+                    contentType: contentType,
                     responseBodyType: responseContext.responseBodyType
                 )
         }
