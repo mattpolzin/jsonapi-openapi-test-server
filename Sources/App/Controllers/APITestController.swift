@@ -44,7 +44,7 @@ extension APITestController {
         // TODO: only include if requested
         return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: req.db),
                                                   includeMessages: true)
-            .flatMap { req.response.success.encode($0) }
+            .flatMap(req.response.success.encode)
             .flatMapError { _ in req.response.serverError }
     }
 
@@ -56,8 +56,10 @@ extension APITestController {
         let query = APITestDescriptor.query(on: req.db)
             .filter(\APITestDescriptor.$id == id)
 
-        return API.singleAPITestDescriptorResponse(query: query, includeMessages: true)
-            .flatMap { req.response.success.encode($0) }
+        // TODO: only include if requested
+        return API.singleAPITestDescriptorResponse(query: query,
+                                                   includeMessages: true)
+            .flatMap(req.response.success.encode)
             .flatMapError { error in
                 guard let abortError = error as? Abort,
                     abortError.status == .notFound else {
@@ -77,8 +79,9 @@ extension APITestController {
 
         return query.first()
             .unwrap(or: Abort(.notFound))
-            .flatMap { req.fileio.collectFile(at: self.zipPath(for: $0)) }
-            .flatMap { req.response.success.encode($0) }
+            .map(self.zipPath)
+            .flatMap(req.fileio.collectFile)
+            .flatMap(req.response.success.encode)
             .flatMapError { error in
                 guard let abortError = error as? Abort,
                     abortError.status == .notFound else {
@@ -96,16 +99,17 @@ extension APITestController {
             .flatMap(UUID.init(uuidString:))
         let descriptor = APITestDescriptor(id: reqUUIDGuess ?? UUID())
 
-        let logger = Logger(systemLogger: req.logger,
-                            descriptor: descriptor,
-                            eventLoop: req.eventLoop,
-                            database: req.db)
+        let logger = Logger(
+            systemLogger: req.logger,
+            descriptor: descriptor,
+            eventLoop: req.eventLoop,
+            database: req.db
+        )
 
         let savedDescriptor = descriptor.save(on: req.db)
 
         guard let source = defaultOpenAPISource else {
-            // eventually want to accept source as argument to endpoint
-            // and just fall back to default
+            // TODO: eventually want to accept source as argument to endpoint and just fall back to default
             return req.response.serverError
         }
 
@@ -159,7 +163,7 @@ extension APITestController {
                 links: .none
             )
         }
-        .flatMap { req.response.success.encode($0) }
+        .flatMap(req.response.success.encode)
         .flatMapError { _ in
             return req.response.serverError
         }
