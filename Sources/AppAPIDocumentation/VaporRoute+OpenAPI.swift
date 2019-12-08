@@ -10,12 +10,6 @@ import OpenAPIKit
 import Vapor
 import App
 
-extension EventLoopFuture: OpenAPIEncodedNodeType where Value: OpenAPIEncodedNodeType {
-    public static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchema {
-        return try Value.openAPINode(using: encoder)
-    }
-}
-
 protocol _Wrapper {
     static var wrappedType: Any.Type { get }
 }
@@ -173,69 +167,3 @@ typealias PartialPathOperationContext = (
 )
 
 typealias PathOperationConstructor = (PartialPathOperationContext) -> (path: OpenAPI.PathComponents, verb: OpenAPI.HttpVerb, operation: OpenAPI.PathItem.Operation)
-
-extension HTTPMethod {
-    internal func openAPIVerb() throws -> OpenAPI.HttpVerb {
-        switch self {
-        case .GET:
-            return .get
-        case .PUT:
-            return .put
-        case .POST:
-            return .post
-        case .DELETE:
-            return .delete
-        case .OPTIONS:
-            return .options
-        case .HEAD:
-            return .head
-        case .PATCH:
-            return .patch
-        case .TRACE:
-            return .trace
-        default:
-            throw OpenAPIHTTPMethodError.unsupportedHttpMethod(String(describing: self))
-        }
-    }
-
-    enum OpenAPIHTTPMethodError: Swift.Error {
-        case unsupportedHttpMethod(String)
-    }
-}
-
-extension Vapor.PathComponent {
-    internal func openAPIPathComponent() throws -> String {
-        switch self {
-        case .constant(let val):
-            return val
-        case .parameter(let val):
-            return "{\(val)}"
-        case .anything,
-             .catchall:
-            throw OpenAPIPathComponentError.unsupportedPathComponent(String(describing: self))
-        }
-    }
-
-    internal var openAPIPathParameter: OpenAPI.PathItem.Parameter? {
-        switch self {
-        case .parameter(let name):
-            return .init(
-                name: name,
-                parameterLocation: .path,
-                schema: .string
-            )
-        default:
-            return nil
-        }
-    }
-
-    enum OpenAPIPathComponentError: Swift.Error {
-        case unsupportedPathComponent(String)
-    }
-}
-
-extension HTTPMediaType {
-    var openAPIContentType: OpenAPI.ContentType? {
-        return OpenAPI.ContentType(rawValue: "\(self.type)/\(self.subType)")
-    }
-}

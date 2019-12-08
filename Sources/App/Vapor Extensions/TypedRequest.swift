@@ -17,7 +17,6 @@ public final class TypedRequest<Context: RouteContext> {
         return request[keyPath: path]
     }
 
-    public var eventLoop: EventLoop { return request.eventLoop }
     public var underlyingRequest: Request { return request }
 
     public init(underlyingRequest: Request) {

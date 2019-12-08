@@ -1,13 +1,10 @@
 import Vapor
+import FluentKit
 import SwiftGen
-import OpenAPIKit
-import FluentPostgresDriver
-import struct Logging.Logger
-import JSONAPI
 import APITesting
 
-/// Controls basic CRUD operations on `Todo`s.
-final class APITestController {
+/// Controls basic CRUD operations on API Tests.
+final class APITestController: Controller {
 
     static let zipPathPrefix = Environment.archivesPath
     let outputPath: String
@@ -154,9 +151,10 @@ final class APITestController {
         return self.outputPath
             + "/\(test.id!.uuidString)/"
     }
+}
 
-    // MARK: - Contexts
-
+// MARK: - Route Contexts
+extension APITestController {
     struct CreateContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
@@ -179,19 +177,7 @@ final class APITestController {
             )
         )
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .internalServerError,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.SingleAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
-                        ]
-                    )
-                ))
-            )
-        )
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
 
         static let builder = { return Self() }
     }
@@ -204,19 +190,7 @@ final class APITestController {
                 response.status = .ok
         }
 
-        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .internalServerError,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.BatchAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
-                        ]
-                    )
-                    ))
-                )
-        )
+        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
 
         static let builder = { return Self() }
     }
@@ -229,47 +203,11 @@ final class APITestController {
                 response.status = .ok
         }
 
-        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .notFound,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.SingleAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Not Found", detail: "The requested tests were not found"))
-                        ]
-                    )
-                ))
-            )
-        )
+        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonNotFoundError(details: "The requested tests were not found")
 
-        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .badRequest,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.SingleAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Bad Request", detail: "Test ID not specified in path"))
-                        ]
-                    )
-                ))
-            )
-        )
+        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonBadRequestError(details: "Test ID not specified in path")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .internalServerError,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.SingleAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
-                        ]
-                    )
-                ))
-            )
-        )
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
 
         static let builder = { return Self() }
     }
@@ -302,51 +240,5 @@ final class APITestController {
         )
 
         static let builder = { return Self() }
-    }
-}
-
-extension APITestController {
-    final class Logger: SwiftGen.Logger {
-        let systemLogger: Logging.Logger
-        let descriptor: APITestDescriptor
-        let eventLoop: EventLoop
-        let database: Database
-
-        init(systemLogger: Logging.Logger,
-             descriptor: APITestDescriptor,
-             eventLoop: EventLoop,
-             database: Database) {
-            self.systemLogger = systemLogger
-            self.descriptor = descriptor
-            self.eventLoop = eventLoop
-            self.database = database
-        }
-
-        public func error(path: String?, context: String, message: String) {
-            systemLogger.error("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .error,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
-        }
-
-        public func warning(path: String?, context: String, message: String) {
-            systemLogger.warning("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .warning,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
-        }
-
-        public func success(path: String?, context: String, message: String) {
-            systemLogger.info("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .success,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
-        }
     }
 }
