@@ -108,7 +108,15 @@ final class APITestController: Controller {
             prepOutputFolder(on: eventLoop, at: outPath, logger: logger)
                 .flatMap { descriptor.markBuilding().save(on: req.db) }
                 .flatMap { openAPIDoc(on: eventLoop, from: source) }
-                .flatMap { openAPIDoc in produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: outPath, zipToPath: zipPath, logger: logger) }
+                .flatMap { openAPIDoc in
+                    produceAPITestPackage(
+                        on: eventLoop,
+                        given: openAPIDoc,
+                        to: outPath,
+                        zipToPath: zipPath,
+                        logger: logger
+                    )
+                }
                 .flatMap { descriptor.markRunning().save(on: req.db) }
                 .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
                 .flatMap { descriptor.markPassed().save(on: req.db) }
@@ -126,11 +134,13 @@ final class APITestController: Controller {
         }
 
         return savedDescriptor.flatMapThrowing { _ in
-            API.SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
-                                                                body: .init(resourceObject: try descriptor.serializable().0),
-                                                                includes: .none,
-                                                                meta: .none,
-                                                                links: .none)
+            API.SingleAPITestDescriptorResponse.SuccessDocument(
+                apiDescription: .none,
+                body: .init(resourceObject: try descriptor.serializable().0),
+                includes: .none,
+                meta: .none,
+                links: .none
+            )
         }
         .flatMap { req.response.success.encode($0) }
         .flatMapError { _ in
@@ -163,21 +173,11 @@ extension APITestController {
                 response.status = .accepted
         }
 
-        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> =
-            .init(response: Response(
-                status: .badRequest,
-                body: .init(data: try! JSONEncoder().encode(
-                    API.SingleAPITestDescriptorResponse.ErrorDocument(
-                        apiDescription: .none,
-                        errors: [
-                            .error(.init(id: nil, title: "Bad Request", detail: "No OpenAPI Document was specified."))
-                        ]
-                    )
-                ))
-            )
-        )
+        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonServerError()
 
         static let builder = { return Self() }
     }
@@ -190,7 +190,8 @@ extension APITestController {
                 response.status = .ok
         }
 
-        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
+        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonServerError()
 
         static let builder = { return Self() }
     }
@@ -203,11 +204,14 @@ extension APITestController {
                 response.status = .ok
         }
 
-        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonNotFoundError(details: "The requested tests were not found")
+        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonNotFoundError(details: "The requested tests were not found")
 
-        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonBadRequestError(details: "Test ID not specified in path")
+        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "Test ID not specified in path")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument> = APITestController.jsonServerError()
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonServerError()
 
         static let builder = { return Self() }
     }

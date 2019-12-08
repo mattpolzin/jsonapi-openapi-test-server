@@ -20,7 +20,11 @@ extension Controller {
                 API.SingleAPITestDescriptorResponse.ErrorDocument(
                     apiDescription: .none,
                     errors: [
-                        .error(.init(id: nil, title: "Internal Server Error", detail: "Unknown error occurred"))
+                        .error(.init(
+                            id: nil,
+                            title: HTTPResponseStatus.internalServerError.reasonPhrase,
+                            detail: "Unknown error occurred"
+                        ))
                     ]
                 )
                 ))
@@ -35,7 +39,11 @@ extension Controller {
                 API.SingleAPITestDescriptorResponse.ErrorDocument(
                     apiDescription: .none,
                     errors: [
-                        .error(.init(id: nil, title: "Bad Request", detail: details))
+                        .error(.init(
+                            id: nil,
+                            title: HTTPResponseStatus.badRequest.reasonPhrase,
+                            detail: details
+                        ))
                     ]
                 )
                 ))
@@ -50,7 +58,11 @@ extension Controller {
                 API.SingleAPITestDescriptorResponse.ErrorDocument(
                     apiDescription: .none,
                     errors: [
-                        .error(.init(id: nil, title: "Not Found", detail: details))
+                        .error(.init(
+                            id: nil,
+                            title: HTTPResponseStatus.notFound.reasonPhrase,
+                            detail: details
+                        ))
                     ]
                 )
                 ))
