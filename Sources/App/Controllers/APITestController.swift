@@ -22,6 +22,23 @@ final class APITestController: Controller {
         try! testEventLoopGroup.syncShutdownGracefully()
     }
 
+    private func testEventLoop() -> EventLoop {
+        return testEventLoopGroup.next()
+    }
+
+    private func zipPath(for test: APITestDescriptor) -> String {
+        return Self.zipPathPrefix
+            + "/\(test.id!.uuidString).zip"
+    }
+
+    private func outPath(for test: APITestDescriptor) -> String {
+        return self.outputPath
+            + "/\(test.id!.uuidString)/"
+    }
+}
+
+// MARK: - Routes
+extension APITestController {
     /// Returns a list of all `APITestDescriptor`s.
     func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
         // TODO: only include if requested
@@ -116,20 +133,20 @@ final class APITestController: Controller {
                         zipToPath: zipPath,
                         logger: logger
                     )
-                }
-                .flatMap { descriptor.markRunning().save(on: req.db) }
-                .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
-                .flatMap { descriptor.markPassed().save(on: req.db) }
-                .always { _ in
-                    try? cleanupOutFolder(outPath, logger: logger)
-                    req.logger.info("Cleaning up tests in \(outPath)")
-                }
-                .whenFailure { error in
-                    req.logger.error("Testing Failed",
-                                     metadata: ["error": .stringConvertible(String(describing: error))])
-                    // following is tmp to workaround above metadata not being dumped to console with previous call:
-                    req.logger.error("\(String(describing: error))")
-                    let _ = descriptor.markFailed().save(on: req.db)
+            }
+            .flatMap { descriptor.markRunning().save(on: req.db) }
+            .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
+            .flatMap { descriptor.markPassed().save(on: req.db) }
+            .always { _ in
+                try? cleanupOutFolder(outPath, logger: logger)
+                req.logger.info("Cleaning up tests in \(outPath)")
+            }
+            .whenFailure { error in
+                req.logger.error("Testing Failed",
+                                 metadata: ["error": .stringConvertible(String(describing: error))])
+                // following is tmp to workaround above metadata not being dumped to console with previous call:
+                req.logger.error("\(String(describing: error))")
+                let _ = descriptor.markFailed().save(on: req.db)
             }
         }
 
@@ -147,41 +164,10 @@ final class APITestController: Controller {
             return req.response.serverError
         }
     }
-
-    private func testEventLoop() -> EventLoop {
-        return testEventLoopGroup.next()
-    }
-
-    private func zipPath(for test: APITestDescriptor) -> String {
-        return Self.zipPathPrefix
-            + "/\(test.id!.uuidString).zip"
-    }
-
-    private func outPath(for test: APITestDescriptor) -> String {
-        return self.outputPath
-            + "/\(test.id!.uuidString)/"
-    }
 }
 
 // MARK: - Route Contexts
 extension APITestController {
-    struct CreateContext: RouteContext {
-        typealias RequestBodyType = EmptyRequestBody
-
-        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
-            .init { response in
-                response.status = .accepted
-        }
-
-        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
-            = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
-
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
-            = Controller.jsonServerError()
-
-        static let builder = { return Self() }
-    }
-
     struct IndexContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
@@ -242,6 +228,23 @@ extension APITestController {
                 status: .internalServerError
             )
         )
+
+        static let builder = { return Self() }
+    }
+
+    struct CreateContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
+            .init { response in
+                response.status = .accepted
+        }
+
+        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
+
+        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+            = Controller.jsonServerError()
 
         static let builder = { return Self() }
     }
