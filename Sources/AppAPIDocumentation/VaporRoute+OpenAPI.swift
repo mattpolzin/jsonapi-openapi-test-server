@@ -89,6 +89,10 @@ extension Vapor.Route {
         let responses = try openAPIResponses(from: responseType, using: encoder)
 
         let pathParameters = path.compactMap { $0.openAPIPathParameter }
+        let queryParameters = openAPIQueryParams(from: responseType)
+
+        let parameters = pathParameters
+            + queryParameters
 
         return { context in
 
@@ -98,7 +102,7 @@ extension Vapor.Route {
                 description: context.description,
                 externalDocs: nil,
                 operationId: nil,
-                parameters: pathParameters.map { .init($0) },
+                parameters: parameters.map { .init($0) },
                 requestBody: requestBody,
                 responses: responses,
                 servers: []
@@ -126,6 +130,16 @@ extension Vapor.Route {
                 tags: tags
             )
         )
+    }
+
+    private func openAPIQueryParams(from responseType: Any.Type) -> [OpenAPI.PathItem.Parameter] {
+        if let responseBodyType = responseType as? AbstractRouteContext.Type {
+            return responseBodyType
+                .requestQueryParams
+                .map { $0.openAPIQueryParam() }
+        }
+
+        return []
     }
 
     private func openAPIResponses(from responseType: Any.Type, using encoder: JSONEncoder) throws -> OpenAPI.Response.Map {

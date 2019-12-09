@@ -11,10 +11,18 @@ public protocol AbstractQueryParam {
     var name: String { get }
     var allowedValues: [String]? { get }
     var description: String? { get }
+
+    var swiftType: Any.Type { get }
 }
 
 public protocol QueryParamProtocol: AbstractQueryParam {
     associatedtype SwiftType
+}
+
+extension QueryParamProtocol {
+    public var swiftType: Any.Type {
+        return SwiftType.self
+    }
 }
 
 public struct QueryParam<T: Decodable>: QueryParamProtocol {
