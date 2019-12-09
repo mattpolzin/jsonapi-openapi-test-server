@@ -1,6 +1,7 @@
 import Vapor
 import Foundation
 import FluentKit
+import APITesting
 
 public final class APITestDescriptor: Model {
     public static let schema = "api_test_descriptors"
@@ -43,7 +44,7 @@ public final class APITestDescriptor: Model {
     }
 }
 
-extension APITestDescriptor {
+extension APITestDescriptor: TestProgressTracker {
     public enum Status: String, Codable, CaseIterable {
         case pending
         case building

@@ -2,6 +2,7 @@ import Vapor
 import FluentKit
 import SwiftGen
 import APITesting
+import struct Logging.Logger
 
 /// Controls basic CRUD operations on API Tests.
 final class APITestController: Controller {
@@ -99,13 +100,6 @@ extension APITestController {
             .flatMap(UUID.init(uuidString:))
         let descriptor = APITestDescriptor(id: reqUUIDGuess ?? UUID())
 
-        let logger = Logger(
-            systemLogger: req.logger,
-            descriptor: descriptor,
-            eventLoop: req.eventLoop,
-            database: req.db
-        )
-
         let savedDescriptor = descriptor.save(on: req.db)
 
         guard let source = defaultOpenAPISource else {
@@ -124,34 +118,22 @@ extension APITestController {
             let zipPath = self.zipPath(for: descriptor)
             let eventLoop = self.testEventLoop()
 
-            req.logger.info("Running tests in \(outPath)")
+            let testLogger = Controller.Logger(
+                systemLogger: req.logger,
+                descriptor: descriptor,
+                eventLoop: eventLoop,
+                database: req.db
+            )
 
-            prepOutputFolder(on: eventLoop, at: outPath, logger: logger)
-                .flatMap { descriptor.markBuilding().save(on: req.db) }
-                .flatMap { openAPIDoc(on: eventLoop, from: source) }
-                .flatMap { openAPIDoc in
-                    produceAPITestPackage(
-                        on: eventLoop,
-                        given: openAPIDoc,
-                        to: outPath,
-                        zipToPath: zipPath,
-                        logger: logger
-                    )
-            }
-            .flatMap { descriptor.markRunning().save(on: req.db) }
-            .flatMap { runAPITestPackage(on: eventLoop, at: outPath, logger: logger) }
-            .flatMap { descriptor.markPassed().save(on: req.db) }
-            .always { _ in
-                try? cleanupOutFolder(outPath, logger: logger)
-                req.logger.info("Cleaning up tests in \(outPath)")
-            }
-            .whenFailure { error in
-                req.logger.error("Testing Failed",
-                                 metadata: ["error": .stringConvertible(String(describing: error))])
-                // following is tmp to workaround above metadata not being dumped to console with previous call:
-                req.logger.error("\(String(describing: error))")
-                let _ = descriptor.markFailed().save(on: req.db)
-            }
+            let _ = APITestCommand.kickTestsOff(
+                testProgressTracking: (descriptor, req.db),
+                source: source,
+                outPath: outPath,
+                zipPath: zipPath,
+                eventLoop: eventLoop,
+                requestLogger: req.logger,
+                testLogger: testLogger
+            )
         }
 
         return savedDescriptor.flatMapThrowing { _ in

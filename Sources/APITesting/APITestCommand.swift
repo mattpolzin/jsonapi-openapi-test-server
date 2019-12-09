@@ -57,22 +57,119 @@ public final class APITestCommand: Command {
 
         let zipToArg = signature.dumpFiles ? cwd + "/api_test_files.zip" : nil
 
-        try prepOutputFolder(on: eventLoop, at: path, logger: logger)
-//            .flatMap { descriptor.markBuilding().save(on: database) }
-            .flatMap { openAPIDoc(on: eventLoop, from: source) }
-            .flatMap { openAPIDoc in produceAPITestPackage(on: eventLoop, given: openAPIDoc, to: path, zipToPath: zipToArg, logger: logger) }
-//            .flatMap { descriptor.markRunning().save(on: database) }
-            .flatMap { runAPITestPackage(on: eventLoop, at: path, logger: logger) }
-//            .flatMap { descriptor.markPassed().save(on: database) }
-            .recover { err in
-                logger.error(path: nil,
-                             context: "Testing Failed",
-                             message: String(describing: err))
-                //                let _ = descriptor.markFailed().save(on: database)
-            }
-            .wait()
+        try Self.kickTestsOff(
+            source: source,
+            outPath: path,
+            zipPath: zipToArg,
+            eventLoop: eventLoop,
+            testLogger: logger
+        )
+        .wait()
     }
 
+    public static func kickTestsOff(
+        source: OpenAPISource,
+        outPath: String,
+        zipPath: String?,
+        eventLoop: EventLoop,
+        testLogger: SwiftGen.Logger
+    ) -> EventLoopFuture<Void> {
+        return Self.kickTestsOff(
+            testProgressTracking: nil as (NullTracker, Never)?,
+            source: source,
+            outPath: outPath,
+            zipPath: zipPath,
+            eventLoop: eventLoop,
+            requestLogger: nil,
+            testLogger: testLogger
+        )
+    }
+
+    /// Kick off API Tests
+    ///
+    /// - parameters:
+    ///     - testProgressTracking: (Optional) If specified, tuple with both
+    ///         a progress tracker and a persistence layer delegate. This is not required
+    ///         to run tests.
+    ///     - source: The source of the OpenAPI documentation for which to generate tests.
+    ///     - outPath: The local path at which test files should be stored.
+    ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
+    ///     - eventLoop: The event loop on which the tests should be executed.
+    ///     - requestLogger: (Optional) If specified, a system logger to which certain process related
+    ///         status updates will be logged. These updates will not be the results of tests with the
+    ///         notable exception of test summaries on failure (although if this logger is `nil`,
+    ///         the test summary will be logged to the testLogger).
+    ///     - testLogger: A logger to which test-related log messages will be recorded.
+    public static func kickTestsOff<Persister, Tracker: TestProgressTracker>(
+        testProgressTracking: (Tracker, Persister)?,
+        source: OpenAPISource,
+        outPath: String,
+        zipPath: String?,
+        eventLoop: EventLoop,
+        requestLogger: Logging.Logger?,
+        testLogger: SwiftGen.Logger
+    ) -> EventLoopFuture<Void> where Tracker.Persister == Persister {
+        requestLogger?.info("Running tests in \(outPath)")
+
+        let testProgressTracker = testProgressTracking?.0
+
+        func trackProgress(_ progress: @autoclosure () -> Tracker?) -> EventLoopFuture<Void> {
+            zip(progress(), testProgressTracking?.1)
+                .map { $0.0.save(on: $0.1) }
+                ?? eventLoop.makeSucceededFuture(())
+        }
+
+        return prepOutputFolder(
+            on: eventLoop,
+            at: outPath,
+            logger: testLogger
+        )
+        .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
+        .flatMap { openAPIDoc(on: eventLoop, from: source) }
+        .flatMap { openAPIDoc in
+            produceAPITestPackage(
+                on: eventLoop,
+                given: openAPIDoc,
+                to: outPath,
+                zipToPath: zipPath,
+                logger: testLogger
+            )
+        }
+        .flatMap { trackProgress(testProgressTracker?.markRunning()) }
+        .flatMap { runAPITestPackage(
+            on: eventLoop,
+            at: outPath,
+            logger: testLogger
+            )
+        }
+        .flatMap { trackProgress(testProgressTracker?.markPassed()) }
+        .always { _ in
+            try? cleanupOutFolder(outPath, logger: testLogger)
+            requestLogger?.info("Cleaning up tests in \(outPath)")
+        }
+        .recover { error in
+            // For requests with the ability to distinguish between request
+            // logging and test logging, only log this "summary" message
+            // to the request logger. For any other request, log it to the
+            // test logger.
+            if let requestLogger = requestLogger {
+                requestLogger.error("Testing Failed",
+                                     metadata: ["error": .stringConvertible(String(describing: error))])
+                // following is tmp to workaround above metadata not being dumped to console with previous call:
+                requestLogger.error("\(String(describing: error))")
+            } else {
+                testLogger.error(path: nil,
+                                 context: "Testing Failed",
+                                 message: String(describing: error))
+            }
+
+            let _ = trackProgress(testProgressTracker?.markFailed())
+        }
+    }
+}
+
+// MARK: - Logger
+extension APITestCommand {
     final class Logger: SwiftGen.Logger {
         let console: Console
 
@@ -121,15 +218,16 @@ public final class APITestCommand: Command {
     }
 }
 
+// MARK: - Helpers
 public func prepOutputFolder(on loop: EventLoop,
-                                    at outputPath: String,
-                                    logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+                             at outputPath: String,
+                             logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
 
     loop.submit { try prepOutFolder(outputPath, logger: logger) }
 }
 
 public func openAPIDoc(on loop: EventLoop,
-                              from source: OpenAPISource) -> EventLoopFuture<OpenAPI.Document> {
+                       from source: OpenAPISource) -> EventLoopFuture<OpenAPI.Document> {
     /// Get the OpenAPI documentation from a URL
     func get(_ url: URI, credentials: (username: String, password: String)? = nil) -> EventLoopFuture<OpenAPI.Document> {
         let client = HTTPClient(eventLoopGroupProvider: .shared(loop))
@@ -203,7 +301,6 @@ public func runAPITestPackage(on loop: EventLoop,
         )
     }
 }
-
 
 public enum OpenAPISource {
     case file(path: String)
