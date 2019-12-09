@@ -9,8 +9,8 @@ import Vapor
 
 @dynamicMemberLookup
 public struct ResponseBuilder<Context: RouteContext> {
-    public let context: Context
-    private let request: TypedRequest<Context>
+    public let context: Context = .shared
+    private unowned var request: TypedRequest<Context>
 
     public subscript<T>(dynamicMember path: KeyPath<Context, ResponseContext<T>>) -> ResponseEncoder<T> {
         return .init(request: request, modifiers: [context[keyPath: path].configure])
@@ -21,7 +21,6 @@ public struct ResponseBuilder<Context: RouteContext> {
     }
 
     public init(request: TypedRequest<Context>) {
-        context = .build()
         self.request = request
     }
 

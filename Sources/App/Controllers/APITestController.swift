@@ -42,11 +42,16 @@ final class APITestController: Controller {
 extension APITestController {
     /// Returns a list of all `APITestDescriptor`s.
     func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
-        // TODO: only include if requested
-        return API.batchAPITestDescriptorResponse(query: APITestDescriptor.query(on: req.db),
-                                                  includeMessages: true)
-            .flatMap(req.response.success.encode)
-            .flatMapError { _ in req.response.serverError }
+        let shouldIncludeMessages = req.query.include?
+            .contains("messages")
+            ?? false
+
+        return API.batchAPITestDescriptorResponse(
+            query: APITestDescriptor.query(on: req.db),
+            includeMessages: shouldIncludeMessages
+        )
+        .flatMap(req.response.success.encode)
+        .flatMapError { _ in req.response.serverError }
     }
 
     func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
@@ -57,16 +62,21 @@ extension APITestController {
         let query = APITestDescriptor.query(on: req.db)
             .filter(\APITestDescriptor.$id == id)
 
-        // TODO: only include if requested
-        return API.singleAPITestDescriptorResponse(query: query,
-                                                   includeMessages: true)
-            .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .notFound else {
-                        return req.response.serverError
-                }
-                return req.response.notFound
+        let shouldIncludeMessages = req.query.include?
+            .contains("messages")
+            ?? false
+
+        return API.singleAPITestDescriptorResponse(
+            query: query,
+            includeMessages: shouldIncludeMessages
+        )
+        .flatMap(req.response.success.encode)
+        .flatMapError { error in
+            guard let abortError = error as? Abort,
+                abortError.status == .notFound else {
+                    return req.response.serverError
+            }
+            return req.response.notFound
         }
     }
 
@@ -107,9 +117,10 @@ extension APITestController {
             return req.response.serverError
         }
 
+        // Kick tests off asynchronously
         savedDescriptor.whenSuccess { [weak self] in
 
-            // this just happens if the controller has been released from memory
+            // this just fails if the controller has been released from memory
             // which we consider possible here because this whole process is async
             // and independent of the API request completion.
             guard let self = self else { return }
@@ -157,6 +168,12 @@ extension APITestController {
     struct IndexContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
+        let include: CSVQueryParam<String> = .init(
+            name: "include",
+            description: "Specify 'messages' to include related messages in response.",
+            allowedValues: ["messages"]
+        )
+
         let success: ResponseContext<API.BatchAPITestDescriptorResponse.SuccessDocument> =
             .init { response in
                 response.status = .ok
@@ -165,11 +182,17 @@ extension APITestController {
         let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument>
             = Controller.jsonServerError()
 
-        static let builder = { return Self() }
+        static let shared = Self()
     }
 
     struct ShowContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
+
+        let include: CSVQueryParam<String> = .init(
+            name: "include",
+            description: "Specify 'messages' to include related messages in response.",
+            allowedValues: ["messages"]
+        )
 
         let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
             .init { response in
@@ -185,7 +208,7 @@ extension APITestController {
         let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
             = Controller.jsonServerError()
 
-        static let builder = { return Self() }
+        static let shared = Self()
     }
 
     struct FilesContext: RouteContext {
@@ -215,7 +238,7 @@ extension APITestController {
             )
         )
 
-        static let builder = { return Self() }
+        static let shared = Self()
     }
 
     struct CreateContext: RouteContext {
@@ -232,6 +255,6 @@ extension APITestController {
         let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
             = Controller.jsonServerError()
 
-        static let builder = { return Self() }
+        static let shared = Self()
     }
 }

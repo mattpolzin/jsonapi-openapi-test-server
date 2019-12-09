@@ -11,6 +11,8 @@ import NIO
 @dynamicMemberLookup
 public final class TypedRequest<Context: RouteContext> {
     private let request: Request
+
+    public private(set) lazy var query: Query = Query(request: self)
     public private(set) lazy var response = ResponseBuilder<Context>(request: self)
 
     public subscript<T>(dynamicMember path: KeyPath<Request, T>) -> T {
@@ -29,5 +31,45 @@ public final class TypedRequest<Context: RouteContext> {
 
     public func decodeBody() throws -> Context.RequestBodyType {
         return try request.content.decode(Context.RequestBodyType.self)
+    }
+}
+
+extension TypedRequest {
+
+    @dynamicMemberLookup
+    public final class Query {
+        private unowned var typedRequest: TypedRequest
+        private let context: Context = .shared
+
+        init(request: TypedRequest) {
+            self.typedRequest = request
+        }
+
+        private func getString(at name: String) -> String? {
+            return typedRequest
+                .underlyingRequest
+                .query[String.self, at: name]
+        }
+
+        private func getStringArray(at name: String) -> [String]? {
+            return getString(at: name)?
+                .split(separator: ",")
+                .map(String.init)
+        }
+
+        /// Get a single query value
+        public subscript<T: LosslessStringConvertible>(dynamicMember path: KeyPath<Context, QueryParam<T>>) -> T? {
+            return getString(at: context[keyPath: path].name)
+                .flatMap(T.init)
+        }
+
+        /// Get an array of values
+        public subscript<T: LosslessStringConvertible>(dynamicMember path: KeyPath<Context, QueryParam<[T]>>) -> [T]? {
+            return getStringArray(at: context[keyPath: path].name)?
+                .compactMap(T.init)
+        }
+
+        // TODO: add support for dictionary
+//        public subscript Dictionary
     }
 }

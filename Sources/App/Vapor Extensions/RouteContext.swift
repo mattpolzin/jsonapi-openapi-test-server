@@ -17,25 +17,23 @@ extension EmptyResponseBody: ResponseEncodable {
 }
 
 public protocol AbstractRouteContext {
-    var requestBodyType: Any.Type { get }
+    static var requestBodyType: Any.Type { get }
+    static var requestQueryParams: [AbstractQueryParam] { get }
+
     static var responseBodyTuples: [(statusCode: Int, contentType: HTTPMediaType?, responseBodyType: Any.Type)] { get }
 }
 
 public protocol RouteContext: AbstractRouteContext {
     associatedtype RequestBodyType: Decodable
 
-    static var builder: () -> Self { get }
+    static var shared: Self { get }
 }
 
 extension RouteContext {
-    public static func build() -> Self { return .builder() }
-}
-
-extension RouteContext {
-    public var requestBodyType: Any.Type { return RequestBodyType.self }
+    public static var requestBodyType: Any.Type { return RequestBodyType.self }
 
     public static var responseBodyTuples: [(statusCode: Int, contentType: HTTPMediaType?, responseBodyType: Any.Type)] {
-        let context = Self.build()
+        let context = Self.shared
 
         let mirror = Mirror(reflecting: context)
 
@@ -57,5 +55,15 @@ extension RouteContext {
                     responseBodyType: responseContext.responseBodyType
                 )
         }
+    }
+
+    public static var requestQueryParams: [AbstractQueryParam] {
+        let context = Self.shared
+
+        let mirror = Mirror(reflecting: context)
+
+        return mirror
+            .children
+            .compactMap { property in property.value as? AbstractQueryParam }
     }
 }
