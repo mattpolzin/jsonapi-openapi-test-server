@@ -15,25 +15,16 @@ import APITesting
 ///         database.
 public func configure(_ app: Application, hobbled: Bool = false) throws {
     if !hobbled {
-        // Register providers first
-        app.provider(FluentProvider())
-
         // Register middleware
-        app.register(extension: MiddlewareConfiguration.self) { middlewares, app in
-            middlewares.use(ErrorMiddleware.default(environment: app.environment))
-            middlewares.use(FileMiddleware(publicDirectory: DirectoryConfiguration.detect().publicDirectory))
-        }
+        addMiddleware(app)
 
         // Configure databases
-        app.register(extension: Databases.self, databases)
-        app.register(Database.self) { app in
-            return app.make(Databases.self).database(.psql)!
-        }
+        try addDatabases(app)
 
         // Configure migrations
-        app.register(Migrations.self, migrations)
+        addMigrations(app)
     }
 
     // Register routes
-    try routes(app)
+    try addRoutes(app)
 }

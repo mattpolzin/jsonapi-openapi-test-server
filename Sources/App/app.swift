@@ -13,7 +13,7 @@ import Vapor
 public func app(_ env: Environment, hobbled: Bool = false) throws -> Application {
     var environment = env
     try LoggingSystem.bootstrap(from: &environment)
-    let app = Application(environment: environment)
+    let app = Application(environment)
     try configure(app, hobbled: hobbled)
     return app
 }

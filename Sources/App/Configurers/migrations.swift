@@ -7,12 +7,8 @@ private let migrationList: [Migration] = [
     InitAPITestMessageMigration()
 ]
 
-public func migrations(_ app: Application) -> Migrations {
-    var migrations = Migrations()
-
+public func addMigrations(_ app: Application) {
     for migration in migrationList {
-        migrations.add(migration, to: .psql)
+        app.migrations.add(migration)
     }
-
-    return migrations
 }

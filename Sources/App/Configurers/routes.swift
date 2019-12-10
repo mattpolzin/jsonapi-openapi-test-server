@@ -3,7 +3,7 @@ import FluentPostgresDriver
 import APITesting
 
 /// Register your application's routes here.
-public func routes(_ app: Application) throws {
+public func addRoutes(_ app: Application) throws {
 
     let testController = APITestController(outputPath: Environment.outPath,
                                            openAPISource: try? .detect())
