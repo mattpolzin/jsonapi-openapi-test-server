@@ -15,4 +15,6 @@ let documentation = try OpenAPIDocs(
 
 dummyApp.shutdown()
 
-print(try YAMLEncoder().encode(documentation.document))
+let documentationString = try YAMLEncoder().encode(documentation.document)
+
+print(documentationString)
