@@ -27,12 +27,12 @@ final class APITestController: Controller {
         return testEventLoopGroup.next()
     }
 
-    private func zipPath(for test: APITestDescriptor) -> String {
+    private func zipPath(for test: DB.APITestDescriptor) -> String {
         return Self.zipPathPrefix
             + "/\(test.id!.uuidString).zip"
     }
 
-    private func outPath(for test: APITestDescriptor) -> String {
+    private func outPath(for test: DB.APITestDescriptor) -> String {
         return self.outputPath
             + "/\(test.id!.uuidString)/"
     }
@@ -47,7 +47,7 @@ extension APITestController {
             ?? false
 
         return API.batchAPITestDescriptorResponse(
-            query: APITestDescriptor.query(on: req.db),
+            query: DB.APITestDescriptor.query(on: req.db),
             includeMessages: shouldIncludeMessages
         )
         .flatMap(req.response.success.encode)
@@ -59,8 +59,8 @@ extension APITestController {
             return req.response.badRequest
         }
 
-        let query = APITestDescriptor.query(on: req.db)
-            .filter(\APITestDescriptor.$id == id)
+        let query = DB.APITestDescriptor.query(on: req.db)
+            .filter(\.$id == id)
 
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
@@ -85,8 +85,8 @@ extension APITestController {
             return req.response.badRequest
         }
 
-        let query = APITestDescriptor.query(on: req.db)
-            .filter(\APITestDescriptor.$id == id)
+        let query = DB.APITestDescriptor.query(on: req.db)
+            .filter(\.$id == id)
 
         return query.first()
             .unwrap(or: Abort(.notFound))
@@ -108,17 +108,27 @@ extension APITestController {
             .logger[metadataKey: "uuid"]
             .map { $0.description }
             .flatMap(UUID.init(uuidString:))
-        let descriptor = APITestDescriptor(id: reqUUIDGuess ?? UUID())
-
-        let savedDescriptor = descriptor.save(on: req.db)
 
         guard let source = defaultOpenAPISource else {
             // TODO: eventually want to accept source as argument to endpoint and just fall back to default
             return req.response.serverError
         }
 
+        let openAPISourceModel = source.dbModel(from: req.db)
+
+        let descriptorFuture = openAPISourceModel.flatMapThrowing { sourceModel in
+            try DB.APITestDescriptor(
+                id: reqUUIDGuess ?? UUID(),
+                openAPISource: sourceModel
+            )
+        }
+
+        let savedDescriptor = descriptorFuture
+            .flatMap { $0.save(on: req.db) }
+            .flatMap { descriptorFuture }
+
         // Kick tests off asynchronously
-        savedDescriptor.whenSuccess { [weak self] in
+        savedDescriptor.whenSuccess { [weak self] descriptor in
 
             // this just fails if the controller has been released from memory
             // which we consider possible here because this whole process is async
@@ -147,8 +157,8 @@ extension APITestController {
             )
         }
 
-        return savedDescriptor.flatMapThrowing { _ in
-            API.SingleAPITestDescriptorResponse.SuccessDocument(
+        return savedDescriptor.flatMapThrowing { descriptor in
+            API.SingleAPITestDescriptorDocument.SuccessDocument(
                 apiDescription: .none,
                 body: .init(resourceObject: try descriptor.serializable().0),
                 includes: .none,
@@ -174,12 +184,12 @@ extension APITestController {
             allowedValues: ["messages"]
         )
 
-        let success: ResponseContext<API.BatchAPITestDescriptorResponse.SuccessDocument> =
+        let success: ResponseContext<API.BatchAPITestDescriptorDocument.SuccessDocument> =
             .init { response in
                 response.status = .ok
         }
 
-        let serverError: CannedResponse<API.BatchAPITestDescriptorResponse.ErrorDocument>
+        let serverError: CannedResponse<API.BatchAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonServerError()
 
         static let shared = Self()
@@ -194,18 +204,18 @@ extension APITestController {
             allowedValues: ["messages"]
         )
 
-        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
+        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =
             .init { response in
                 response.status = .ok
         }
 
-        let notFound: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+        let notFound: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonNotFoundError(details: "The requested tests were not found")
 
-        let badRequest: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+        let badRequest: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "Test ID not specified in path")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+        let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonServerError()
 
         static let shared = Self()
@@ -244,15 +254,15 @@ extension APITestController {
     struct CreateContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
-        let success: ResponseContext<API.SingleAPITestDescriptorResponse.SuccessDocument> =
+        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =
             .init { response in
                 response.status = .accepted
         }
 
-        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+        let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorResponse.ErrorDocument>
+        let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonServerError()
 
         static let shared = Self()

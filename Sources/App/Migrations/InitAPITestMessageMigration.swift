@@ -11,7 +11,7 @@ import PostgresKit
 public struct InitAPITestMessageMigration: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
-        return database.schema(APITestMessage.schema)
+        return database.schema(DB.APITestMessage.schema)
         .field(
             "id",
             .uuid,
@@ -45,7 +45,7 @@ public struct InitAPITestMessageMigration: Migration {
             .uuid,
             .required,
             .foreignKey(
-                field: .string(schema: APITestDescriptor.schema, field: "id"),
+                field: .string(schema: DB.APITestDescriptor.schema, field: "id"),
                 onDelete: .cascade,
                 onUpdate: .cascade
             )
@@ -54,6 +54,6 @@ public struct InitAPITestMessageMigration: Migration {
     }
 
     public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(APITestMessage.schema).delete()
+        return database.schema(DB.APITestMessage.schema).delete()
     }
 }

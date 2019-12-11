@@ -17,7 +17,7 @@ extension Controller {
         .init(response: Response(
             status: .internalServerError,
             body: .init(data: try! JSONEncoder().encode(
-                API.SingleAPITestDescriptorResponse.ErrorDocument(
+                API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,
                     errors: [
                         .error(.init(
@@ -36,7 +36,7 @@ extension Controller {
         .init(response: Response(
             status: .badRequest,
             body: .init(data: try! JSONEncoder().encode(
-                API.SingleAPITestDescriptorResponse.ErrorDocument(
+                API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,
                     errors: [
                         .error(.init(
@@ -55,7 +55,7 @@ extension Controller {
         .init(response: Response(
             status: .notFound,
             body: .init(data: try! JSONEncoder().encode(
-                API.SingleAPITestDescriptorResponse.ErrorDocument(
+                API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,
                     errors: [
                         .error(.init(
@@ -75,12 +75,12 @@ extension Controller {
 extension Controller {
     final class Logger: SwiftGen.Logger {
         let systemLogger: Logging.Logger
-        let descriptor: APITestDescriptor
+        let descriptor: DB.APITestDescriptor
         let eventLoop: EventLoop
         let database: Database
 
         init(systemLogger: Logging.Logger,
-             descriptor: APITestDescriptor,
+             descriptor: DB.APITestDescriptor,
              eventLoop: EventLoop,
              database: Database) {
             self.systemLogger = systemLogger
@@ -91,7 +91,7 @@ extension Controller {
 
         public func error(path: String?, context: String, message: String) {
             systemLogger.error("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
                                                           messageType: .error,
                                                           path: path,
                                                           context: context.isEmpty ? nil : context,
@@ -100,7 +100,7 @@ extension Controller {
 
         public func warning(path: String?, context: String, message: String) {
             systemLogger.warning("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
                                                           messageType: .warning,
                                                           path: path,
                                                           context: context.isEmpty ? nil : context,
@@ -109,7 +109,7 @@ extension Controller {
 
         public func success(path: String?, context: String, message: String) {
             systemLogger.info("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try APITestMessage(testDescriptor: self.descriptor,
+            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
                                                           messageType: .success,
                                                           path: path,
                                                           context: context.isEmpty ? nil : context,

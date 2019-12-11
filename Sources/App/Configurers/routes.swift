@@ -5,11 +5,26 @@ import APITesting
 /// Register your application's routes here.
 public func addRoutes(_ app: Application) throws {
 
+    let sourceController = OpenAPISourceController()
+
     let testController = APITestController(outputPath: Environment.outPath,
                                            openAPISource: try? .detect())
 
+    // MARK: - OpenAPI Sources
+    app.post("openapi_sources", use: sourceController.create)
+        .tags("Sources")
+        .summary("Create a new OpenAPI Source")
+
+    app.get("openapi_sources", use: sourceController.index)
+        .tags("Sources")
+        .summary("Retrieve all OpenAPI Sources")
+
+    app.get("openapi_sources", ":id", use: sourceController.show)
+        .tags("Sources")
+        .summary("Retrieve a single OpenAPI Source")
+
     // MARK: - API Testing
-    app.post("api_test", use: testController.create)
+    app.post("api_tests", use: testController.create)
         .tags("Testing")
         .summary("Run tests")
         .description(
@@ -20,16 +35,16 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
 """
     )
 
-    app.get("api_test", use: testController.index)
+    app.get("api_tests", use: testController.index)
         .tags("Testing")
         .summary("Retrieve all test results")
 
-    app.get("api_test", ":id", use: testController.show)
+    app.get("api_tests", ":id", use: testController.show)
         .tags("Testing")
         .summary("Retrieve a single test result")
 
     // MARK: Test File Retrieval
-    app.get("api_test", ":id", "files", use: testController.files)
+    app.get("api_tests", ":id", "files", use: testController.files)
         .tags("Test Files")
         .summary("Retrieve the test files for the given test.")
 

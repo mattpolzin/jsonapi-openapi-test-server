@@ -24,4 +24,7 @@ extension JSONAPI.Document.SuccessDocument: Content, RequestDecodable, ResponseE
 
 extension Either: Content, RequestDecodable, ResponseEncodable where A: Content, B: Content {}
 
-public enum API {}
+public enum API {
+    public typealias SingleDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+    public typealias BatchDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+}

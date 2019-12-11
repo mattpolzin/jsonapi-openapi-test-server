@@ -21,6 +21,6 @@ extension API.APITestDescriptorDescription.Attributes: Sampleable {
 
 extension API.APITestDescriptorDescription.Relationships: Sampleable {
     public static var sample: Self {
-        return .init(messageIds: [.init(), .init()])
+        return .init(sourceId: .init(), messageIds: [.init(), .init()])
     }
 }

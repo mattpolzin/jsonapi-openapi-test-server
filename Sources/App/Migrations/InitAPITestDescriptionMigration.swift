@@ -9,7 +9,7 @@ import Fluent
 
 public struct InitAPITestDescriptorMigration: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(APITestDescriptor.schema)
+        return database.schema(DB.APITestDescriptor.schema)
         .field(
             "id",
             .uuid,
@@ -29,10 +29,20 @@ public struct InitAPITestDescriptorMigration: Migration {
             .string,
             .required
         )
+        .field(
+            "openapi_source_id",
+            .uuid,
+            .required,
+            .foreignKey(
+                field: .string(schema: DB.OpenAPISource.schema, field: "id"),
+                onDelete: .restrict,
+                onUpdate: .cascade
+            )
+        )
         .create()
     }
 
     public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(APITestDescriptor.schema).delete()
+        return database.schema(DB.APITestDescriptor.schema).delete()
     }
 }

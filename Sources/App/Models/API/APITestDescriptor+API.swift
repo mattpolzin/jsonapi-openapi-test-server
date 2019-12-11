@@ -18,11 +18,11 @@ extension API {
         public struct Attributes: JSONAPI.Attributes {
             public let createdAt: Attribute<Date>
             public let finishedAt: Attribute<Date?>
-            public let status: Attribute<App.APITestDescriptor.Status>
+            public let status: Attribute<DB.APITestDescriptor.Status>
 
             public init(createdAt: Date,
                         finishedAt: Date?,
-                        status: App.APITestDescriptor.Status) {
+                        status: DB.APITestDescriptor.Status) {
                 self.createdAt = .init(value: createdAt)
                 self.finishedAt = .init(value: finishedAt)
                 self.status = .init(value: status)
@@ -31,16 +31,20 @@ extension API {
 
         public struct Relationships: JSONAPI.Relationships {
             public let messages: ToManyRelationship<APITestMessage, NoMetadata, NoLinks>
+            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>
 
-            public init(messages: [APITestMessage]) {
+            public init(source: OpenAPISource, messages: [APITestMessage]) {
+                self.openAPISource = .init(resourceObject: source)
                 self.messages = .init(resourceObjects: messages)
             }
 
-            public init(messages: APITestMessage.Pointers) {
+            public init(source: OpenAPISource.Pointer, messages: APITestMessage.Pointers) {
+                self.openAPISource = source
                 self.messages = messages
             }
 
-            public init(messageIds: [APITestMessage.Id]) {
+            public init(sourceId: OpenAPISource.Id, messageIds: [APITestMessage.Id]) {
+                self.openAPISource = .init(id: sourceId)
                 self.messages = .init(ids: messageIds)
             }
         }
@@ -48,30 +52,26 @@ extension API {
 
     public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
 
-    public typealias SingleDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<SingleResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
-    public typealias BatchDocument<R: CodablePrimaryResource, I: Include> = JSONAPI.Document<ManyResourceBody<R>, NoMetadata, NoLinks, I, NoAPIDescription, BasicJSONAPIError<String>>
+    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include1<APITestMessage>>
 
-    public typealias BatchAPITestDescriptorResponse = BatchDocument<APITestDescriptor, Include1<APITestMessage>>
+    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include1<APITestMessage>>
 
-    public typealias SingleAPITestDescriptorResponse = SingleDocument<APITestDescriptor, Include1<APITestMessage>>
-
-    static func batchAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorResponse.SuccessDocument> {
+    static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
 
         // ensure the messages are preloaded because that is necessary just to get relationship Ids.
         // Note this loses some efficiency for loading all related messages into swift objects instead
         // of just snagging the Ids as integers. That efficiency is not worth addressing until it is.
-        let primaryFuture = query.with(\.$messages).all()
+        let primaryFuture = query.with(\.$messages).with(\.$openAPISource).all()
 
         let resourcesFuture: EventLoopFuture<[(APITestDescriptor, [APITestMessage])]> = primaryFuture
             .flatMapThrowing {
                 try $0.map { apiTestDescriptor -> (APITestDescriptor, [APITestMessage]) in
-
-                    return try apiTestDescriptor.serializable()
+                    try apiTestDescriptor.serializable()
             }
         }
 
         let responseFuture = resourcesFuture.map { resources in
-            BatchAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+            BatchAPITestDescriptorDocument.SuccessDocument(apiDescription: .none,
                                                            body: .init(resourceObjects: resources.map { $0.0 }),
                                                            includes: .none,
                                                            meta: .none,
@@ -87,7 +87,7 @@ extension API {
         }
 
         return resourcesFuture.and(includesFuture).map { (resources, includes) in
-            BatchAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+            BatchAPITestDescriptorDocument.SuccessDocument(apiDescription: .none,
                                                            body: .init(resourceObjects: resources.map { $0.0 }),
                                                            includes: includes,
                                                            meta: .none,
@@ -96,9 +96,12 @@ extension API {
     }
 
     /// Pass a query builder where the first result will be used.
-    static func singleAPITestDescriptorResponse(query: QueryBuilder<App.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorResponse.SuccessDocument> {
+    static func singleAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorDocument.SuccessDocument> {
 
-        let primaryFuture = query.with(\.$messages).first()
+        // ensure the messages are preloaded because that is necessary just to get relationship Ids.
+        // Note this loses some efficiency for loading all related messages into swift objects instead
+        // of just snagging the Ids as integers. That efficiency is not worth addressing until it is.
+        let primaryFuture = query.with(\.$messages).with(\.$openAPISource).first()
 
         let resourceFuture = primaryFuture
             .flatMapThrowing {
@@ -107,7 +110,7 @@ extension API {
 
         let responseFuture = resourceFuture
             .map { resource in
-                SingleAPITestDescriptorResponse.SuccessDocument(apiDescription: .none,
+                SingleAPITestDescriptorDocument.SuccessDocument(apiDescription: .none,
                                                                 body: .init(resourceObject: resource.0),
                                                                 includes: .none,
                                                                 meta: .none,
