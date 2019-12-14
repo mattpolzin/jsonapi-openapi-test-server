@@ -17,6 +17,8 @@ public protocol AbstractQueryParam {
 
 public protocol QueryParamProtocol: AbstractQueryParam {
     associatedtype SwiftType
+
+    var defaultValue: SwiftType? { get }
 }
 
 extension QueryParamProtocol {
@@ -31,16 +33,19 @@ public struct QueryParam<T: Decodable>: QueryParamProtocol {
     public let name: String
     public let allowedValues: [String]?
     public let description: String?
+    public let defaultValue: T?
 
-    public init(name: String, description: String? = nil) {
+    public init(name: String, description: String? = nil, defaultValue: T? = nil) {
         self.name = name
         self.allowedValues = nil
+        self.defaultValue = defaultValue
         self.description = description
     }
 
-    public init<U: LosslessStringConvertible>(name: String, description: String? = nil, allowedValues: [U]) {
+    public init<U: LosslessStringConvertible>(name: String, description: String? = nil, defaultValue: T? = nil, allowedValues: [U]) {
         self.name = name
         self.description = description
+        self.defaultValue = defaultValue
         self.allowedValues = allowedValues.map(String.init(describing:))
     }
 }
@@ -68,30 +73,35 @@ public typealias NumberQueryParam = QueryParam<Double>
 
 /// A comma separated list of values
 ///
-/// e.x. (`.csv(.string)`)
+/// e.x. (`CSVQueryParam<String>`)
 ///
 ///     <path>?param=hello,world
 public typealias CSVQueryParam<SwiftType: Decodable> = QueryParam<[SwiftType]>
 
-/// A dictionary of values.
-///
-/// You can specify the keys that should be allowed in the dictionary or leave
-/// that `nil` to allow any key.
+/// A value nested in an object.
 ///
 /// e.x.
 ///
 ///     <path>?param[hello]=hi+there
-public struct DictQueryParam<SwiftType: Decodable>: QueryParamProtocol {
-    public let name: String
-    public let description: String?
-    public let allowedKeys: [String]?
+///
+/// In this example, the path would be `["param", "hello"]`
+public struct NestedQueryParam<SwiftType: Decodable>: QueryParamProtocol {
+    public let path: [String]
     public let allowedValues: [String]?
+    public let description: String?
+    public let defaultValue: SwiftType?
 
-    public init(name: String, description: String? = nil, allowedKeys: [String]? = nil) {
-        self.name = name
+    public var name: String { path[0] }
+
+    public init(path: String..., description: String? = nil, defaultValue: SwiftType? = nil, allowedValues: [String]? = nil) {
+        self.init(path: path, description: description, defaultValue: defaultValue, allowedValues: allowedValues)
+    }
+
+    public init(path: [String], description: String? = nil, defaultValue: SwiftType? = nil, allowedValues: [String]? = nil) {
+        self.path = path
+        self.allowedValues = allowedValues
         self.description = description
-        self.allowedKeys = allowedKeys
-        self.allowedValues = nil
+        self.defaultValue = defaultValue
     }
 }
 

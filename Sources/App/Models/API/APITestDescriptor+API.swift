@@ -52,22 +52,35 @@ extension API {
 
     public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
 
-    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include1<APITestMessage>>
+    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
 
-    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include1<APITestMessage>>
+    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
 
-    static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
+    static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
 
-        // ensure the messages are preloaded because that is necessary just to get relationship Ids.
-        // Note this loses some efficiency for loading all related messages into swift objects instead
-        // of just snagging the Ids as integers. That efficiency is not worth addressing until it is.
-        let primaryFuture = query.with(\.$messages).with(\.$openAPISource).all()
+        var query = query
 
-        let resourcesFuture: EventLoopFuture<[(APITestDescriptor, [APITestMessage])]> = primaryFuture
-            .flatMapThrowing {
-                try $0.map { apiTestDescriptor -> (APITestDescriptor, [APITestMessage]) in
-                    try apiTestDescriptor.serializable()
-            }
+        if includeSource {
+            query = query.with(\.$openAPISource)
+        }
+        // TODO: fix so that you can not include messages but still return IDs for this relationship.
+//        if includeMessages {
+            query = query.with(\.$messages)
+//        }
+
+        let primaryFuture = query.all()
+
+        let resourcesFuture = primaryFuture
+            .flatMapThrowing { descriptors -> [(APITestDescriptor, [BatchAPITestDescriptorDocument.Include])] in
+                try descriptors
+                    .map { try $0.serializable() }
+                    .map {
+                        (
+                            $0.descriptor,
+                            ($0.source.map(BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? [])
+                            + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
+                        )
+                }
         }
 
         let responseFuture = resourcesFuture.map { resources in
@@ -78,12 +91,15 @@ extension API {
                                                            links: .none)
         }
 
-        guard includeMessages else {
+        guard includeMessages || includeSource else {
             return responseFuture
         }
 
         let includesFuture = resourcesFuture.map { resources in
-            Includes(values: resources.flatMap { $0.1 }.map { Include1($0) })
+            Includes(
+                values: resources
+                    .flatMap { $0.1 }
+            )
         }
 
         return resourcesFuture.and(includesFuture).map { (resources, includes) in
@@ -96,16 +112,31 @@ extension API {
     }
 
     /// Pass a query builder where the first result will be used.
-    static func singleAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorDocument.SuccessDocument> {
+    static func singleAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorDocument.SuccessDocument> {
 
-        // ensure the messages are preloaded because that is necessary just to get relationship Ids.
-        // Note this loses some efficiency for loading all related messages into swift objects instead
-        // of just snagging the Ids as integers. That efficiency is not worth addressing until it is.
-        let primaryFuture = query.with(\.$messages).with(\.$openAPISource).first()
+        var query = query
+
+        if includeSource {
+            query = query.with(\.$openAPISource)
+        }
+        // TODO: fix so that you can not include messages but still return IDs for this relationship.
+//        if includeMessages {
+            query = query.with(\.$messages)
+//        }
+
+        let primaryFuture = query.first()
 
         let resourceFuture = primaryFuture
-            .flatMapThrowing {
-                try $0?.serializable()
+            .flatMapThrowing { descriptor -> (APITestDescriptor, [SingleAPITestDescriptorDocument.Include])? in
+                try descriptor
+                    .map { try $0.serializable() }
+                    .map {
+                        (
+                            $0.descriptor,
+                            ($0.source.map(BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? [])
+                                + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
+                        )
+                }
         }.unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
@@ -117,13 +148,13 @@ extension API {
                                                                 links: .none)
         }
 
-        guard includeMessages else {
+        guard includeMessages || includeSource else {
             return responseFuture
         }
 
         let includesFuture = resourceFuture
             .map { resource in
-                Includes(values: resource.1.map { Include1($0) })
+                Includes(values: resource.1)
         }
 
         return responseFuture.and(includesFuture)

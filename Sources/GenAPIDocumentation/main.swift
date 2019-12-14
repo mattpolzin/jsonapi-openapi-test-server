@@ -15,6 +15,8 @@ let documentation = try OpenAPIDocs(
 
 dummyApp.shutdown()
 
-let documentationString = try YAMLEncoder().encode(documentation.document)
+let encoder = YAMLEncoder()
+encoder.options.sortKeys = true
+let documentationString = try encoder.encode(documentation.document)
 
 print(documentationString)

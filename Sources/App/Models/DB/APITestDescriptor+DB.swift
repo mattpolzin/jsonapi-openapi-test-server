@@ -7,10 +7,6 @@ extension DB {
     public final class APITestDescriptor: Model {
         public static let schema = "api_test_descriptors"
 
-        // bit of a hacky way to track whether this resource
-        // was created fresh or loaded from the database.
-        public let isLoadedFromDb: Bool
-
         @ID(key: "id")
         public var id: UUID?
 
@@ -34,7 +30,6 @@ extension DB {
         /// then logging related to the originating request can be easily tied
         /// to logging related to the separate testing tasks.
         public init(id: UUID, openAPISource: OpenAPISource) throws {
-            isLoadedFromDb = false
             self.id = id
             createdAt = Date()
             finishedAt = nil
@@ -44,9 +39,7 @@ extension DB {
 
         /// Used to construct Model from Database
         @available(*, deprecated, renamed: "init(id:)")
-        public init() {
-            isLoadedFromDb = true
-        }
+        public init() {}
     }
 }
 
@@ -93,17 +86,15 @@ extension DB.APITestDescriptor: TestProgressTracker {
 }
 
 extension DB.APITestDescriptor {
-    func serializable() throws -> (API.APITestDescriptor, [API.APITestMessage]) {
-        let messages: [API.APITestMessage]
-        let sourceId: API.OpenAPISource.Id
+    func serializable() throws -> (descriptor: API.APITestDescriptor, source: API.OpenAPISource?, message: [API.APITestMessage]) {
 
-        sourceId = .init(rawValue: $openAPISource.id)
+        let sourceId = API.OpenAPISource.Id(rawValue: $openAPISource.id)
+        let source = try $openAPISource.eagerLoaded?.serializable()
 
-        if isLoadedFromDb {
-            messages = try $messages.eagerLoaded().map { try $0.serializable() }
-        } else {
-            messages = []
-        }
+        let messages = try $messages
+            .eagerLoaded?
+            .map { try $0.serializable() }
+            ?? []
 
         let attributes = API.APITestDescriptor.Attributes(
             createdAt: createdAt,
@@ -124,6 +115,7 @@ extension DB.APITestDescriptor {
                 meta: .none,
                 links: .none
             ),
+            source,
             messages
         )
     }

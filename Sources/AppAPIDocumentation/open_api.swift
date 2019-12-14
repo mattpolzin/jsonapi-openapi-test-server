@@ -15,7 +15,12 @@ public struct OpenAPIDocs {
         let jsonEncoder = JSONEncoder()
         if #available(macOS 10.12, *) {
             jsonEncoder.dateEncodingStrategy = .iso8601
+            jsonEncoder.outputFormatting = .sortedKeys
         }
+        #if os(Linux)
+            jsonEncoder.dateEncodingStrategy = .iso8601
+            jsonEncoder.outputFormatting = .sortedKeys
+        #endif
 
         let info = OpenAPI.Document.Info(
             title: "OpenAPI Test Server API",

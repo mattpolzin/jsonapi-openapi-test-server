@@ -45,9 +45,13 @@ extension APITestController {
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
             ?? false
+        let shouldIncludeSource = req.query.include?
+            .contains("openAPISource")
+            ?? false
 
         return API.batchAPITestDescriptorResponse(
             query: DB.APITestDescriptor.query(on: req.db),
+            includeSource: shouldIncludeSource,
             includeMessages: shouldIncludeMessages
         )
         .flatMap(req.response.success.encode)
@@ -65,9 +69,13 @@ extension APITestController {
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
             ?? false
+        let shouldIncludeSource = req.query.include?
+            .contains("openAPISource")
+            ?? false
 
         return API.singleAPITestDescriptorResponse(
             query: query,
+            includeSource: shouldIncludeSource,
             includeMessages: shouldIncludeMessages
         )
         .flatMap(req.response.success.encode)
@@ -102,7 +110,7 @@ extension APITestController {
         }
     }
 
-    /// Create an `APITestDescriptor` and run a new test suite.
+    /// Create an `APITestDescriptor` and run new tests.
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
         let reqUUIDGuess = req
             .logger[metadataKey: "uuid"]
@@ -180,8 +188,8 @@ extension APITestController {
 
         let include: CSVQueryParam<String> = .init(
             name: "include",
-            description: "Specify 'messages' to include related messages in response.",
-            allowedValues: ["messages"]
+            description: "Include the given types of resources in the response.",
+            allowedValues: ["openAPISource", "messages"]
         )
 
         let success: ResponseContext<API.BatchAPITestDescriptorDocument.SuccessDocument> =
@@ -200,8 +208,8 @@ extension APITestController {
 
         let include: CSVQueryParam<String> = .init(
             name: "include",
-            description: "Specify 'messages' to include related messages in response.",
-            allowedValues: ["messages"]
+            description: "Include the given types of resources in the response.",
+            allowedValues: ["openAPISource", "messages"]
         )
 
         let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =

@@ -60,16 +60,24 @@ extension TypedRequest {
         /// Get a single query value
         public subscript<T: LosslessStringConvertible>(dynamicMember path: KeyPath<Context, QueryParam<T>>) -> T? {
             return getString(at: context[keyPath: path].name)
-                .flatMap(T.init)
+                .flatMap(T.init) ?? context[keyPath: path].defaultValue
         }
 
         /// Get an array of values
         public subscript<T: LosslessStringConvertible>(dynamicMember path: KeyPath<Context, QueryParam<[T]>>) -> [T]? {
             return getStringArray(at: context[keyPath: path].name)?
-                .compactMap(T.init)
+                .compactMap(T.init) ?? context[keyPath: path].defaultValue
         }
 
-        // TODO: add support for dictionary
-//        public subscript Dictionary
+        // TODO: add better support for dictionary
+        //      needs modifications to or replacement of the default
+        //      parser which throws fatal error if requesting a path
+        //      that is not in the query params.
+        public subscript(dynamicMember path: KeyPath<Context, NestedQueryParam<String>>) -> String? {
+            return typedRequest
+                .underlyingRequest
+                .query[String.self, at: context[keyPath: path].path]
+                ?? context[keyPath: path].defaultValue
+        }
     }
 }
