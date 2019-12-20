@@ -2,6 +2,7 @@ import Vapor
 import FluentKit
 import SwiftGen
 import APITesting
+import JSONAPI
 import struct Logging.Logger
 
 /// Controls basic CRUD operations on API Tests.
@@ -117,26 +118,41 @@ extension APITestController {
             .map { $0.description }
             .flatMap(UUID.init(uuidString:))
 
-        guard let source = defaultOpenAPISource else {
-            // TODO: eventually want to accept source as argument to endpoint and just fall back to default
-            return req.response.serverError
+        let requestedOpenAPISource = req.eventLoop.makeSucceededFuture(())
+            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
+            .optionalMap { $0 ~> \.openAPISource }
+            .flatMap { DB.OpenAPISource.find($0, on: req.db) }
+
+        let futureOpenAPISource: EventLoopFuture<DB.OpenAPISource> = requestedOpenAPISource
+            .flatMap {
+                if let source = $0 {
+                    return req.eventLoop.makeSucceededFuture(source)
+                }
+
+                guard let defaultSource = self.defaultOpenAPISource else {
+                    return req.eventLoop.makeFailedFuture(Abort(.badRequest))
+                }
+
+                return defaultSource
+                    .dbModel(from: req.db)
         }
 
-        let openAPISourceModel = source.dbModel(from: req.db)
-
-        let descriptorFuture = openAPISourceModel.flatMapThrowing { sourceModel in
-            try DB.APITestDescriptor(
-                id: reqUUIDGuess ?? UUID(),
-                openAPISource: sourceModel
+        let descriptorFuture = futureOpenAPISource.flatMapThrowing { sourceModel in
+            (
+                try DB.APITestDescriptor(
+                    id: reqUUIDGuess ?? UUID(),
+                    openAPISource: sourceModel
+                ),
+                sourceModel
             )
         }
 
-        let savedDescriptor = descriptorFuture
-            .flatMap { $0.save(on: req.db) }
+        let savedDescriptorTuple = descriptorFuture
+            .flatMap { $0.0.save(on: req.db) }
             .flatMap { descriptorFuture }
 
         // Kick tests off asynchronously
-        savedDescriptor.whenSuccess { [weak self] descriptor in
+        savedDescriptorTuple.whenSuccess { [weak self] (descriptor, source) in
 
             // this just fails if the controller has been released from memory
             // which we consider possible here because this whole process is async
@@ -156,7 +172,7 @@ extension APITestController {
 
             let _ = APITestCommand.kickTestsOff(
                 testProgressTracking: (descriptor, req.db),
-                source: source,
+                source: .init(source),
                 outPath: outPath,
                 zipPath: zipPath,
                 eventLoop: eventLoop,
@@ -165,7 +181,7 @@ extension APITestController {
             )
         }
 
-        return savedDescriptor.flatMapThrowing { descriptor in
+        return savedDescriptorTuple.flatMapThrowing { (descriptor, _) in
             API.SingleAPITestDescriptorDocument.SuccessDocument(
                 apiDescription: .none,
                 body: .init(resourceObject: try descriptor.serializable().0),
@@ -175,8 +191,25 @@ extension APITestController {
             )
         }
         .flatMap(req.response.success.encode)
-        .flatMapError { _ in
-            return req.response.serverError
+        .flatMapError { err in
+            switch err {
+            case is DecodingError,
+                 is JSONAPI.DocumentDecodingError:
+                return req.response.malformedRequestBody
+
+            case let error as AbortError:
+                switch error.status {
+                case .badRequest:
+                    return req.response.noOpenAPIDocumentSpecified
+                case .unprocessableEntity:
+                    return req.response.malformedRequestBody
+                default:
+                    return req.response.serverError
+                }
+
+            default:
+                return req.response.serverError
+            }
         }
     }
 }
@@ -260,7 +293,7 @@ extension APITestController {
     }
 
     struct CreateContext: RouteContext {
-        typealias RequestBodyType = EmptyRequestBody
+        typealias RequestBodyType = API.NewAPITestDescriptorDocument
 
         let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =
             .init { response in
@@ -269,6 +302,9 @@ extension APITestController {
 
         let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
+
+        let malformedRequestBody: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "The request body could not be parsed as an \(RequestBodyType.PrimaryResourceBody.PrimaryResource.jsonType)")
 
         let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonServerError()

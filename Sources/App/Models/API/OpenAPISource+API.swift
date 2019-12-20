@@ -12,7 +12,7 @@ import Fluent
 import Vapor
 
 extension API {
-    public struct OpenAPISourceDescription: JSONAPI.ResourceObjectDescription {
+    public enum OpenAPISourceDescription: JSONAPI.ResourceObjectDescription {
         public static let jsonType: String = "openapi_source"
 
         public struct Attributes: JSONAPI.SparsableAttributes {

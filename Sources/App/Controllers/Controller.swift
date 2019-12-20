@@ -14,8 +14,12 @@ class Controller {}
 // MARK: - Canned Responses
 extension Controller {
     static func jsonServerError<ResponseBodyType: ResponseEncodable>() -> CannedResponse<ResponseBodyType> {
-        .init(response: Response(
+        var headers = HTTPHeaders()
+        headers.contentType = .jsonAPI
+
+        return .init(response: Response(
             status: .internalServerError,
+            headers: headers,
             body: .init(data: try! JSONEncoder().encode(
                 API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,
@@ -33,7 +37,10 @@ extension Controller {
     }
 
     static func jsonBadRequestError<ResponseBodyType: ResponseEncodable>(details: String) -> CannedResponse<ResponseBodyType> {
-        .init(response: Response(
+        var headers = HTTPHeaders()
+        headers.contentType = .jsonAPI
+
+        return .init(response: Response(
             status: .badRequest,
             body: .init(data: try! JSONEncoder().encode(
                 API.SingleAPITestDescriptorDocument.ErrorDocument(
@@ -52,7 +59,10 @@ extension Controller {
     }
 
     static func jsonNotFoundError<ResponseBodyType: ResponseEncodable>(details: String) -> CannedResponse<ResponseBodyType> {
-        .init(response: Response(
+        var headers = HTTPHeaders()
+        headers.contentType = .jsonAPI
+
+        return .init(response: Response(
             status: .notFound,
             body: .init(data: try! JSONEncoder().encode(
                 API.SingleAPITestDescriptorDocument.ErrorDocument(

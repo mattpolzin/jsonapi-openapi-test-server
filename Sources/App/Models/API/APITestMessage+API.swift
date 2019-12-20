@@ -9,7 +9,7 @@ import Foundation
 import JSONAPI
 
 extension API {
-    public struct APITestMessageDescription: JSONAPI.ResourceObjectDescription {
+    public enum APITestMessageDescription: JSONAPI.ResourceObjectDescription {
         public static let jsonType: String = "api_test_message"
 
         public struct Attributes: JSONAPI.Attributes {

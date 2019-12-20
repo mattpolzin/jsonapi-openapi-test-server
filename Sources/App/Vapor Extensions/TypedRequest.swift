@@ -73,11 +73,11 @@ extension TypedRequest {
         //      needs modifications to or replacement of the default
         //      parser which throws fatal error if requesting a path
         //      that is not in the query params.
-        public subscript(dynamicMember path: KeyPath<Context, NestedQueryParam<String>>) -> String? {
-            return typedRequest
-                .underlyingRequest
-                .query[String.self, at: context[keyPath: path].path]
-                ?? context[keyPath: path].defaultValue
-        }
+//        public subscript(dynamicMember path: KeyPath<Context, NestedQueryParam<String>>) -> String? {
+//            return typedRequest
+//                .underlyingRequest
+//                .query[String.self, at: context[keyPath: path].path]
+//                ?? context[keyPath: path].defaultValue
+//        }
     }
 }

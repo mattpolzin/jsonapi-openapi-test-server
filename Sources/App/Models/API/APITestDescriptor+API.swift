@@ -12,7 +12,7 @@ import Fluent
 import Vapor
 
 extension API {
-    public struct APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
+    public enum APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
         public static let jsonType: String = "api_test_descriptor"
 
         public struct Attributes: JSONAPI.Attributes {
@@ -50,11 +50,23 @@ extension API {
         }
     }
 
+    public enum NewAPITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
+        public static let jsonType: String = APITestDescriptorDescription.jsonType
+
+        public typealias Attributes = NoAttributes
+
+        public struct Relationships: JSONAPI.Relationships {
+            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>?
+        }
+    }
+
     public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
+    public typealias NewAPITestDescriptor = JSONAPI.ResourceObject<NewAPITestDescriptorDescription, NoMetadata, NoLinks, Unidentified>
 
     public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
 
     public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
+    public typealias NewAPITestDescriptorDocument = SingleDocument<NewAPITestDescriptor, NoIncludes>
 
     static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
 

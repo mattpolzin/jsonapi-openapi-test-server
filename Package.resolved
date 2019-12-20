@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "5a2fbd642f7bf20fcc1cc744e2ee8e1bfafb67d1",
-          "version": "1.0.0-beta.2.4"
+          "revision": "c232981184891cb762f041d0c70f96b254d97a78",
+          "version": "1.0.0-beta.2.5"
         }
       },
       {
@@ -123,7 +123,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "8a6d630132564617d00f7d07540cbab87122bed1",
+          "revision": "282f67794f620bf69e534d36f3f46f8bc422937e",
           "version": null
         }
       },
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "104e5e17cd317624ec76577f97fdaaaad0af19b9",
-          "version": "0.8.0"
+          "revision": "7a0b0e171a02e67519d163b8a3ddf8ddbf36e786",
+          "version": "0.9.0"
         }
       },
       {
@@ -357,8 +357,8 @@
         "repositoryURL": "https://github.com/vapor/websocket-kit.git",
         "state": {
           "branch": null,
-          "revision": "3c3bf59b027e53d19d36b98ab7f6b4291d5e1f64",
-          "version": "2.0.0-beta.2"
+          "revision": "4c9da4fe7d8186243418254031288ab5ee0202e4",
+          "version": "2.0.0-beta.2.1"
         }
       },
       {
