@@ -247,10 +247,9 @@ public func openAPIDoc(on loop: EventLoop,
         }
 
         return client.execute(request: request).flatMapThrowing { response in
-            try client.syncShutdown()
             return try ClientResponse(status: response.status, headers: response.headers, body: response.body)
                 .content.decode(OpenAPI.Document.self)
-        }
+        }.always { _ in try! client.syncShutdown() }
     }
 
     switch source {
