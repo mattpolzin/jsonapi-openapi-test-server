@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import VaporTypedRoutes
 import FluentKit
 import SwiftGen
 import APITesting

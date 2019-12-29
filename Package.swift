@@ -14,6 +14,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-alpha.3"),
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-alpha.3"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-alpha.2.1"),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.1.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .branch("master")),
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
 
         .package(url: "https://github.com/ianpartridge/swift-backtrace.git", from: "1.1.1"),
@@ -25,7 +27,7 @@ let package = Package(
     targets: [
         /// MARK: Server App library
         .target(name: "App", dependencies: [
-          "Vapor", "Fluent", "FluentPostgresDriver",
+          "Vapor", "Fluent", "FluentPostgresDriver", "VaporTypedRoutes", "VaporOpenAPI",
 
           "Backtrace",
 
@@ -41,7 +43,7 @@ let package = Package(
         ]),
 
         /// MARK: Server API Documentation library
-        .target(name: "AppAPIDocumentation", dependencies: ["App", "JSONAPIOpenAPI"]),
+        .target(name: "AppAPIDocumentation", dependencies: ["App", "JSONAPIOpenAPI", "VaporOpenAPI"]),
 
         /// MARK: Executables
         .target(name: "Run", dependencies: ["App"]),

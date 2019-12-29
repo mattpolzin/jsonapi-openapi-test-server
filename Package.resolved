@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "c232981184891cb762f041d0c70f96b254d97a78",
-          "version": "1.0.0-beta.2.5"
+          "revision": "877bf492c591f96ddd2410cf763fb228b3c5bded",
+          "version": "1.0.0-beta.2.7"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
         "state": {
           "branch": null,
-          "revision": "438031dd580e3cfd54bb143accde846e9af62de9",
-          "version": "2.0.0-beta.2.2"
+          "revision": "3b989aa9d46b684578ed2d12f7f9af12bd47d376",
+          "version": "2.0.0-beta.2.3"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "6abeb3f5c03beba2b9e4dbe20886e773b5b629b6",
-          "version": "8.0.4"
+          "revision": "b02b00b30b6353632aa4a5fb6124f8147f7140c0",
+          "version": "8.0.5"
         }
       },
       {
@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-nio.git",
         "state": {
           "branch": null,
-          "revision": "c5010f37ebd7a0ca34c537f5c60b999c42bac655",
-          "version": "1.0.0-beta.2.3"
+          "revision": "3adaee5fa31630d7f37fb818c2668c562bc7cdbb",
+          "version": "1.0.0-beta.2.4"
         }
       },
       {
@@ -348,8 +348,26 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "88bc369b95036fc02394f045efe0a36af3bfccdb",
-          "version": "4.0.0-beta.3"
+          "revision": "adcce86be49463445a5b24c1bc3f0532b21ab845",
+          "version": "4.0.0-beta.3.1"
+        }
+      },
+      {
+        "package": "VaporOpenAPI",
+        "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
+        "state": {
+          "branch": "master",
+          "revision": "71be5704b666a338e312aa20c3b23c687f141cad",
+          "version": null
+        }
+      },
+      {
+        "package": "VaporTypedRoutes",
+        "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes.git",
+        "state": {
+          "branch": null,
+          "revision": "05154f914c62782db9c6d70e54feb49323219418",
+          "version": "0.1.0"
         }
       },
       {

@@ -1,4 +1,6 @@
 import Vapor
+import VaporTypedRoutes
+import VaporOpenAPI
 import FluentPostgresDriver
 import APITesting
 
