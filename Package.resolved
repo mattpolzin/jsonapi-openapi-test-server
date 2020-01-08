@@ -123,8 +123,17 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "282f67794f620bf69e534d36f3f46f8bc422937e",
+          "revision": "dfd7c746d0fb0d2668387b9b06a89f911385ab9a",
           "version": null
+        }
+      },
+      {
+        "package": "JSONAPIViz",
+        "repositoryURL": "https://github.com/mattpolzin/JSONAPIViz.git",
+        "state": {
+          "branch": null,
+          "revision": "c11b79a029c74ed72f86857f0da4f1e2b113ded8",
+          "version": "0.0.2"
         }
       },
       {
@@ -159,8 +168,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "7a0b0e171a02e67519d163b8a3ddf8ddbf36e786",
-          "version": "0.9.0"
+          "revision": "44ded671ba54700f6948e166b7bd5dd331dd6a1e",
+          "version": "0.10.0"
         }
       },
       {
@@ -222,8 +231,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Sampleable.git",
         "state": {
           "branch": null,
-          "revision": "8a88ca056a58587daa99c33a04c63c9d59429932",
-          "version": "2.0.0"
+          "revision": "df44bf1a860481109dcf455e3c6daf0a0f1bc259",
+          "version": "2.1.0"
         }
       },
       {
@@ -357,7 +366,7 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
         "state": {
           "branch": "master",
-          "revision": "71be5704b666a338e312aa20c3b23c687f141cad",
+          "revision": "e94dc187ed77c8459f90639d299d928474dc5c63",
           "version": null
         }
       },

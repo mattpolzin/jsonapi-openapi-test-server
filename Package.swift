@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/ianpartridge/swift-backtrace.git", from: "1.1.1"),
 
         .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
-        .package(url: "https://github.com/mattpolzin/OpenAPI.git", from: "0.8.0"),
+        .package(url: "https://github.com/mattpolzin/OpenAPI.git", .upToNextMinor(from: "0.10.0")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0"))
     ],
     targets: [
