@@ -14,6 +14,7 @@ func configure(_ app: Application) throws {
 }
 
 let app = Application(try .detect())
+defer { app.shutdown() }
 
 try configure(app)
 

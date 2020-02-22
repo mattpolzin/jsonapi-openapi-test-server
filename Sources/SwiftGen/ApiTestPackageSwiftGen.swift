@@ -97,11 +97,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
     fullyQualifiedTestFuncNames: [String]
     )]
     results = HttpVerb.allCases.flatMap { httpVerb in
-        return pathItems.compactMap { (path, pathItemOrReference) in
-            guard case let .b(pathItem) = pathItemOrReference else {
-                return nil
-            }
-
+        return pathItems.compactMap { (path, pathItem) in
             guard let operation = pathItem.for(httpVerb) else {
                 return nil
             }
@@ -112,20 +108,21 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
 
             let apiRequestTest = try? APIRequestTestSwiftGen(server: server,
                                                              pathComponents: path,
-                                                             parameters: parameters.compactMap { $0.a })
+                                                             parameters: parameters.compactMap { $0.b })
 
             let responses = operation.responses
             let responseDocuments = documents(from: responses,
                                               for: httpVerb,
                                               at: path,
                                               on: server,
-                                              given: parameters.compactMap { $0.a },
+                                              given: parameters.compactMap { $0.b },
                                               logger: logger)
 
             let requestDocument: DataDocumentSwiftGen?
             do {
                 try requestDocument = operation
                     .requestBody
+                    .flatMap { $0.b }
                     .flatMap { try document(from: $0,
                                             for: httpVerb,
                                             at: path,
@@ -464,7 +461,7 @@ func documents(from responses: OpenAPI.Response.Map,
     var responseDocuments = [OpenAPI.Response.StatusCode: DataDocumentSwiftGen]()
     for (statusCode, response) in responses {
 
-        guard let jsonResponse = response.a?.content[.json] else {
+        guard let jsonResponse = response.b?.content[.json] else {
             continue
         }
 

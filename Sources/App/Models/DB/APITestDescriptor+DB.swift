@@ -89,10 +89,10 @@ extension DB.APITestDescriptor {
     func serializable() throws -> (descriptor: API.APITestDescriptor, source: API.OpenAPISource?, message: [API.APITestMessage]) {
 
         let sourceId = API.OpenAPISource.Id(rawValue: $openAPISource.id)
-        let source = try $openAPISource.eagerLoaded?.serializable()
+        let source = try $openAPISource.value?.serializable()
 
         let messages = try $messages
-            .eagerLoaded?
+            .value?
             .map { try $0.serializable() }
             ?? []
 

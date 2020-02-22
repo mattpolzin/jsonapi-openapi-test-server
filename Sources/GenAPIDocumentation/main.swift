@@ -1,10 +1,17 @@
 
+import Vapor
 import App
 import AppAPIDocumentation
 import Foundation
 import Yams
 
-let dummyApp = try app(.detect(), hobbled: true)
+var environment = try Environment.detect()
+try LoggingSystem.bootstrap(from: &environment)
+
+let dummyApp = Application(environment)
+defer { dummyApp.shutdown() }
+
+try configure(dummyApp, hobbled: true)
 
 let routes = dummyApp.routes
 
