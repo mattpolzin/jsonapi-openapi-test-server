@@ -1,5 +1,5 @@
 
-FROM swift:5.1 as builder
+FROM swiftlang/swift:nightly-5.2 as builder
 
 #
 # For local build, add `--build-arg env=docker`
@@ -37,7 +37,7 @@ RUN /build/bin/GenAPIDocumentation > ./Public/openapi.yml
 ## Production image
 #
 
-FROM swift:5.1
+FROM swiftlang/swift:nightly-5.2
 ARG env
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \

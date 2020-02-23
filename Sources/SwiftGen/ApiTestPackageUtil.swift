@@ -9,9 +9,18 @@ import Foundation
 import OpenAPIKit
 
 public func prepOutFolder(_ outPath: String, logger: Logger) throws {
+    try? FileManager.default.removeItem(atPath: outPath + "/Sources/GeneratedAPI")
     try? FileManager.default.removeItem(atPath: outPath + "/Tests/GeneratedAPITests")
     try? FileManager.default.removeItem(atPath: outPath + "/api_tests.log")
     try? FileManager.default.removeItem(atPath: outPath + "/.build")
+
+    if !FileManager.default.fileExists(atPath: outPath + "/Sources/GeneratedAPI") {
+        try FileManager.default.createDirectory(atPath: outPath + "/Sources/GeneratedAPI",
+                                                withIntermediateDirectories: true,
+                                                attributes: nil)
+
+        shell("touch \(outPath)/Sources/GeneratedAPI/Empty.swift")
+    }
 
     if !FileManager.default.fileExists(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects") {
         try FileManager.default.createDirectory(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",

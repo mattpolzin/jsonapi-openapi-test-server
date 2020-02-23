@@ -632,12 +632,18 @@ import PackageDescription
 
 let package = Package(
     name: "GeneratedAPITests",
-    products: [],
+    products: [
+        .library(name: "generated-api", targets: ["GeneratedAPI"])
+    ],
     dependencies: [
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0"))
     ],
     targets: [
+        .target(
+            name: "GeneratedAPI",
+            dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable"]
+        ),
         .testTarget(
             name: "GeneratedAPITests",
             dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable"]
