@@ -8,6 +8,7 @@
 import Vapor
 import Fluent
 import APITesting
+import OpenAPIReflection
 
 extension DB {
     public final class OpenAPISource: Model {
@@ -46,7 +47,7 @@ extension DB {
 }
 
 extension DB.OpenAPISource {
-    public enum SourceType: String, Codable, CaseIterable {
+    public enum SourceType: String, Codable, CaseIterable, AnyJSONCaseIterable {
         case filepath = "filepath"
         case url = "url"
     }

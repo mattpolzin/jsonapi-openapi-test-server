@@ -87,14 +87,14 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                named: "LinuxMain.swift")
 
     let results: [(
-    httpVerb: HttpVerb,
-    path: OpenAPI.PathComponents,
-    pathItem: OpenAPI.PathItem,
-    documentFileNameString: String,
-    apiRequestTest: APIRequestTestSwiftGen?,
-    requestDocument: DataDocumentSwiftGen?,
-    responseDocuments: [OpenAPI.Response.StatusCode : DataDocumentSwiftGen],
-    fullyQualifiedTestFuncNames: [String]
+        httpVerb: HttpVerb,
+        path: OpenAPI.PathComponents,
+        pathItem: OpenAPI.PathItem,
+        documentFileNameString: String,
+        apiRequestTest: APIRequestTestSwiftGen?,
+        requestDocument: DataDocumentSwiftGen?,
+        responseDocuments: [OpenAPI.Response.StatusCode : DataDocumentSwiftGen],
+        fullyQualifiedTestFuncNames: [String]
     )]
     results = HttpVerb.allCases.flatMap { httpVerb in
         return pathItems.compactMap { (path, pathItem) in

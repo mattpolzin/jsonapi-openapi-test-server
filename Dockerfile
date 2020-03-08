@@ -1,11 +1,6 @@
 
 FROM swiftlang/swift:nightly-5.2 as builder
 
-#
-# For local build, add `--build-arg env=docker`
-#
-ARG env
-
 RUN apt-get -qq update && apt-get install -y \
   libssl-dev zlib1g-dev \
   && rm -r /var/lib/apt/lists/*
@@ -16,12 +11,12 @@ RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
 
 #########
 # RELEASE
-# RUN swift build -c release \
+# RUN swift build --enable-test-discovery -c release \
 #  && mv `swift build -c release --show-bin-path` /build/bin
 #
 #########
 # DEBUG
-RUN swift build -c release -Xswiftc -g -Xswiftc -DDEBUG \
+RUN swift build --enable-test-discovery -c release -Xswiftc -g -Xswiftc -DDEBUG \
   && mv `swift build -c release --show-bin-path` /build/bin
 #
 #########
@@ -89,4 +84,4 @@ ENV ENVIRONMENT=$env
 # --log
 # The log-level. One of case "trace", "debug", "info", "notice", "warning", "error", "critical"
 
-CMD ./Run serve --env $ENVIRONMENT --hostname 0.0.0.0 --port 80
+CMD ["./Run", "serve", "--env", "$ENVIRONMENT", "--hostname", "0.0.0.0", "--port", "80"]

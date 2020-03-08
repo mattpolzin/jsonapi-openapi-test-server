@@ -3,6 +3,7 @@ import Foundation
 import FluentKit
 import SQLKit
 import PostgresKit
+import OpenAPIReflection
 
 extension DB {
     public final class APITestMessage: Model {
@@ -46,7 +47,7 @@ extension DB {
 }
 
 public extension DB.APITestMessage {
-    enum MessageType: String, Codable {
+    enum MessageType: String, Codable, CaseIterable, AnyJSONCaseIterable {
         case debug = "debug"
         case info = "info"
         case warning = "warning"

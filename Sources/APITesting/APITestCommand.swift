@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Yams
 import Vapor
 import SwiftGen
 import OpenAPIKit
@@ -55,7 +56,7 @@ public final class APITestCommand: Command {
 
         let cwd = FileManager.default.currentDirectoryPath
 
-        let zipToArg = signature.dumpFiles ? cwd + "/api_test_files.zip" : nil
+        let zipToArg = signature.dumpFiles ? cwd + "/out/api_test_files.zip" : nil
 
         try Self.kickTestsOff(
             source: source,
@@ -219,15 +220,19 @@ extension APITestCommand {
 }
 
 // MARK: - Helpers
-public func prepOutputFolder(on loop: EventLoop,
-                             at outputPath: String,
-                             logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+public func prepOutputFolder(
+    on loop: EventLoop,
+    at outputPath: String,
+    logger: SwiftGen.Logger
+) -> EventLoopFuture<Void> {
 
     loop.submit { try prepOutFolder(outputPath, logger: logger) }
 }
 
-public func openAPIDoc(on loop: EventLoop,
-                       from source: OpenAPISource) -> EventLoopFuture<OpenAPI.Document> {
+public func openAPIDoc(
+    on loop: EventLoop,
+    from source: OpenAPISource
+) -> EventLoopFuture<OpenAPI.Document> {
     /// Get the OpenAPI documentation from a URL
     func get(_ url: URI, credentials: (username: String, password: String)? = nil) -> EventLoopFuture<OpenAPI.Document> {
         let client = HTTPClient(eventLoopGroupProvider: .shared(loop))
@@ -255,11 +260,22 @@ public func openAPIDoc(on loop: EventLoop,
     switch source {
     case .file(path: let path):
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: path))
+            let filePath = URL(fileURLWithPath: path)
 
-            let decoder = JSONDecoder()
+            if filePath.pathExtension == "yml" || filePath.pathExtension == "yaml" {
+                let string = try String(contentsOf: filePath)
 
-            return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: data))
+                let decoder = YAMLDecoder()
+
+                return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: string))
+            } else {
+                let data = try Data(contentsOf: filePath)
+
+                let decoder = JSONDecoder()
+
+                return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: data))
+            }
+
         } catch let error {
             return loop.makeFailedFuture(OpenAPISource.Error.fileReadError(String(describing: error)))
         }
@@ -298,16 +314,5 @@ public func runAPITestPackage(on loop: EventLoop,
             at: outputPath,
             logger: logger
         )
-    }
-}
-
-public enum OpenAPISource {
-    case file(path: String)
-    case unauthenticated(url: URI)
-    case basicAuth(url: URI, username: String, password: String)
-
-    public enum Error: Swift.Error {
-        case noInputSpecified
-        case fileReadError(String)
     }
 }
