@@ -5,9 +5,18 @@ RUN apt-get -qq update && apt-get install -y \
   libssl-dev zlib1g-dev \
   && rm -r /var/lib/apt/lists/*
 
-WORKDIR /app
-COPY . .
 RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
+
+WORKDIR /app
+
+# Copy manifest
+COPY ./Package.* ./
+
+# Resolve dependencies
+RUN swift package resolve
+
+# Build Source
+COPY . .
 
 #########
 # RELEASE

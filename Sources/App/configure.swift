@@ -14,6 +14,7 @@ import APITesting
 ///         generation a chance to inspect the app's routes without requiring a
 ///         database.
 public func configure(_ app: Application, hobbled: Bool = false) throws {
+
     if !hobbled {
         // Register middleware
         addMiddleware(app)
