@@ -23,7 +23,7 @@ extension DB {
         @Field(key: "uri")
         var uri: String
 
-        @Field(key: "source_type")
+        @Enum(key: "source_type")
         var sourceType: SourceType
 
         public init(uri: String, sourceType: SourceType) {
@@ -77,7 +77,7 @@ extension OpenAPISource {
         }
 
         return DB.OpenAPISource.query(on: database)
-            .filter(\.$sourceType == dbSourceType)
+            .filter(\.$sourceType == .enumCase(dbSourceType.rawValue))
             .filter(\.$uri == uri)
             .first(orCreate: DB.OpenAPISource(uri: uri, sourceType: dbSourceType))
     }

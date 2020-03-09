@@ -15,7 +15,7 @@ extension DB {
         @Field(key: "created_at")
         var createdAt: Date
 
-        @Field(key: "message_type")
+        @Enum(key: "message_type")
         var messageType: MessageType
 
         @Field(key: "path")

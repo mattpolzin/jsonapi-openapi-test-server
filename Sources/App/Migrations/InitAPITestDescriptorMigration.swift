@@ -6,29 +6,19 @@
 //
 
 import Fluent
-import PostgresKit
 
 public struct InitAPITestDescriptorMigration: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
-        
-        let statusDataTypeFuture: EventLoopFuture<DatabaseSchema.DataType>
 
-        if let sqlDb = database as? SQLDatabase,
-            sqlDb.dialect.enumSyntax == .typeName {
-            
-            statusDataTypeFuture = sqlDb.create(enum: "TEST_STATUS")
-                .value("pending")
-                .value("building")
-                .value("running")
-                .value("passed")
-                .value("failed")
-                .run()
-                .map { .custom("\"TEST_STATUS\"") }
-        } else {
-            statusDataTypeFuture = database.eventLoop.makeSucceededFuture(.string)
-        }
+        let statusTypeFuture = database.enum("TEST_STATUS")
+            .case("pending")
+            .case("building")
+            .case("running")
+            .case("passed")
+            .case("failed")
+            .create()
 
-        return statusDataTypeFuture.flatMap { statusDataType in
+        return statusTypeFuture.flatMap { statusDataType in
             database.schema(DB.APITestDescriptor.schema)
                 .field(
                     "id",
@@ -65,12 +55,7 @@ public struct InitAPITestDescriptorMigration: Migration {
     }
 
     public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(DB.APITestDescriptor.schema).delete().flatMap {
-            if let sqlDb = database as? SQLDatabase,
-                sqlDb.dialect.enumSyntax == .typeName {
-                return sqlDb.drop(enum: "TEST_STATUS").run()
-            }
-            return database.eventLoop.makeSucceededFuture(())
-        }
+        return database.schema(DB.APITestDescriptor.schema).delete()
+            .flatMap { database.enum("TEST_STATUS").delete() }
     }
 }

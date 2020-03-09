@@ -17,7 +17,7 @@ extension DB {
         @Field(key: "finished_at")
         var finishedAt: Date?
 
-        @Field(key: "status")
+        @Enum(key: "status")
         var status: Status
 
         @Children(for: \.$apiTestDescriptor)

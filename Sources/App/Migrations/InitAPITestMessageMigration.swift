@@ -11,24 +11,15 @@ import PostgresKit
 public struct InitAPITestMessageMigration: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
-        let messageDataTypeFuture: EventLoopFuture<DatabaseSchema.DataType>
+        let messageTypeFuture = database.enum("MESSAGE_TYPE")
+            .case("debug")
+            .case("info")
+            .case("warning")
+            .case("success")
+            .case("error")
+            .create()
 
-        if let sqlDb = database as? SQLDatabase,
-            sqlDb.dialect.enumSyntax == .typeName {
-            
-            messageDataTypeFuture = sqlDb.create(enum: "MESSAGE_TYPE")
-                .value("debug")
-                .value("info")
-                .value("warning")
-                .value("success")
-                .value("error")
-                .run()
-                .map { .custom("\"MESSAGE_TYPE\"") }
-        } else {
-            messageDataTypeFuture = database.eventLoop.makeSucceededFuture(.string)
-        }
-
-        return messageDataTypeFuture.flatMap { messageDataType in
+        return messageTypeFuture.flatMap { messageDataType in
             database.schema(DB.APITestMessage.schema)
                 .field(
                     "id",
@@ -74,12 +65,7 @@ public struct InitAPITestMessageMigration: Migration {
     }
 
     public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(DB.APITestMessage.schema).delete().flatMap {
-            if let sqlDb = database as? SQLDatabase,
-                sqlDb.dialect.enumSyntax == .typeName {
-                return sqlDb.drop(enum: "MESSAGE_TYPE").run()
-            }
-            return database.eventLoop.makeSucceededFuture(())
-        }
+        return database.schema(DB.APITestMessage.schema).delete()
+            .flatMap { database.enum("MESSAGE_TYPE").delete() }
     }
 }
