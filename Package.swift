@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
         .package(url: "https://github.com/ianpartridge/swift-backtrace.git", from: "1.1.1"),
 
-        .package(name: "JSONAPIOpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
+        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
         .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.23.0")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "2.0.0"))
@@ -54,7 +54,7 @@ let package = Package(
         /// MARK: Server API Documentation library
         .target(name: "AppAPIDocumentation", dependencies: [
             "App",
-            .product(name: "JSONAPIOpenAPI", package: "JSONAPIOpenAPI"),
+            .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             "VaporOpenAPI"
         ]),
 
@@ -68,9 +68,9 @@ let package = Package(
 
         /// MARK: Swift Generation interface
         .target(name: "SwiftGen", dependencies: [
-            .product(name: "JSONAPIOpenAPI", package: "JSONAPIOpenAPI"),
+            .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             "OpenAPIKit",
-            .product(name: "JSONAPISwiftGen", package: "JSONAPIOpenAPI"),
+            .product(name: "JSONAPISwiftGen", package: "JSONAPI-OpenAPI"),
             "ZIPFoundation"
         ])
     ]

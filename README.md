@@ -36,6 +36,12 @@ You will find the dumped files at `./out/api_test_files.zip`.
 ### As Server
 You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable.
 
+First you need to run the migrator against your Postgres database.
+```shell
+docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' -p '8080:80' mattpolzin2/api-test-server migrate --yes
+```
+
+Then you can start the server.
 ```shell
 docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' -p '8080:80' mattpolzin2/api-test-server
 ```
