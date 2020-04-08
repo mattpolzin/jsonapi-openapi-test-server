@@ -16,13 +16,12 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc.1"),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.3.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.0.1")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.0.5")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
-        .package(url: "https://github.com/ianpartridge/swift-backtrace.git", from: "1.1.1"),
 
-        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.23.0")),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("feature/gen-swift")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.28.0")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "2.0.0"))
     ],
@@ -35,13 +34,11 @@ let package = Package(
           "VaporTypedRoutes", 
           "VaporOpenAPI",
 
-          .product(name: "Backtrace", package: "swift-backtrace"),
-
           "SwiftGen", 
           "APITesting", 
           "JSONAPI"
         ]),
-        .testTarget(name: "AppTests", dependencies: ["App"]),
+        .testTarget(name: "AppTests", dependencies: ["App", .product(name: "Fluent", package: "fluent"), .product(name: "Vapor", package: "vapor")]),
 
         /// MARK: Terminal App library
         .target(name: "APITesting", dependencies: [

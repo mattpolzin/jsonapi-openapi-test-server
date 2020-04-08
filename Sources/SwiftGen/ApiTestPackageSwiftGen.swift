@@ -88,7 +88,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
 
     let results: [(
         httpVerb: HttpVerb,
-        path: OpenAPI.PathComponents,
+        path: OpenAPI.Path,
         pathItem: OpenAPI.PathItem,
         documentFileNameString: String,
         apiRequestTest: APIRequestTestSwiftGen?,
@@ -138,7 +138,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                 .flatMap { doc in
                     doc.testExampleFuncs.map { $0.functionName }
             }.map {
-                namespace(for: OpenAPI.PathComponents(path.components + [httpVerb.rawValue, "Response"]))
+                namespace(for: OpenAPI.Path(path.components + [httpVerb.rawValue, "Response"]))
                     + "." + $0
             }
 
@@ -147,7 +147,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                     doc.testExampleFuncs
                         .map { $0.functionName }
                         .map {
-                            namespace(for: OpenAPI.PathComponents(path.components + [httpVerb.rawValue, "Request"]))
+                            namespace(for: OpenAPI.Path(path.components + [httpVerb.rawValue, "Request"]))
                                 + "." + $0
                     }
             } ?? []
@@ -169,14 +169,14 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         try! writeResourceObjectFiles(
             toPath: resourceObjDir + "/\(result.documentFileNameString)_response_",
             for: result.responseDocuments.values,
-            extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Response"]))
+            extending: namespace(for: OpenAPI.Path(result.path.components + [result.httpVerb.rawValue, "Response"]))
         )
 
         if let reqDoc = result.requestDocument {
             try! writeResourceObjectFiles(
                 toPath: resourceObjDir + "/\(result.documentFileNameString)_request_",
                 for: [reqDoc],
-                extending: namespace(for: OpenAPI.PathComponents(result.path.components + [result.httpVerb.rawValue, "Request"]))
+                extending: namespace(for: OpenAPI.Path(result.path.components + [result.httpVerb.rawValue, "Request"]))
             )
         }
 
@@ -217,13 +217,13 @@ func swiftTypeName(from string: String) -> String {
         .replacingOccurrences(of: " ", with: "_")
 }
 
-func namespace(for path: OpenAPI.PathComponents) -> String {
+func namespace(for path: OpenAPI.Path) -> String {
     return path.components
         .map(swiftTypeName)
         .joined(separator: ".")
 }
 
-func documentTypeName(path: OpenAPI.PathComponents,
+func documentTypeName(path: OpenAPI.Path,
                       verb: HttpVerb) -> String {
     let pathSnippet = swiftTypeName(from: path.components
         .joined(separator: "_"))
@@ -454,7 +454,7 @@ func namespaceDecls(for pathItems: OpenAPI.PathItem.Map) -> [DeclNode] {
 
 func documents(from responses: OpenAPI.Response.Map,
                for httpVerb: HttpVerb,
-               at path: OpenAPI.PathComponents,
+               at path: OpenAPI.Path,
                on server: OpenAPI.Server,
                given params: [OpenAPI.PathItem.Parameter],
                logger: Logger?) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
@@ -532,7 +532,7 @@ func documents(from responses: OpenAPI.Response.Map,
 
 func document(from request: OpenAPI.Request,
               for httpVerb: HttpVerb,
-              at path: OpenAPI.PathComponents,
+              at path: OpenAPI.Path,
               logger: Logger?) throws -> DataDocumentSwiftGen? {
 
     guard let jsonRequest = request.content[.json] else {
@@ -585,7 +585,7 @@ func document(from request: OpenAPI.Request,
 }
 
 func exampleTests(server: OpenAPI.Server,
-                  pathComponents: OpenAPI.PathComponents,
+                  pathComponents: OpenAPI.Path,
                   parameters: [OpenAPI.PathItem.Parameter],
                   jsonResponse: OpenAPI.Content,
                   exampleDataPropName: String?,
