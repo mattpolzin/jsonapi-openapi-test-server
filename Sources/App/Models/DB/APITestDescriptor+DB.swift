@@ -3,6 +3,7 @@ import Foundation
 import FluentKit
 import APITesting
 import OpenAPIReflection
+import APIModels
 
 extension DB {
     public final class APITestDescriptor: Model {
@@ -18,7 +19,7 @@ extension DB {
         var finishedAt: Date?
 
         @Enum(key: "status")
-        var status: Status
+        var status: API.TestStatus
 
         @Children(for: \.$apiTestDescriptor)
         var messages: [APITestMessage]
@@ -45,13 +46,6 @@ extension DB {
 }
 
 extension DB.APITestDescriptor: TestProgressTracker {
-    public enum Status: String, Codable, CaseIterable, AnyJSONCaseIterable {
-        case pending
-        case building
-        case running
-        case passed
-        case failed
-    }
 
     /// Mutates this APIDescriptor to .pending and returns self for chaining.
     public func markPending() -> DB.APITestDescriptor {

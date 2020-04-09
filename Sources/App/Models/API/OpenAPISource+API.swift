@@ -1,52 +1,16 @@
 //
-//  API_OpenAPISource.swift
-//  App
+//  File.swift
+//  
 //
-//  Created by Mathew Polzin on 9/23/19.
+//  Created by Mathew Polzin on 4/8/20.
 //
 
 import Foundation
-import JSONAPI
-import Poly
+import APIModels
 import Fluent
 import Vapor
 
 extension API {
-    public enum OpenAPISourceDescription: JSONAPI.ResourceObjectDescription {
-        public static let jsonType: String = "openapi_source"
-
-        public struct Attributes: JSONAPI.SparsableAttributes {
-            public let createdAt: Attribute<Date>
-            public let uri: Attribute<String>
-            public let sourceType: Attribute<DB.OpenAPISource.SourceType>
-
-            public init(createdAt: Date,
-                        uri: String,
-                        sourceType: DB.OpenAPISource.SourceType) {
-                self.createdAt = .init(value: createdAt)
-                self.uri = .init(value: uri)
-                self.sourceType = .init(value: sourceType)
-            }
-
-            public enum CodingKeys: SparsableCodingKey {
-                case createdAt
-                case uri
-                case sourceType
-            }
-        }
-
-        public typealias Relationships = NoRelationships
-    }
-
-    public typealias OpenAPISource = JSONAPI.ResourceObject<OpenAPISourceDescription, NoMetadata, NoLinks, UUID>
-    public typealias NewOpenAPISource = JSONAPI.ResourceObject<OpenAPISourceDescription, NoMetadata, NoLinks, Unidentified>
-
-    public typealias BatchOpenAPISourceDocument = BatchDocument<OpenAPISource, NoIncludes>
-
-    public typealias SingleOpenAPISourceDocument = SingleDocument<OpenAPISource, NoIncludes>
-
-    public typealias CreateOpenAPISourceDocument = SingleDocument<NewOpenAPISource, NoIncludes>
-
     static func batchOpenAPISourceResponse(query: QueryBuilder<DB.OpenAPISource>) -> EventLoopFuture<BatchOpenAPISourceDocument.SuccessDocument> {
 
         let primaryFuture = query.all()

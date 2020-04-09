@@ -5,6 +5,7 @@ import SwiftGen
 import APITesting
 import JSONAPI
 import struct Logging.Logger
+import APIModels
 
 /// Controls basic CRUD operations on API Tests.
 final class APITestController: Controller {

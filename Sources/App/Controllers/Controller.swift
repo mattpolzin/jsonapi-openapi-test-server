@@ -9,6 +9,7 @@ import Vapor
 import VaporTypedRoutes
 import FluentKit
 import SwiftGen
+import APIModels
 
 class Controller {}
 

@@ -4,6 +4,7 @@ import FluentKit
 import SQLKit
 import PostgresKit
 import OpenAPIReflection
+import APIModels
 
 extension DB {
     public final class APITestMessage: Model {
@@ -16,7 +17,7 @@ extension DB {
         var createdAt: Date
 
         @Enum(key: "message_type")
-        var messageType: MessageType
+        var messageType: API.MessageType
 
         @Field(key: "path")
         var path: String?
@@ -30,7 +31,7 @@ extension DB {
         @Parent(key: "api_test_descriptor_id")
         var apiTestDescriptor: APITestDescriptor
 
-        public init(testDescriptor: APITestDescriptor, messageType: MessageType, path: String?, context: String?, message: String) throws {
+        public init(testDescriptor: APITestDescriptor, messageType: API.MessageType, path: String?, context: String?, message: String) throws {
             id = UUID()
             createdAt = Date()
             $apiTestDescriptor.id = try testDescriptor.requireID()
@@ -46,15 +47,7 @@ extension DB {
     }
 }
 
-public extension DB.APITestMessage {
-    enum MessageType: String, Codable, CaseIterable, AnyJSONCaseIterable {
-        case debug = "debug"
-        case info = "info"
-        case warning = "warning"
-        case success = "success"
-        case error = "error"
-    }
-}
+extension API.MessageType: AnyJSONCaseIterable {}
 
 extension DB.APITestMessage {
     func serializable() throws -> API.APITestMessage {

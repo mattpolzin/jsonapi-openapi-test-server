@@ -9,6 +9,7 @@ import Vapor
 import Fluent
 import APITesting
 import OpenAPIReflection
+import APIModels
 
 extension DB {
     public final class OpenAPISource: Model {
@@ -24,9 +25,9 @@ extension DB {
         var uri: String
 
         @Enum(key: "source_type")
-        var sourceType: SourceType
+        var sourceType: API.SourceType
 
-        public init(uri: String, sourceType: SourceType) {
+        public init(uri: String, sourceType: API.SourceType) {
             id = UUID()
             createdAt = Date()
             self.uri = uri
@@ -46,12 +47,7 @@ extension DB {
     }
 }
 
-extension DB.OpenAPISource {
-    public enum SourceType: String, Codable, CaseIterable, AnyJSONCaseIterable {
-        case filepath = "filepath"
-        case url = "url"
-    }
-}
+extension API.SourceType: AnyJSONCaseIterable {}
 
 extension OpenAPISource {
     public init(_ dbModel: DB.OpenAPISource) {
@@ -64,7 +60,7 @@ extension OpenAPISource {
     }
 
     public func dbModel(from database: FluentKit.Database) -> EventLoopFuture<DB.OpenAPISource> {
-        let dbSourceType: DB.OpenAPISource.SourceType
+        let dbSourceType: API.SourceType
         let uri: String
 
         switch self {

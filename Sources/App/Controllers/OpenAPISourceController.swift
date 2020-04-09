@@ -11,6 +11,7 @@ import FluentKit
 import SwiftGen
 import APITesting
 import struct Logging.Logger
+import APIModels
 
 /// Controls basic CRUD operations on OpenAPI Sources.
 final class OpenAPISourceController: Controller {

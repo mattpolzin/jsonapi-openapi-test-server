@@ -1,73 +1,18 @@
 //
-//  JSONAPITestDescriptor.swift
-//  App
+//  APITestDescriptor+API.swift
+//  
 //
-//  Created by Mathew Polzin on 9/23/19.
+//  Created by Mathew Polzin on 4/8/20.
 //
 
 import Foundation
-import JSONAPI
-import Poly
+import APIModels
 import Fluent
 import Vapor
+import OpenAPIReflection
+import JSONAPI
 
 extension API {
-    public enum APITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
-        public static let jsonType: String = "api_test_descriptor"
-
-        public struct Attributes: JSONAPI.Attributes {
-            public let createdAt: Attribute<Date>
-            public let finishedAt: Attribute<Date?>
-            public let status: Attribute<DB.APITestDescriptor.Status>
-
-            public init(createdAt: Date,
-                        finishedAt: Date?,
-                        status: DB.APITestDescriptor.Status) {
-                self.createdAt = .init(value: createdAt)
-                self.finishedAt = .init(value: finishedAt)
-                self.status = .init(value: status)
-            }
-        }
-
-        public struct Relationships: JSONAPI.Relationships {
-            public let messages: ToManyRelationship<APITestMessage, NoMetadata, NoLinks>
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>
-
-            public init(source: OpenAPISource, messages: [APITestMessage]) {
-                self.openAPISource = .init(resourceObject: source)
-                self.messages = .init(resourceObjects: messages)
-            }
-
-            public init(source: OpenAPISource.Pointer, messages: APITestMessage.Pointers) {
-                self.openAPISource = source
-                self.messages = messages
-            }
-
-            public init(sourceId: OpenAPISource.Id, messageIds: [APITestMessage.Id]) {
-                self.openAPISource = .init(id: sourceId)
-                self.messages = .init(ids: messageIds)
-            }
-        }
-    }
-
-    public enum NewAPITestDescriptorDescription: JSONAPI.ResourceObjectDescription {
-        public static let jsonType: String = APITestDescriptorDescription.jsonType
-
-        public typealias Attributes = NoAttributes
-
-        public struct Relationships: JSONAPI.Relationships {
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>?
-        }
-    }
-
-    public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
-    public typealias NewAPITestDescriptor = JSONAPI.ResourceObject<NewAPITestDescriptorDescription, NoMetadata, NoLinks, Unidentified>
-
-    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
-
-    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
-    public typealias NewAPITestDescriptorDocument = SingleDocument<NewAPITestDescriptor, NoIncludes>
-
     static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
 
         var query = query
@@ -76,9 +21,9 @@ extension API {
             query = query.with(\.$openAPISource)
         }
         // TODO: fix so that you can not include messages but still return IDs for this relationship.
-//        if includeMessages {
-            query = query.with(\.$messages)
-//        }
+        //        if includeMessages {
+        query = query.with(\.$messages)
+        //        }
 
         let primaryFuture = query.all()
 
@@ -90,7 +35,7 @@ extension API {
                         (
                             $0.descriptor,
                             ($0.source.map(BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? [])
-                            + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
+                                + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
                         )
                 }
         }
@@ -132,9 +77,9 @@ extension API {
             query = query.with(\.$openAPISource)
         }
         // TODO: fix so that you can not include messages but still return IDs for this relationship.
-//        if includeMessages {
-            query = query.with(\.$messages)
-//        }
+        //        if includeMessages {
+        query = query.with(\.$messages)
+        //        }
 
         let primaryFuture = query.first()
 
@@ -175,3 +120,5 @@ extension API {
         }
     }
 }
+
+extension API.TestStatus: AnyJSONCaseIterable {}

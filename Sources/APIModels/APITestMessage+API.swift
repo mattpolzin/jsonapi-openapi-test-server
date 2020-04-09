@@ -14,13 +14,13 @@ extension API {
 
         public struct Attributes: JSONAPI.Attributes {
             public let createdAt: Attribute<Date>
-            public let messageType: Attribute<DB.APITestMessage.MessageType>
+            public let messageType: Attribute<API.MessageType>
             public let path: Attribute<String?>
             public let context: Attribute<String?>
             public let message: Attribute<String>
 
             public init(createdAt: Date,
-                        messageType: DB.APITestMessage.MessageType,
+                        messageType: API.MessageType,
                         path: String?,
                         context: String?,
                         message: String) {
@@ -46,4 +46,14 @@ extension API {
     }
 
     public typealias APITestMessage = JSONAPI.ResourceObject<APITestMessageDescription, NoMetadata, NoLinks, UUID>
+}
+
+extension API {
+    public enum MessageType: String, Codable, CaseIterable {
+        case debug = "debug"
+        case info = "info"
+        case warning = "warning"
+        case success = "success"
+        case error = "error"
+    }
 }

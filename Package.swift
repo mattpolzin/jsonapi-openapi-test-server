@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(name: "jsonapi-openapi-test-server", targets: ["App"]),
         .library(name: "jsonapi-openapi-test-lib", targets: ["APITesting"]),
+        .library(name: "TestServerModels", targets: ["APIModels"])
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-rc.3"),
@@ -27,6 +28,9 @@ let package = Package(
     ],
     targets: [
         /// MARK: Server App library
+        .target(name: "APIModels", dependencies: [
+            "JSONAPI"
+        ]),
         .target(name: "App", dependencies: [
           .product(name: "Vapor", package: "vapor"), 
           .product(name: "Fluent", package: "fluent"), 
@@ -36,7 +40,8 @@ let package = Package(
 
           "SwiftGen", 
           "APITesting", 
-          "JSONAPI"
+          "JSONAPI",
+          "APIModels"
         ]),
         .testTarget(name: "AppTests", dependencies: ["App", .product(name: "Fluent", package: "fluent"), .product(name: "Vapor", package: "vapor")]),
 
