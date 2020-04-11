@@ -52,22 +52,27 @@ extension APITestController {
             .contains("openAPISource")
             ?? false
 
+        return indexResults(
+            shouldIncludeMessages: shouldIncludeMessages,
+            shouldIncludeSource: shouldIncludeSource,
+            db: req.db
+        )
+            .flatMap(req.response.success.encode)
+            .flatMapError { _ in req.response.serverError }
+    }
+
+    func indexResults(shouldIncludeMessages: Bool, shouldIncludeSource: Bool, db: Database) -> EventLoopFuture<API.BatchAPITestDescriptorDocument.SuccessDocument> {
         return API.batchAPITestDescriptorResponse(
-            query: DB.APITestDescriptor.query(on: req.db),
+            query: DB.APITestDescriptor.query(on: db),
             includeSource: shouldIncludeSource,
             includeMessages: shouldIncludeMessages
         )
-        .flatMap(req.response.success.encode)
-        .flatMapError { _ in req.response.serverError }
     }
 
     func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             return req.response.badRequest
         }
-
-        let query = DB.APITestDescriptor.query(on: req.db)
-            .filter(\.$id == id)
 
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
@@ -76,10 +81,11 @@ extension APITestController {
             .contains("openAPISource")
             ?? false
 
-        return API.singleAPITestDescriptorResponse(
-            query: query,
-            includeSource: shouldIncludeSource,
-            includeMessages: shouldIncludeMessages
+        return showResults(
+            id: id,
+            shouldIncludeMessages: shouldIncludeMessages,
+            shouldIncludeSource: shouldIncludeSource,
+            db: req.db
         )
         .flatMap(req.response.success.encode)
         .flatMapError { error in
@@ -89,6 +95,17 @@ extension APITestController {
             }
             return req.response.notFound
         }
+    }
+
+    func showResults(id: UUID, shouldIncludeMessages: Bool, shouldIncludeSource: Bool, db: Database) -> EventLoopFuture<API.SingleAPITestDescriptorDocument.SuccessDocument> {
+        let query = DB.APITestDescriptor.query(on: db)
+            .filter(\.$id == id)
+
+        return API.singleAPITestDescriptorResponse(
+            query: query,
+            includeSource: shouldIncludeSource,
+            includeMessages: shouldIncludeMessages
+        )
     }
 
     func files(_ req: TypedRequest<FilesContext>) throws -> EventLoopFuture<Response> {

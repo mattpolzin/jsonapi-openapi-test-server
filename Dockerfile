@@ -93,4 +93,5 @@ ENV ENVIRONMENT=$env
 # --log
 # The log-level. One of case "trace", "debug", "info", "notice", "warning", "error", "critical"
 
-CMD ["./Run", "serve", "--env", "$ENVIRONMENT", "--hostname", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["./Run"]
+CMD ["serve", "--env", "$ENVIRONMENT", "--hostname", "0.0.0.0", "--port", "80"]

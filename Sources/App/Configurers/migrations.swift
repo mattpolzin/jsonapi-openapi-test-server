@@ -5,7 +5,8 @@ import Vapor
 private let migrationList: [Migration] = [
     InitOpenAPISourceMigration(),
     InitAPITestDescriptorMigration(),
-    InitAPITestMessageMigration()
+    InitAPITestMessageMigration(),
+    TestUpdateNotificationMigration()
 ]
 
 public func addMigrations(_ app: Application) {

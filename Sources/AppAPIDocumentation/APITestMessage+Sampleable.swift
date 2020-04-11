@@ -8,6 +8,7 @@
 import Foundation
 import App
 import Sampleable
+import APIModels
 
 extension API.APITestMessageDescription.Attributes: Sampleable {
     public static var sample: Self {

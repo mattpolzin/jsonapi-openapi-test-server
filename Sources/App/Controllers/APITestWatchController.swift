@@ -1,0 +1,128 @@
+//
+//  APITestWatchController.swift
+//  
+//
+//  Created by Mathew Polzin on 4/9/20.
+//
+
+import Foundation
+import Vapor
+import PostgresNIO
+import Fluent
+import PostgresKit
+import VaporTypedRoutes
+import APIModels
+
+class APITestWatchController: Controller {
+
+    struct Watcher {
+        let websocket: WebSocket
+        let request: Request
+    }
+
+    private var nextWatcherId: Int = 0
+    private(set) var watchers: [Int: Watcher] = [:]
+
+    override fileprivate init() {}
+
+    static func dummyWatcher() -> APITestWatchController {
+        return .init()
+    }
+
+    func watch(req: Request, ws: WebSocket) {
+        let watcherId = nextWatcherId
+        nextWatcherId += 1
+
+        watchers[watcherId] = .init(websocket: ws, request: req)
+
+        let _ = ws.onClose.always { [weak self] result in
+            switch result {
+            case .failure(let error):
+                // TODO
+                print(error)
+            default:
+                break
+            }
+            self?.watchers.removeValue(forKey: watcherId)
+        }
+
+        startListening()
+    }
+
+    fileprivate func startListening() {
+        fatalError("Use a subclass for an implementation of this method.")
+    }
+}
+
+/// Controls WebSocket watching on API Tests.
+final class DatabaseAPITestWatchController: APITestWatchController {
+
+    let db: PostgresDatabase
+    let testController: APITestController
+
+    private var dbConnection: PostgresConnection?
+
+    init(watching db: PostgresDatabase, with testController: APITestController) {
+        self.db = db
+        self.testController = testController
+        super.init()
+    }
+
+    override fileprivate func startListening() {
+        guard dbConnection == nil else { return }
+
+        let _ = withSustainedConnection { connection in
+            connection.addListener(channel: "test_updated") { context, response in
+                guard let id = UUID(uuidString: response.payload).map(API.APITestDescriptor.Id.init(rawValue:)) else {
+                    self.db.logger.error("Failed to create a UUID from trigger payload: \(response.payload)")
+                    return
+                }
+                self.sendNotifications(for: id)
+            }
+
+            let _ = connection.query("LISTEN test_updated")
+        }
+    }
+
+    private func sendNotifications(for testId: API.APITestDescriptor.Id) {
+        db.logger.info("notifying \(watchers.count) watchers.")
+        let result = testController.showResults(
+            id: testId.rawValue,
+            shouldIncludeMessages: false,
+            shouldIncludeSource: false,
+            db: db as! Database
+        )
+
+        for watcher in watchers.values {
+            let typedRequest = TypedRequest<APITestController.ShowContext>(underlyingRequest: watcher.request)
+
+            result.flatMap(typedRequest.response.success.encode)
+                .flatMapError { _ in typedRequest.response.serverError }
+                .whenSuccess { response in
+                    guard let responseString = response.body.string else {
+                        // error?
+                        return
+                    }
+                    watcher.websocket.send(responseString)
+            }
+        }
+    }
+
+    private func withSustainedConnection(_ closure: @escaping (PostgresConnection) -> Void) -> EventLoopFuture<Void> {
+        guard let connection = dbConnection else {
+            return db.withConnection { connection in
+                self.dbConnection = connection
+                closure(connection)
+                return self.db.eventLoop.makeSucceededFuture(())
+            }
+        }
+        closure(connection)
+        return db.eventLoop.makeSucceededFuture(())
+    }
+
+    deinit {
+        for watcher in watchers.values {
+            let _ = watcher.websocket.close(code: .goingAway)
+        }
+    }
+}

@@ -55,6 +55,10 @@ extension API {
 
         public struct Relationships: JSONAPI.Relationships {
             public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>?
+
+            public init(openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>? = nil) {
+                self.openAPISource = openAPISource
+            }
         }
     }
 

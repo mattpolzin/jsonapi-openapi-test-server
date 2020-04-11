@@ -5,12 +5,19 @@ import FluentPostgresDriver
 import APITesting
 
 /// Register your application's routes here.
-public func addRoutes(_ app: Application) throws {
+public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
 
     let sourceController = OpenAPISourceController()
 
     let testController = APITestController(outputPath: Environment.outPath,
                                            openAPISource: try? .detect())
+
+    let testWatchController: APITestWatchController
+    if hobbled {
+        testWatchController = APITestWatchController.dummyWatcher()
+    } else {
+        testWatchController = DatabaseAPITestWatchController(watching: app.db as! PostgresDatabase, with: testController)
+    }
 
     // MARK: - OpenAPI Sources
     app.post("openapi_sources", use: sourceController.create)
@@ -44,6 +51,17 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
     app.get("api_tests", ":id", use: testController.show)
         .tags("Testing")
         .summary("Retrieve a single test result")
+
+    app.webSocket("watch", onUpgrade: testWatchController.watch)
+        .tags("Monitoring")
+        .summary("Watch for progress on API Tests")
+        .description(
+"""
+This **WebSocket** route will send a message every time a test starts, progresses, finishes, etc.
+
+The message will contain a JSON:API response payload with the APITestDescriptor for the updated test.
+"""
+    )
 
     // MARK: Test File Retrieval
     app.get("api_tests", ":id", "files", use: testController.files)

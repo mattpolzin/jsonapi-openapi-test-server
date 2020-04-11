@@ -27,5 +27,5 @@ public func configure(_ app: Application, hobbled: Bool = false) throws {
     }
 
     // Register routes
-    try addRoutes(app)
+    try addRoutes(app, hobbled: hobbled)
 }
