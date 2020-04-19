@@ -323,7 +323,7 @@ extension APITestController {
             = Controller.jsonBadRequestError(details: "No OpenAPI Document was specified.")
 
         let malformedRequestBody: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
-            = Controller.jsonBadRequestError(details: "The request body could not be parsed as an \(RequestBodyType.PrimaryResourceBody.PrimaryResource.jsonType)")
+            = Controller.jsonBadRequestError(details: "The request body could not be parsed as a document with primary resource of type \(RequestBodyType.PrimaryResourceBody.PrimaryResource.jsonType)")
 
         let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonServerError()
