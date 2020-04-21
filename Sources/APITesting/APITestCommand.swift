@@ -127,6 +127,16 @@ public final class APITestCommand: Command {
         )
         .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
         .flatMap { openAPIDoc(on: eventLoop, from: source) }
+        .flatMapError { error in
+            let errorString: String
+            if let error = error as? Abort {
+                errorString = "HTTP Error: \(error.status.code) - \(error.status.reasonPhrase)"
+            } else {
+                errorString = OpenAPI.Error(from: error).localizedDescription
+            }
+            testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
+            return eventLoop.makeFailedFuture(error)
+        }
         .flatMap { openAPIDoc in
             produceAPITestPackage(
                 on: eventLoop,
@@ -149,10 +159,6 @@ public final class APITestCommand: Command {
             requestLogger?.info("Cleaning up tests in \(outPath)")
         }
         .recover { error in
-            // For requests with the ability to distinguish between request
-            // logging and test logging, only log this "summary" message
-            // to the request logger. For any other request, log it to the
-            // test logger.
             if let requestLogger = requestLogger {
                 requestLogger.error("Testing Failed",
                                      metadata: ["error": .stringConvertible(String(describing: error))])
@@ -251,7 +257,12 @@ public func openAPIDoc(
             return loop.makeFailedFuture(Abort(.badRequest))
         }
 
-        return client.execute(request: request).flatMapThrowing { response in
+        return client.execute(request: request).flatMap { (response) -> EventLoopFuture<HTTPClient.Response> in
+            guard response.status == .ok else {
+                return loop.makeFailedFuture(Abort(response.status))
+            }
+            return loop.makeSucceededFuture(response)
+        }.flatMapThrowing { response in
             return try ClientResponse(status: response.status, headers: response.headers, body: response.body)
                 .content.decode(OpenAPI.Document.self)
         }.always { _ in try! client.syncShutdown() }

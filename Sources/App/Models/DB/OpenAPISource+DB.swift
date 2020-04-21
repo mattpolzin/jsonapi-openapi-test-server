@@ -55,7 +55,13 @@ extension OpenAPISource {
         case .filepath:
             self = .file(path: dbModel.uri)
         case .url:
-            self = .unauthenticated(url: URI(string: dbModel.uri))
+            let url = URI(string: dbModel.uri)
+            if url.string == Environment.inUrl, let credentials = try? Environment.credentials() {
+                self = .basicAuth(url: url, username: credentials.username, password: credentials.password)
+            }
+            else {
+                self = .unauthenticated(url: url)
+            }
         }
     }
 
