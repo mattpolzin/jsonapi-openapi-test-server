@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "4401a7ecceabc23052ed4255c2b1d68dc20e71fb",
-          "version": "4.0.0-rc.2"
+          "revision": "a5916ec4ffcc1482096e91f652911fc33ba9a7fb",
+          "version": "4.0.0-rc.2.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "4f3ec755ea8a011eeb056c34ac18c9ec826b402b",
-          "version": "1.0.0-rc.1.19"
+          "revision": "85fefeeecc206ccd379e7db848dc19e37e40cb82",
+          "version": "1.0.0-rc.1.21"
         }
       },
       {
@@ -105,7 +105,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "3e9e0c1dc3a7130914779bb500cfe7f547cf86ad",
+          "revision": "a8f4a79abf79c6b547df74c7b87389860244894b",
           "version": null
         }
       },
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
           "branch": null,
-          "revision": "ff8b447549499b80aed8b73b1e1a0f54f090991c",
-          "version": "0.28.0"
+          "revision": "abbfc112ebef55e4eff1bba04340289aa1b6ba09",
+          "version": "0.29.0"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection.git",
         "state": {
           "branch": null,
-          "revision": "952af87b1bdc0fab00001a8be682cd112aa22850",
-          "version": "0.0.4"
+          "revision": "253abc5da0c275dca1ad4e618cc1039ab1a4b8c9",
+          "version": "0.1.0"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/vapor/routing-kit.git",
         "state": {
           "branch": null,
-          "revision": "35da702471cbcc308f58d38aa8fea971fa3fb166",
-          "version": "4.0.0"
+          "revision": "e7f2d5bd36dc65a9edb303541cb678515a7fece3",
+          "version": "4.1.0"
         }
       },
       {
@@ -348,8 +348,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "089361cf633080028c2f15d58e0fd6e48c64f323",
-          "version": "4.0.1"
+          "revision": "7f6c8277b8cbe4381d00ddcef3b898c820780324",
+          "version": "4.4.0"
         }
       },
       {
@@ -357,8 +357,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "8d247289d5dd7828844394b66e661c9a60560445",
-          "version": "0.0.5"
+          "revision": "60be588cbc39ac4e0b485e70b26079fe9bb6ef76",
+          "version": "0.0.6"
         }
       },
       {
@@ -366,8 +366,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes.git",
         "state": {
           "branch": null,
-          "revision": "050c5d73bbbd6aab33b6f71fcde372fad960473f",
-          "version": "0.3.0"
+          "revision": "49264de8f9e5e905c27d8d95e26e2e0e8fe96bb1",
+          "version": "0.4.0"
         }
       },
       {
