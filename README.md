@@ -1,4 +1,8 @@
 # JSON:API/OpenAPI Test Server
+## Requirements
+### Server
+The test server requires a Postgres database.
+
 ## Usage
 ### As A Tool
 #### Against a URL

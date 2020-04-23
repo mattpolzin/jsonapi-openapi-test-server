@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  APITestMessageController.swift
 //  
 //
 //  Created by Mathew Polzin on 4/22/20.
@@ -21,8 +21,13 @@ final class APITestMessageController: Controller {
             return req.response.badRequest
         }
 
+        let shouldIncludeDescriptor = req.query.include?
+            .contains("apiTestDescriptor")
+            ?? false
+
         return showResults(
             id: id,
+            shouldIncludeTestDescriptor: shouldIncludeDescriptor,
             db: req.db
         )
             .flatMap(req.response.success.encode)
@@ -35,12 +40,13 @@ final class APITestMessageController: Controller {
         }
     }
 
-    static func showResults(id: UUID, db: Database) -> EventLoopFuture<API.SingleAPITestMessageDocument.SuccessDocument> {
+    static func showResults(id: UUID, shouldIncludeTestDescriptor: Bool, db: Database) -> EventLoopFuture<API.SingleAPITestMessageDocument.SuccessDocument> {
         let query = DB.APITestMessage.query(on: db)
             .filter(\.$id == id)
 
         return API.singleAPITestMessageResponse(
-            query: query
+            query: query,
+            includeTestDescriptor: shouldIncludeTestDescriptor
         )
     }
 }
@@ -50,6 +56,12 @@ extension APITestMessageController {
 
     struct ShowContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
+
+        let include: CSVQueryParam<String> = .init(
+            name: "include",
+            description: "Include the given types of resources in the response.",
+            allowedValues: ["apiTestDescriptor"]
+        )
 
         let success: ResponseContext<API.SingleAPITestMessageDocument.SuccessDocument> =
             .init { response in

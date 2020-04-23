@@ -48,7 +48,10 @@ extension DB {
 }
 
 extension DB.APITestMessage {
-    func serializable() throws -> API.APITestMessage {
+    func serializable() throws -> (message: API.APITestMessage, descriptor: API.APITestDescriptor?) {
+
+        let testDescriptor = try $apiTestDescriptor.value?.serializable().descriptor
+
         let attributes = API.APITestMessage.Attributes(createdAt: createdAt,
                                                        messageType: messageType,
                                                        path: path,
@@ -56,11 +59,16 @@ extension DB.APITestMessage {
                                                        message: message)
         let relationships = API.APITestMessage.Relationships(apiTestDescriptorId: .init(rawValue: $apiTestDescriptor.id))
 
-        return API.APITestMessage(id: .init(rawValue: try requireID()),
-                                  attributes: attributes,
-                                  relationships: relationships,
-                                  meta: .none,
-                                  links: .none)
+        return (
+            API.APITestMessage(
+                id: .init(rawValue: try requireID()),
+                attributes: attributes,
+                relationships: relationships,
+                meta: .none,
+                links: .none
+            ),
+            testDescriptor
+        )
     }
 }
 

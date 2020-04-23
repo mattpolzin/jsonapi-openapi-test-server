@@ -122,6 +122,7 @@ final class DatabaseAPITestWatchController: APITestWatchController {
         db.logger.info("notifying \(watchers.count) watchers of message update.")
         let result = APITestMessageController.showResults(
             id: messageId.rawValue,
+            shouldIncludeTestDescriptor: true,
             db: db as! Database
         )
 

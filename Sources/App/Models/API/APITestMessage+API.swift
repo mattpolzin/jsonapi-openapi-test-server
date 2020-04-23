@@ -14,27 +14,54 @@ import JSONAPI
 
 extension API {
     /// Pass a query builder where the first result will be used.
-    static func singleAPITestMessageResponse(query: QueryBuilder<DB.APITestMessage>) -> EventLoopFuture<SingleAPITestMessageDocument.SuccessDocument> {
+    static func singleAPITestMessageResponse(query: QueryBuilder<DB.APITestMessage>, includeTestDescriptor: Bool) -> EventLoopFuture<SingleAPITestMessageDocument.SuccessDocument> {
+
+        var query = query
+
+        if includeTestDescriptor {
+            query = query.with(\.$apiTestDescriptor) {
+                $0.with(\.$messages)
+            }
+        }
 
         let primaryFuture = query.first()
 
         let resourceFuture = primaryFuture
-            .flatMapThrowing { message -> APITestMessage? in
-                try message.map { try $0.serializable() }
+            .flatMapThrowing { message -> (APITestMessage, [SingleAPITestMessageDocument.Include])? in
+                try message
+                    .map { try $0.serializable() }
+                    .map {
+                        (
+                            $0.message,
+                            ($0.descriptor.map(SingleAPITestMessageDocument.Include.init).map { [$0] } ?? [])
+                        )
+                }
         }.unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
             .map { resource in
                 SingleAPITestMessageDocument.SuccessDocument(
                     apiDescription: .none,
-                    body: .init(resourceObject: resource),
+                    body: .init(resourceObject: resource.0),
                     includes: .none,
                     meta: .none,
                     links: .none
                 )
         }
 
-        return responseFuture
+        guard includeTestDescriptor else {
+            return responseFuture
+        }
+
+        let includesFuture = resourceFuture
+            .map { resource in
+                Includes(values: resource.1)
+        }
+
+        return responseFuture.and(includesFuture)
+            .map { (response, includes) in
+                response.including(includes)
+        }
     }
 }
 

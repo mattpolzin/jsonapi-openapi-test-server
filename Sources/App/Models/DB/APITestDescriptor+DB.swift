@@ -88,7 +88,7 @@ extension DB.APITestDescriptor {
 
         let messages = try $messages
             .value?
-            .map { try $0.serializable() }
+            .map { try $0.serializable().0 }
             ?? []
 
         let attributes = API.APITestDescriptor.Attributes(

@@ -98,11 +98,13 @@ extension API {
 
         let responseFuture = resourceFuture
             .map { resource in
-                SingleAPITestDescriptorDocument.SuccessDocument(apiDescription: .none,
-                                                                body: .init(resourceObject: resource.0),
-                                                                includes: .none,
-                                                                meta: .none,
-                                                                links: .none)
+                SingleAPITestDescriptorDocument.SuccessDocument(
+                    apiDescription: .none,
+                    body: .init(resourceObject: resource.0),
+                    includes: .none,
+                    meta: .none,
+                    links: .none
+                )
         }
 
         guard includeMessages || includeSource else {
