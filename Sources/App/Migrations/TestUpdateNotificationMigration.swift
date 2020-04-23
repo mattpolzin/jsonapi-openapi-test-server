@@ -17,9 +17,10 @@ public struct TestUpdateNotificationMigration: Migration {
             CREATE FUNCTION test_update_notify()
               RETURNS trigger AS $$
             DECLARE
+                channel_name TEXT := TG_ARGV[0] || '_updated';
             BEGIN
               PERFORM pg_notify(
-                CAST('test_updated' AS text),
+                channel_name,
                 CAST(NEW.id AS text)
               );
               RETURN NULL;
@@ -32,12 +33,21 @@ public struct TestUpdateNotificationMigration: Migration {
             CREATE TRIGGER test_descriptor_event
             AFTER INSERT OR UPDATE ON \(DB.APITestDescriptor.schema)
             FOR EACH ROW
-            EXECUTE FUNCTION test_update_notify()
+            EXECUTE FUNCTION test_update_notify('\(DB.APITestDescriptor.schema)')
+        """)
+        .run()
+
+        let messageTrigger = db.raw("""
+            CREATE TRIGGER test_message_event
+            AFTER INSERT OR UPDATE ON \(DB.APITestMessage.schema)
+            FOR EACH ROW
+            EXECUTE FUNCTION test_update_notify('\(DB.APITestMessage.schema)')
         """)
         .run()
 
         return testUpdateNotifyFunction
             .flatMap { descriptorTrigger }
+            .flatMap { messageTrigger }
     }
 
     public func revert(on database: Database) -> EventLoopFuture<Void> {
@@ -53,7 +63,13 @@ public struct TestUpdateNotificationMigration: Migration {
             .table(DB.APITestDescriptor.schema)
             .run()
 
+        let dropMessageTrigger = db
+            .drop(trigger: "test_message_event")
+            .table(DB.APITestMessage.schema)
+            .run()
+
         return dropDescriptorTrigger
+            .flatMap { dropMessageTrigger }
             .flatMap { dropFunction }
     }
 }

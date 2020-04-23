@@ -46,6 +46,8 @@ extension API {
     }
 
     public typealias APITestMessage = JSONAPI.ResourceObject<APITestMessageDescription, NoMetadata, NoLinks, UUID>
+
+    public typealias SingleAPITestMessageDocument = SingleDocument<APITestMessage, NoIncludes>
 }
 
 extension API {

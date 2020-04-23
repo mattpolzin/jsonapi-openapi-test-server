@@ -1,27 +1,27 @@
 # JSON:API/OpenAPI Test Server
 ## Usage
-### As Tool
+### As A Tool
 #### Against a URL
 You can point the test tool at a URL serving up OpenAPI documentation. The URL can either require HTTP Basic Authentication or no authentication.
 
 The unauthenticated version only requires the `API_TEST_IN_URL` environment variable.
 ```shell
-docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' mattpolzin2/api-test-server ./APITest
+docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_URL=https://website.com/api/documentation' mattpolzin2/api-test-server
 ```
 
 The authenticated version additionally requires the `API_TEST_USERNAME` and `API_TEST_PASSWORD` environment variables.
 ```shell
-docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_USERNAME=username' --env 'API_TEST_PASSWORD=password' mattpolzin2/api-test-server ./APITest
+docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_USERNAME=username' --env 'API_TEST_PASSWORD=password' mattpolzin2/api-test-server ./APITest
 ```
 
 #### Against a local file
 You can point the test tool at a local file if you mount that file into the docker container and specify the mount destination with the `API_TEST_IN_FILE` environment variable.
 ```shell
-docker run --rm --env 'API_TEST_IN_FILE=/api/openapi.json' -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server ./APITest
+docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server
 ```
 Note that you cannot use relative paths with bind mounts but if, for example, your `openapi.json` file is in the current working directory then you could invoke as:
 ```shell
-docker run --rm --env 'API_TEST_IN_FILE=/api/openapi.json' -v "$(pwd)/openapi.json:/api/openapi.json" mattpolzin2/api-test-server ./APITest
+docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v "$(pwd)/openapi.json:/api/openapi.json" mattpolzin2/api-test-server
 ```
 
 #### Dumping test files
@@ -33,7 +33,7 @@ docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' -v
 
 You will find the dumped files at `./out/api_test_files.zip`.
 
-### As Server
+### As A Server
 You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable.
 
 First you need to run the migrator against your Postgres database.

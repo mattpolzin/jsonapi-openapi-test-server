@@ -72,20 +72,30 @@ final class DatabaseAPITestWatchController: APITestWatchController {
         guard dbConnection == nil else { return }
 
         let _ = withSustainedConnection { connection in
-            connection.addListener(channel: "test_updated") { context, response in
+            connection.addListener(channel: "api_test_descriptors_updated") { context, response in
                 guard let id = UUID(uuidString: response.payload).map(API.APITestDescriptor.Id.init(rawValue:)) else {
                     self.db.logger.error("Failed to create a UUID from trigger payload: \(response.payload)")
                     return
                 }
-                self.sendNotifications(for: id)
+                self.sendNotificationsFor(test: id)
             }
 
-            let _ = connection.query("LISTEN test_updated")
+            let _ = connection.query("LISTEN api_test_descriptors_updated")
+
+            connection.addListener(channel: "api_test_messages_updated") { context, response in
+                guard let id = UUID(uuidString: response.payload).map(API.APITestMessage.Id.init(rawValue:)) else {
+                    self.db.logger.error("Failed to create a UUID from trigger payload: \(response.payload)")
+                    return
+                }
+                self.sendNotificationsFor(message: id)
+            }
+
+            let _ = connection.query("LISTEN api_test_messages_updated")
         }
     }
 
-    private func sendNotifications(for testId: API.APITestDescriptor.Id) {
-        db.logger.info("notifying \(watchers.count) watchers.")
+    private func sendNotificationsFor(test testId: API.APITestDescriptor.Id) {
+        db.logger.info("notifying \(watchers.count) watchers of test update.")
         let result = testController.showResults(
             id: testId.rawValue,
             shouldIncludeMessages: false,
@@ -95,6 +105,28 @@ final class DatabaseAPITestWatchController: APITestWatchController {
 
         for watcher in watchers.values {
             let typedRequest = TypedRequest<APITestController.ShowContext>(underlyingRequest: watcher.request)
+
+            result.flatMap(typedRequest.response.success.encode)
+                .flatMapError { _ in typedRequest.response.serverError }
+                .whenSuccess { response in
+                    guard let responseString = response.body.string else {
+                        // error?
+                        return
+                    }
+                    watcher.websocket.send(responseString)
+            }
+        }
+    }
+
+    private func sendNotificationsFor(message messageId: API.APITestMessage.Id) {
+        db.logger.info("notifying \(watchers.count) watchers of message update.")
+        let result = APITestMessageController.showResults(
+            id: messageId.rawValue,
+            db: db as! Database
+        )
+
+        for watcher in watchers.values {
+            let typedRequest = TypedRequest<APITestMessageController.ShowContext>(underlyingRequest: watcher.request)
 
             result.flatMap(typedRequest.response.success.encode)
                 .flatMapError { _ in typedRequest.response.serverError }

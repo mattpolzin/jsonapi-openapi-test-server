@@ -47,8 +47,6 @@ extension DB {
     }
 }
 
-extension API.MessageType: AnyJSONCaseIterable {}
-
 extension DB.APITestMessage {
     func serializable() throws -> API.APITestMessage {
         let attributes = API.APITestMessage.Attributes(createdAt: createdAt,
