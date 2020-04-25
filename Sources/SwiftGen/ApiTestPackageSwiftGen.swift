@@ -471,7 +471,7 @@ func documents(from responses: OpenAPI.Response.Map,
 
         guard case .object = responseSchema else {
             logger?.warning(path: path.rawValue,
-                            context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
+                            context: "Parsing the HTTP \(statusCode.rawValue) response document for \(httpVerb.rawValue)",
                 message: "Found non-object response schema root (expected JSON:API 'data' object). Skipping '\(String(describing: responseSchema.jsonTypeFormat?.jsonType))'.")
             continue
         }
@@ -501,7 +501,7 @@ func documents(from responses: OpenAPI.Response.Map,
             switch err {
             case .incorrectTestParameterFormat:
                 logger?.warning(path: path.rawValue,
-                                context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
+                                context: "Parsing the HTTP \(statusCode.rawValue) response document for \(httpVerb.rawValue)",
                     message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary.")
             }
 
@@ -522,7 +522,7 @@ func documents(from responses: OpenAPI.Response.Map,
                                                                      testExampleFuncs: testExampleFuncs)
         } catch let err {
             logger?.warning(path: path.rawValue,
-                            context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
+                            context: "Parsing the HTTP \(statusCode.rawValue) response document for \(httpVerb.rawValue)",
                 message: String(describing: err))
             continue
         }

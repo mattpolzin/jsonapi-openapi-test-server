@@ -66,7 +66,11 @@ The message will contain a JSON:API response payload with the APITestDescriptor 
     // MARK: Test File Retrieval
     app.get("api_tests", ":id", "files", use: testController.files)
         .tags("Test Files")
-        .summary("Retrieve the test files for the given test.")
+        .summary("Retrieve the test files for the given test run.")
+
+    app.get("api_tests", ":id", "logs", use: testController.logs)
+        .tags("Test Files")
+        .summary("Retrieve the test logs for the given test run.")
 
     // MARK: - Documentation
     app.get("docs", use: DocumentationController.show)

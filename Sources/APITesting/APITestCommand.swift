@@ -57,11 +57,13 @@ public final class APITestCommand: Command {
         let cwd = FileManager.default.currentDirectoryPath
 
         let zipToArg = signature.dumpFiles ? cwd + "/out/api_test_files.zip" : nil
+        let testLogPath = cwd + "/out/api_test.log"
 
         try Self.kickTestsOff(
             source: source,
             outPath: path,
             zipPath: zipToArg,
+            testLogPath: testLogPath,
             eventLoop: eventLoop,
             testLogger: logger
         )
@@ -72,6 +74,7 @@ public final class APITestCommand: Command {
         source: OpenAPISource,
         outPath: String,
         zipPath: String?,
+        testLogPath: String,
         eventLoop: EventLoop,
         testLogger: SwiftGen.Logger
     ) -> EventLoopFuture<Void> {
@@ -80,6 +83,7 @@ public final class APITestCommand: Command {
             source: source,
             outPath: outPath,
             zipPath: zipPath,
+            testLogPath: testLogPath,
             eventLoop: eventLoop,
             requestLogger: nil,
             testLogger: testLogger
@@ -95,6 +99,7 @@ public final class APITestCommand: Command {
     ///     - source: The source of the OpenAPI documentation for which to generate tests.
     ///     - outPath: The local path at which test files should be stored.
     ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
+    ///     - testLogPath: The path and filename where plaintext test logs will be saved.
     ///     - eventLoop: The event loop on which the tests should be executed.
     ///     - requestLogger: (Optional) If specified, a system logger to which certain process related
     ///         status updates will be logged. These updates will not be the results of tests with the
@@ -106,6 +111,7 @@ public final class APITestCommand: Command {
         source: OpenAPISource,
         outPath: String,
         zipPath: String?,
+        testLogPath: String,
         eventLoop: EventLoop,
         requestLogger: Logging.Logger?,
         testLogger: SwiftGen.Logger
@@ -150,6 +156,7 @@ public final class APITestCommand: Command {
         .flatMap { runAPITestPackage(
             on: eventLoop,
             at: outPath,
+            testLogPath: testLogPath,
             logger: testLogger
             )
         }
@@ -319,10 +326,12 @@ public func produceAPITestPackage(on loop: EventLoop,
 
 public func runAPITestPackage(on loop: EventLoop,
                               at outputPath: String,
+                              testLogPath: String,
                               logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
     loop.submit {
         try SwiftGen.runAPITestPackage(
             at: outputPath,
+            testLogPath: testLogPath,
             logger: logger
         )
     }

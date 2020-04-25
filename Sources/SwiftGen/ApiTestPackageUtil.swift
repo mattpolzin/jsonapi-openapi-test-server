@@ -33,13 +33,15 @@ public func cleanupOutFolder(_ outPath: String, logger: Logger) throws {
     try FileManager.default.removeItem(atPath: outPath)
 }
 
-public func runAPITestPackage(at path: String, logger: Logger) throws {
+public func runAPITestPackage(at path: String, testLogPath: String, logger: Logger) throws {
     let (exitCode, stdout) = shell("cd '\(path)' && swift test 2>&1")
 
     do {
-        try stdout.write(toFile: path + "/api_tests.log",
-                     atomically: true,
-                     encoding: .utf8)
+        try stdout.write(
+            toFile: testLogPath,
+            atomically: true,
+            encoding: .utf8
+        )
     } catch let error {
         logger.warning(path: path, context: "While writing test logs to file", message: String(describing: error))
     }

@@ -35,6 +35,11 @@ final class APITestController: Controller {
             + "/\(test.id!.uuidString).zip"
     }
 
+    private func testLogPath(for test: DB.APITestDescriptor) -> String {
+        return Self.zipPathPrefix
+            + "/\(test.id!.uuidString).log"
+    }
+
     private func outPath(for test: DB.APITestDescriptor) -> String {
         return self.outputPath
             + "/\(test.id!.uuidString)/"
@@ -130,6 +135,28 @@ extension APITestController {
         }
     }
 
+    func logs(_ req: TypedRequest<LogsContext>) throws -> EventLoopFuture<Response> {
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            return req.response.badRequest
+        }
+
+        let query = DB.APITestDescriptor.query(on: req.db)
+            .filter(\.$id == id)
+
+        return query.first()
+            .unwrap(or: Abort(.notFound))
+            .map(self.testLogPath)
+            .flatMap(req.fileio.collectFile)
+            .flatMap(req.response.success.encode)
+            .flatMapError { error in
+                guard let abortError = error as? Abort,
+                    abortError.status == .notFound else {
+                        return req.response.serverError
+                }
+                return req.response.notFound
+        }
+    }
+
     /// Create an `APITestDescriptor` and run new tests.
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
         let reqUUIDGuess = req
@@ -179,6 +206,7 @@ extension APITestController {
             guard let self = self else { return }
 
             let outPath = self.outPath(for: descriptor)
+            let testLogPath = self.testLogPath(for: descriptor)
             let zipPath = self.zipPath(for: descriptor)
             let eventLoop = self.testEventLoop()
 
@@ -194,6 +222,7 @@ extension APITestController {
                 source: .init(source),
                 outPath: outPath,
                 zipPath: zipPath,
+                testLogPath: testLogPath,
                 eventLoop: eventLoop,
                 requestLogger: req.logger,
                 testLogger: testLogger
@@ -306,6 +335,36 @@ extension APITestController {
             .init(response: Response(
                 status: .internalServerError
             )
+        )
+
+        static let shared = Self()
+    }
+
+    struct LogsContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let success: ResponseContext<ByteBuffer> =
+            .init { response in
+                response.status = .ok
+                response.headers.contentType = .plainText
+        }
+
+        let notFound: CannedResponse<EmptyResponseBody> =
+            .init(response: Response(
+                status: .notFound
+                )
+        )
+
+        let badRequest: CannedResponse<EmptyResponseBody> =
+            .init(response: Response(
+                status: .badRequest
+                )
+        )
+
+        let serverError: CannedResponse<EmptyResponseBody> =
+            .init(response: Response(
+                status: .internalServerError
+                )
         )
 
         static let shared = Self()
