@@ -1,5 +1,5 @@
 
-FROM swiftlang/swift:nightly-5.2 as builder
+FROM swift:5.2 as builder
 
 RUN apt-get -qq update && apt-get install -y \
   libssl-dev zlib1g-dev \
@@ -41,7 +41,7 @@ RUN /build/bin/GenAPIDocumentation > ./Public/openapi.yml
 ## Production image
 #
 
-FROM swiftlang/swift:nightly-5.2
+FROM swift:5.2
 ARG env
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
