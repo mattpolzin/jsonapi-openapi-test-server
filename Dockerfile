@@ -20,7 +20,7 @@ COPY . .
 
 #########
 # RELEASE
-# RUN swift build --enable-test-discovery -c release \
+# RUN swift build --enable-test-discovery -c release -Xswiftc -g \
 #  && mv `swift build -c release --show-bin-path` /build/bin
 #
 #########
