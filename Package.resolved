@@ -105,7 +105,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": "feature/gen-swift",
-          "revision": "a8f4a79abf79c6b547df74c7b87389860244894b",
+          "revision": "2c79ff10da1e23b1ced0b37a05f8da406bc982a5",
           "version": null
         }
       },
