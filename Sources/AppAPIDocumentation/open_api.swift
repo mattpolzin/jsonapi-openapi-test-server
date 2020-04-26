@@ -73,6 +73,7 @@ You specify test parameters under an `x-tests` specification extension on the Op
     "test_name": {
         "test_host": "url", (optional, if omitted then default server for API will be used.
         "skip_example": true | false, (optional, defaults to false)
+        "ignore_missing_parameter_warnings": true | false, (optional, defaults to false)
         "parameters": {
             "path_param_name": "value",
             "header_param_name": "value" (must be a string, even if the parameter type is Int or other)

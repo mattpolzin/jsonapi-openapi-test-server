@@ -601,14 +601,23 @@ func exampleTests(server: OpenAPI.Server,
 
     return try OpenAPIExampleRequestTestSwiftGen.TestProperties
         .properties(for: testsExtension, server: server)
-        .map { properties in
-            try OpenAPIExampleRequestTestSwiftGen(server: server,
-                                                  pathComponents: pathComponents,
-                                                  parameters: parameters,
-                                                  testProperties: properties,
-                                                  exampleResponseDataPropName: exampleDataPropName,
-                                                  responseBodyType: bodyType,
-                                                  expectedHttpStatus: expectedHttpStatus)
+        .compactMap { properties in
+            do {
+                return try OpenAPIExampleRequestTestSwiftGen(
+                    server: server,
+                    pathComponents: pathComponents,
+                    parameters: parameters,
+                    testProperties: properties,
+                    exampleResponseDataPropName: exampleDataPropName,
+                    responseBodyType: bodyType,
+                    expectedHttpStatus: expectedHttpStatus
+                )
+            } catch let error as OpenAPIExampleRequestTestSwiftGen.Error {
+                if case .valueMissingForParameter = error, properties.ignoreMissingParameterWarnings {
+                    return nil
+                }
+                throw error
+            }
     }
 }
 
