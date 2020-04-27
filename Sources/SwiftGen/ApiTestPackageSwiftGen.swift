@@ -94,7 +94,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         apiRequestTest: APIRequestTestSwiftGen?,
         requestDocument: DataDocumentSwiftGen?,
         responseDocuments: [OpenAPI.Response.StatusCode : DataDocumentSwiftGen],
-        fullyQualifiedTestFuncNames: [String]
+        testFunctionNames: [TestFunctionName]
     )]
     results = HttpVerb.allCases.flatMap { httpVerb in
         return pathItems.compactMap { (path, pathItem) in
@@ -133,22 +133,30 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                 requestDocument = nil
             }
 
-            let fullyQualifiedResponseTestFuncNames = responseDocuments
+            let responseTestFunctionNames = responseDocuments
                 .values
                 .flatMap { doc in
                     doc.testExampleFuncs.map { $0.functionName }
-            }.map {
-                namespace(for: OpenAPI.Path(path.components + [httpVerb.rawValue, "Response"]))
-                    + "." + $0
+            }.map { testName in
+                TestFunctionName(
+                    path: path,
+                    endpoint: httpVerb,
+                    direction: .response,
+                    testName: testName
+                )
             }
 
-            let fullyQualifiedRequestTestFuncNames = requestDocument
+            let requestTestFunctionNames = requestDocument
                 .map { doc in
                     doc.testExampleFuncs
                         .map { $0.functionName }
-                        .map {
-                            namespace(for: OpenAPI.Path(path.components + [httpVerb.rawValue, "Request"]))
-                                + "." + $0
+                        .map { testName in
+                            TestFunctionName(
+                                path: path,
+                                endpoint: httpVerb,
+                                direction: .request,
+                                testName: testName
+                            )
                     }
             } ?? []
 
@@ -160,7 +168,7 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
                 apiRequestTest: apiRequestTest,
                 requestDocument: requestDocument,
                 responseDocuments: responseDocuments,
-                fullyQualifiedTestFuncNames: fullyQualifiedResponseTestFuncNames + fullyQualifiedRequestTestFuncNames
+                testFunctionNames: responseTestFunctionNames + requestTestFunctionNames
             )
         }
     }
@@ -191,9 +199,11 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
         )
     }
 
-    let testClassFileContents = XCTestClassSwiftGen(className: "GeneratedTests",
-                                                    importNames: [],
-                                                    forwardingFullyQualifiedTestNames: results.flatMap { $0.fullyQualifiedTestFuncNames })
+    let testClassFileContents = XCTestClassSwiftGen(
+        className: "GeneratedTests",
+        importNames: [],
+        testFunctionNames: results.flatMap { $0.testFunctionNames }
+    )
     try! write(
         contents: try! testClassFileContents.formattedSwiftCode(),
         toFileAt: testDir + "/",
@@ -203,11 +213,6 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
     if let zipToPath = zipToPath {
         try! archive(from: outPath, to: zipToPath)
     }
-}
-
-enum HttpDirection: String {
-    case request
-    case response
 }
 
 func swiftTypeName(from string: String) -> String {

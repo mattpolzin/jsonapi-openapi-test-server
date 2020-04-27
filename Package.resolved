@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "9eba411f098d752c12765f44b72457c024ed1037",
-          "version": "0.15.0"
+          "revision": "673c52cc65fa51fb50e874641664b543c6afc6de",
+          "version": "0.15.1"
         }
       },
       {

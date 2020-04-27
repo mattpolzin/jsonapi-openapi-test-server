@@ -22,7 +22,8 @@ let package = Package(
 
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.15.0")),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.15.1")),
+        // .package(name: "JSONAPI-OpenAPI", path: "../JSONAPI-OpenAPI"),
         .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.29.0")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "2.0.0"))

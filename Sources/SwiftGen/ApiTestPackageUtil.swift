@@ -7,6 +7,7 @@
 
 import Foundation
 import OpenAPIKit
+import JSONAPISwiftGen
 
 public func prepOutFolder(_ outPath: String, logger: Logger) throws {
     try? FileManager.default.removeItem(atPath: outPath + "/Sources/GeneratedAPI")
@@ -65,6 +66,15 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
         return inString
     }
 
+    func testFunctionName(for line: String) -> TestFunctionName? {
+        let testFunctionNameRawValue = TestFunctionName.testPrefix + line
+            .components(separatedBy: "__")
+            .dropFirst()
+            .joined(separator: "__")
+
+        return TestFunctionName(rawValue: testFunctionNameRawValue)
+    }
+
     let failedTestLines = testOutput.filter { $0.contains(": error:") }
     let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
 
@@ -75,14 +85,20 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
             .map(dropBracket))
             .flatMap { zip($0.first, $0.last) }
 
-        let pathParseAttempt = (pathAndTiming?.0 ?? "")
-            .components(separatedBy: "__")
-            .dropFirst()
-            .joined(separator: ", ")
+        let pathParseAttempt = pathAndTiming
+            .flatMap { testFunctionName(for: $0.0) }
+            .map { testFunctionName in
+                [
+                    testFunctionName.path.rawValue,
+                    testFunctionName.endpoint.rawValue,
+                    testFunctionName.direction.rawValue,
+                    testFunctionName.testStatusCodeGuess.map { "HTTP \($0.rawValue)" }
+                ].compactMap { $0 }.joined(separator: ", ")
+        }
 
         let isolatedTiming = pathAndTiming?.1 ?? String(line)
 
-        logger.success(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
+        logger.success(path: pathParseAttempt ?? path,
                        context: isolatedTiming,
                        message: "\(context(for: line)) Passed")
     }
@@ -95,14 +111,20 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
                 .map(dropBracket))
                 .flatMap { zip($0.first, $0.last) }
 
-            let pathParseAttempt = (pathAndError?.0 ?? "")
-                .components(separatedBy: "__")
-                .dropFirst()
-                .joined(separator: ", ")
+            let pathParseAttempt = pathAndError
+                .flatMap { testFunctionName(for: $0.0) }
+                .map { testFunctionName in
+                    [
+                        testFunctionName.path.rawValue,
+                        testFunctionName.endpoint.rawValue,
+                        testFunctionName.direction.rawValue,
+                        testFunctionName.testStatusCodeGuess.map { "HTTP \($0.rawValue)" }
+                        ].compactMap { $0 }.joined(separator: ", ")
+            }
 
             let isolatedError = pathAndError?.1 ?? String(line)
 
-            logger.error(path: pathParseAttempt.isEmpty ? path : pathParseAttempt,
+            logger.error(path: pathParseAttempt ?? path,
                          context: isolatedError,
                          message: "\(context(for: line)) Failed")
         }
