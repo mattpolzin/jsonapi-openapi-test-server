@@ -488,7 +488,7 @@ func documents(from responses: OpenAPI.Response.Map,
         do {
             example = try jsonResponse.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
         } catch let err {
-            logger?.warning(path: path.rawValue, context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
+            logger?.warning(path: path.rawValue, context: "Parsing the HTTP \(statusCode.rawValue) response document for \(httpVerb.rawValue)",
                 message: String(describing: err))
             example = nil
         }
@@ -513,7 +513,7 @@ func documents(from responses: OpenAPI.Response.Map,
             testExampleFuncs = []
         } catch let err {
             logger?.warning(path: path.rawValue,
-                            context: "Parsing the \(statusCode) response document for \(httpVerb.rawValue)",
+                            context: "Parsing the HTTP \(statusCode.rawValue) response document for \(httpVerb.rawValue)",
                 message: String(describing: err))
 
             testExampleFuncs = []
