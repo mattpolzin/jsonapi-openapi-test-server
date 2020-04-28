@@ -8,7 +8,7 @@
 import Fluent
 import PostgresKit
 
-public struct InitAPITestMessageMigration: Migration {
+public struct APITestMessageMigration_Init: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
         let messageTypeFuture = database.enum("MESSAGE_TYPE")

@@ -8,7 +8,7 @@
 import Fluent
 import PostgresKit
 
-public struct InitOpenAPISourceMigration: Migration {
+public struct OpenAPISourceMigration_Init: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
         let sourceTypeFuture = database.enum("SOURCE_TYPE")

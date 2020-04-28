@@ -7,7 +7,7 @@
 
 import Fluent
 
-public struct InitAPITestDescriptorMigration: Migration {
+public struct APITestDescriptorMigration_Init: Migration {
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
 
         let statusTypeFuture = database.enum("TEST_STATUS")
