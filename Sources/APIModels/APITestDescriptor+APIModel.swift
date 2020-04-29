@@ -29,20 +29,20 @@ extension API {
 
         public struct Relationships: JSONAPI.Relationships {
             public let messages: ToManyRelationship<APITestMessage, NoMetadata, NoLinks>
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>
+            public let testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>
 
-            public init(source: OpenAPISource, messages: [APITestMessage]) {
-                self.openAPISource = .init(resourceObject: source)
+            public init(testProperties: APITestProperties, messages: [APITestMessage]) {
+                self.testProperties = .init(resourceObject: testProperties)
                 self.messages = .init(resourceObjects: messages)
             }
 
-            public init(source: OpenAPISource.Pointer, messages: APITestMessage.Pointers) {
-                self.openAPISource = source
+            public init(testProperties: APITestProperties.Pointer, messages: APITestMessage.Pointers) {
+                self.testProperties = testProperties
                 self.messages = messages
             }
 
-            public init(sourceId: OpenAPISource.Id, messageIds: [APITestMessage.Id]) {
-                self.openAPISource = .init(id: sourceId)
+            public init(testPropertiesId: APITestProperties.Id, messageIds: [APITestMessage.Id]) {
+                self.testProperties = .init(id: testPropertiesId)
                 self.messages = .init(ids: messageIds)
             }
         }
@@ -54,10 +54,10 @@ extension API {
         public typealias Attributes = NoAttributes
 
         public struct Relationships: JSONAPI.Relationships {
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>?
+            public let testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>?
 
-            public init(openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>? = nil) {
-                self.openAPISource = openAPISource
+            public init(testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>? = nil) {
+                self.testProperties = testProperties
             }
         }
     }
@@ -65,9 +65,9 @@ extension API {
     public typealias APITestDescriptor = JSONAPI.ResourceObject<APITestDescriptorDescription, NoMetadata, NoLinks, UUID>
     public typealias NewAPITestDescriptor = JSONAPI.ResourceObject<NewAPITestDescriptorDescription, NoMetadata, NoLinks, Unidentified>
 
-    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
+    public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include3<APITestProperties, OpenAPISource, APITestMessage>>
 
-    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include2<OpenAPISource, APITestMessage>>
+    public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include3<APITestProperties, OpenAPISource, APITestMessage>>
     public typealias NewAPITestDescriptorDocument = SingleDocument<NewAPITestDescriptor, NoIncludes>
 }
 

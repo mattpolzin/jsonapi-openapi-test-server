@@ -24,19 +24,19 @@ extension DB {
         @Children(for: \.$apiTestDescriptor)
         var messages: [APITestMessage]
 
-        @Parent(key: "openapi_source_id")
-        var openAPISource: OpenAPISource
+        @Parent(key: "test_properties_id")
+        var testProperties: APITestProperties
 
         /// Create a new test descriptor. It is strongly recommended that
         /// the id be set to that of the originating API request because
         /// then logging related to the originating request can be easily tied
         /// to logging related to the separate testing tasks.
-        public init(id: UUID, openAPISource: OpenAPISource) throws {
+        public init(id: UUID, testProperties: APITestProperties) throws {
             self.id = id
             createdAt = Date()
             finishedAt = nil
             status = .pending
-            $openAPISource.id = try openAPISource.requireID()
+            $testProperties.id = try testProperties.requireID()
         }
 
         /// Used to construct Model from Database
@@ -81,10 +81,10 @@ extension DB.APITestDescriptor: TestProgressTracker {
 }
 
 extension DB.APITestDescriptor {
-    func serializable() throws -> (descriptor: API.APITestDescriptor, source: API.OpenAPISource?, message: [API.APITestMessage]) {
+    func serializable() throws -> (descriptor: API.APITestDescriptor, properties: API.APITestProperties?, source: API.OpenAPISource?, messages: [API.APITestMessage]) {
 
-        let sourceId = API.OpenAPISource.Id(rawValue: $openAPISource.id)
-        let source = try $openAPISource.value?.serializable()
+        let propertiesId = API.APITestProperties.Id(rawValue: $testProperties.id)
+        let properties = try $testProperties.value?.serializable()
 
         let messages = try $messages
             .value?
@@ -98,7 +98,7 @@ extension DB.APITestDescriptor {
         )
 
         let relationships = API.APITestDescriptor.Relationships(
-            sourceId: sourceId,
+            testPropertiesId: propertiesId,
             messageIds: messages.map { $0.id }
         )
 
@@ -110,7 +110,8 @@ extension DB.APITestDescriptor {
                 meta: .none,
                 links: .none
             ),
-            source,
+            properties?.properties,
+            properties?.source,
             messages
         )
     }

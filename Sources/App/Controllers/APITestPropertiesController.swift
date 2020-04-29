@@ -1,0 +1,195 @@
+//
+//  APITestPropertiesController.swift
+//  
+//
+//  Created by Mathew Polzin on 4/29/20.
+//
+
+import Vapor
+import VaporTypedRoutes
+import FluentKit
+import SwiftGen
+import APITesting
+import struct Logging.Logger
+import APIModels
+import JSONAPI
+
+/// Controls basic CRUD operations on OpenAPI Sources.
+final class APITestPropertiesController: Controller {
+
+    let defaultOpenAPISource: OpenAPISource?
+
+    init(openAPISource: OpenAPISource?) {
+        self.defaultOpenAPISource = openAPISource
+    }
+
+    deinit {}
+}
+
+// MARK: - Routes
+extension APITestPropertiesController {
+    /// Returns a list of all `APITestProperties`.
+    func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
+
+        let shouldIncludeSource = req.query.include?
+            .contains("openAPISource")
+            ?? false
+
+        return API.batchAPITestPropertiesResponse(
+            query: DB.APITestProperties.query(on: req.db),
+            includeSource: shouldIncludeSource
+        )
+            .flatMap(req.response.success.encode)
+            .flatMapError { _ in req.response.serverError }
+    }
+
+    func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            return req.response.badRequest
+        }
+
+        let shouldIncludeSource = req.query.include?
+            .contains("openAPISource")
+            ?? false
+
+        let query = DB.APITestProperties.query(on: req.db)
+            .filter(\.$id == id)
+
+        return API.singleAPITestPropertiesResponse(
+            query: query,
+            includeSource: shouldIncludeSource
+        )
+            .flatMap(req.response.success.encode)
+            .flatMapError { error in
+                guard let abortError = error as? Abort,
+                    abortError.status == .notFound else {
+                        return req.response.serverError
+                }
+                return req.response.notFound
+        }
+    }
+
+    /// Create an `OpenAPISource`.
+    func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
+
+        let properties = req.eventLoop.makeSucceededFuture(())
+            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
+            .unwrap(or: Abort(.badRequest))
+
+        let givenOpenAPISourceId = properties
+            .map { ($0 ~> \.openAPISource)?.rawValue }
+            .optionalFlatMap { DB.OpenAPISource.find($0, on: req.db).unwrap(or: Abort(.badRequest, reason: "The specified OpenAPI source could not be found.")) }
+
+        let openAPISourceId: EventLoopFuture<UUID> = givenOpenAPISourceId
+            .flatMap { (source: DB.OpenAPISource?) in
+                if let id = source?.id {
+                    return req.eventLoop.makeSucceededFuture(id)
+                }
+
+                return self.defaultSource(on: req.db)
+                    .map { $0.id }
+                    .unwrap(or: Abort(.badRequest, reason: "There was no OpenAPI source specified and no default was found."))
+        }
+
+        let propertiesModel = properties.and(openAPISourceId)
+            .map { DB.APITestProperties.init(apiModel: $0.0, openAPISourceId: $0.1) }
+
+        return propertiesModel
+            .flatMap { $0.save(on: req.db) }
+            .flatMap { propertiesModel }
+            .flatMapThrowing { responseModel in
+                API.SingleAPITestPropertiesDocument.SuccessDocument(
+                    apiDescription: .none,
+                    body: .init(resourceObject: try responseModel.serializable().0),
+                    includes: .none,
+                    meta: .none,
+                    links: .none
+                )
+        }
+        .flatMap(req.response.success.encode)
+        .flatMapError { error in
+            guard let abortError = error as? Abort,
+                abortError.status == .badRequest else {
+                    return req.response.serverError
+            }
+            return req.response.badRequest
+        }
+    }
+}
+
+extension APITestPropertiesController {
+    func defaultSource(on db: Database) -> EventLoopFuture<DB.OpenAPISource> {
+        guard let defaultSource = defaultOpenAPISource else {
+            return db.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "No Open API Source specified and no default OpenAPI Source available."))
+        }
+
+        return defaultSource
+            .dbModel(from: db)
+    }
+}
+
+// MARK: - Route Contexts
+extension APITestPropertiesController {
+    struct IndexContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let include: CSVQueryParam<String> = .init(
+            name: "include",
+            description: "Include the given types of resources in the response.",
+            allowedValues: ["openAPISource"]
+        )
+
+        let success: ResponseContext<API.BatchAPITestPropertiesDocument.SuccessDocument> =
+            .init { response in
+                response.status = .ok
+        }
+
+        let serverError: CannedResponse<API.BatchAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonServerError()
+
+        static let shared = Self()
+    }
+
+    struct ShowContext: RouteContext {
+        typealias RequestBodyType = EmptyRequestBody
+
+        let include: CSVQueryParam<String> = .init(
+            name: "include",
+            description: "Include the given types of resources in the response.",
+            allowedValues: ["openAPISource"]
+        )
+
+        let success: ResponseContext<API.SingleAPITestPropertiesDocument.SuccessDocument> =
+            .init { response in
+                response.status = .ok
+        }
+
+        let notFound: CannedResponse<API.SingleAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonNotFoundError(details: "The requested API Test Properties object was not found")
+
+        let badRequest: CannedResponse<API.SingleAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "API Test Properties ID not specified in path")
+
+        let serverError: CannedResponse<API.SingleAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonServerError()
+
+        static let shared = Self()
+    }
+
+    struct CreateContext: RouteContext {
+        typealias RequestBodyType = API.CreateAPITestPropertiesDocument.SuccessDocument
+
+        let success: ResponseContext<API.SingleAPITestPropertiesDocument.SuccessDocument> =
+            .init { response in
+                response.status = .created
+        }
+
+        let badRequest: CannedResponse<API.SingleAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonBadRequestError(details: "Request body could not be parsed as an 'openapi_source' resource")
+
+        let serverError: CannedResponse<API.SingleAPITestPropertiesDocument.ErrorDocument>
+            = Controller.jsonServerError()
+
+        static let shared = Self()
+    }
+}

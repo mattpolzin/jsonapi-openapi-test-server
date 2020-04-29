@@ -53,23 +53,26 @@ extension APITestController {
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
             ?? false
+        let shouldIncludeProperties = req.query.include?
+            .contains("testProperties")
+            ?? false
         let shouldIncludeSource = req.query.include?
-            .contains("openAPISource")
+            .contains("testProperties.openAPISource")
             ?? false
 
         return indexResults(
             shouldIncludeMessages: shouldIncludeMessages,
-            shouldIncludeSource: shouldIncludeSource,
+            shouldIncludeProperties: (shouldIncludeProperties, alsoIncludeSource: shouldIncludeSource),
             db: req.db
         )
             .flatMap(req.response.success.encode)
             .flatMapError { _ in req.response.serverError }
     }
 
-    func indexResults(shouldIncludeMessages: Bool, shouldIncludeSource: Bool, db: Database) -> EventLoopFuture<API.BatchAPITestDescriptorDocument.SuccessDocument> {
+    func indexResults(shouldIncludeMessages: Bool, shouldIncludeProperties: (Bool, alsoIncludeSource: Bool), db: Database) -> EventLoopFuture<API.BatchAPITestDescriptorDocument.SuccessDocument> {
         return API.batchAPITestDescriptorResponse(
             query: DB.APITestDescriptor.query(on: db),
-            includeSource: shouldIncludeSource,
+            includeProperties: shouldIncludeProperties,
             includeMessages: shouldIncludeMessages
         )
     }
@@ -82,14 +85,17 @@ extension APITestController {
         let shouldIncludeMessages = req.query.include?
             .contains("messages")
             ?? false
+        let shouldIncludeProperties = req.query.include?
+            .contains("testProperties")
+            ?? false
         let shouldIncludeSource = req.query.include?
-            .contains("openAPISource")
+            .contains("testProperties.openAPISource")
             ?? false
 
         return showResults(
             id: id,
             shouldIncludeMessages: shouldIncludeMessages,
-            shouldIncludeSource: shouldIncludeSource,
+            shouldIncludeProperties: (shouldIncludeProperties, alsoIncludeSource: shouldIncludeSource),
             db: req.db
         )
         .flatMap(req.response.success.encode)
@@ -102,13 +108,13 @@ extension APITestController {
         }
     }
 
-    func showResults(id: UUID, shouldIncludeMessages: Bool, shouldIncludeSource: Bool, db: Database) -> EventLoopFuture<API.SingleAPITestDescriptorDocument.SuccessDocument> {
+    func showResults(id: UUID, shouldIncludeMessages: Bool, shouldIncludeProperties: (Bool, alsoIncludeSource: Bool), db: Database) -> EventLoopFuture<API.SingleAPITestDescriptorDocument.SuccessDocument> {
         let query = DB.APITestDescriptor.query(on: db)
             .filter(\.$id == id)
 
         return API.singleAPITestDescriptorResponse(
             query: query,
-            includeSource: shouldIncludeSource,
+            includeProperties: shouldIncludeProperties,
             includeMessages: shouldIncludeMessages
         )
     }
@@ -164,32 +170,28 @@ extension APITestController {
             .map { $0.description }
             .flatMap(UUID.init(uuidString:))
 
-        let requestedOpenAPISource = req.eventLoop.makeSucceededFuture(())
+        let requestedTestProperties = req.eventLoop.makeSucceededFuture(())
             .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
-            .optionalMap { $0 ~> \.openAPISource }
-            .flatMap { DB.OpenAPISource.find($0, on: req.db) }
+            .optionalMap { $0 ~> \.testProperties }
+            .optionalFlatMap { Self.givenProperties(with: $0, on: req.db) }
 
-        let futureOpenAPISource: EventLoopFuture<DB.OpenAPISource> = requestedOpenAPISource
+        let futureTestProperties: EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> = requestedTestProperties
             .flatMap {
-                if let source = $0 {
-                    return req.eventLoop.makeSucceededFuture(source)
+                if let properties = $0 {
+                    return req.eventLoop.makeSucceededFuture(properties)
                 }
 
-                guard let defaultSource = self.defaultOpenAPISource else {
-                    return req.eventLoop.makeFailedFuture(Abort(.badRequest))
-                }
-
-                return defaultSource
-                    .dbModel(from: req.db)
+                return self.defaultProperties(on: req.db)
         }
 
-        let descriptorFuture = futureOpenAPISource.flatMapThrowing { sourceModel in
+        let descriptorFuture = futureTestProperties.flatMapThrowing { (testProperties, source) in
             (
                 try DB.APITestDescriptor(
                     id: reqUUIDGuess ?? UUID(),
-                    openAPISource: sourceModel
+                    testProperties: testProperties
                 ),
-                sourceModel
+                testProperties,
+                source
             )
         }
 
@@ -198,7 +200,7 @@ extension APITestController {
             .flatMap { descriptorFuture }
 
         // Kick tests off asynchronously
-        savedDescriptorTuple.whenSuccess { [weak self] (descriptor, source) in
+        savedDescriptorTuple.whenSuccess { [weak self] (descriptor, properties, source) in
 
             // this just fails if the controller has been released from memory
             // which we consider possible here because this whole process is async
@@ -217,6 +219,7 @@ extension APITestController {
                 database: req.db
             )
 
+            #warning("pass the `properties` to the kickoff!")
             let _ = APITestCommand.kickTestsOff(
                 testProgressTracking: (descriptor, req.db),
                 source: .init(source),
@@ -229,7 +232,7 @@ extension APITestController {
             )
         }
 
-        return savedDescriptorTuple.flatMapThrowing { (descriptor, _) in
+        return savedDescriptorTuple.flatMapThrowing { (descriptor, _, _) in
             API.SingleAPITestDescriptorDocument.SuccessDocument(
                 apiDescription: .none,
                 body: .init(resourceObject: try descriptor.serializable().0),
@@ -262,6 +265,43 @@ extension APITestController {
     }
 }
 
+extension APITestController {
+    static func givenProperties(with
+        testPropertiesId: API.APITestProperties.Id,
+                                on db: Database
+    ) -> EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> {
+        return DB.APITestProperties
+            .query(on: db)
+            .filter(\.$id == testPropertiesId.rawValue)
+            .with(\.$openAPISource)
+            .first()
+            .optionalMap { ($0, $0.$openAPISource.value!) }
+            .unwrap(or: Abort(.badRequest, reason: "Given API test properties could not be found."))
+    }
+
+    func defaultProperties(on db: Database) -> EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> {
+        guard let defaultSource = defaultOpenAPISource else {
+            return db.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "No API Test properties specified and no default OpenAPI Source available."))
+        }
+
+        let defaultSourceAndId = defaultSource
+            .dbModel(from: db)
+            .flatMapThrowing { source in
+                (source, try source.requireID())
+        }
+
+        return defaultSourceAndId
+            .flatMap { (source, sourceId) in
+                DB.APITestProperties
+                    .query(on: db)
+                    .filter(\.$openAPISource.$id == sourceId)
+                    .filter(\.$apiHostOverride == nil)
+                    .first(orCreate: DB.APITestProperties(openAPISourceId: sourceId, apiHostOverride: nil))
+                    .map { ($0, source) }
+        }
+    }
+}
+
 // MARK: - Route Contexts
 extension APITestController {
     struct IndexContext: RouteContext {
@@ -270,7 +310,7 @@ extension APITestController {
         let include: CSVQueryParam<String> = .init(
             name: "include",
             description: "Include the given types of resources in the response.",
-            allowedValues: ["openAPISource", "messages"]
+            allowedValues: ["testProperties", "testProperties.openAPISource", "messages"]
         )
 
         let success: ResponseContext<API.BatchAPITestDescriptorDocument.SuccessDocument> =
@@ -290,7 +330,7 @@ extension APITestController {
         let include: CSVQueryParam<String> = .init(
             name: "include",
             description: "Include the given types of resources in the response.",
-            allowedValues: ["openAPISource", "messages"]
+            allowedValues: ["testProperties", "testProperties.openAPISource", "messages"]
         )
 
         let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =

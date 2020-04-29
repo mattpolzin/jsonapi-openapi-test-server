@@ -13,13 +13,19 @@ import OpenAPIReflection
 import JSONAPI
 
 extension API {
-    static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
+
+    static func batchAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeProperties: (Bool, alsoIncludeSource: Bool), includeMessages: Bool) -> EventLoopFuture<BatchAPITestDescriptorDocument.SuccessDocument> {
 
         var query = query
 
-        if includeSource {
-            query = query.with(\.$openAPISource)
+        if includeProperties.0 {
+            query.with(\.$testProperties) {
+                if includeProperties.alsoIncludeSource {
+                    $0.with(\.$openAPISource)
+                }
+            }
         }
+
         // TODO: fix so that you can not include messages but still return IDs for this relationship.
         //        if includeMessages {
         query = query.with(\.$messages)
@@ -34,8 +40,9 @@ extension API {
                     .map {
                         (
                             $0.descriptor,
-                            ($0.source.map(BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? [])
-                                + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
+                            propertiesIncludes(from: $0)
+                                + sourceIncludes(from: $0)
+                                + messageIncludes(from: $0)
                         )
                 }
         }
@@ -48,7 +55,7 @@ extension API {
                                                            links: .none)
         }
 
-        guard includeMessages || includeSource else {
+        guard includeMessages || includeProperties.0 else {
             return responseFuture
         }
 
@@ -69,12 +76,16 @@ extension API {
     }
 
     /// Pass a query builder where the first result will be used.
-    static func singleAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeSource: Bool, includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorDocument.SuccessDocument> {
+    static func singleAPITestDescriptorResponse(query: QueryBuilder<DB.APITestDescriptor>, includeProperties: (Bool, alsoIncludeSource: Bool), includeMessages: Bool) -> EventLoopFuture<SingleAPITestDescriptorDocument.SuccessDocument> {
 
         var query = query
 
-        if includeSource {
-            query = query.with(\.$openAPISource)
+        if includeProperties.0 {
+            query.with(\.$testProperties) {
+                if includeProperties.alsoIncludeSource {
+                    $0.with(\.$openAPISource)
+                }
+            }
         }
         // TODO: fix so that you can not include messages but still return IDs for this relationship.
         //        if includeMessages {
@@ -90,8 +101,9 @@ extension API {
                     .map {
                         (
                             $0.descriptor,
-                            ($0.source.map(BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? [])
-                                + $0.message.map(BatchAPITestDescriptorDocument.Include.init)
+                            propertiesIncludes(from: $0)
+                                + sourceIncludes(from: $0)
+                                + messageIncludes(from: $0)
                         )
                 }
         }.unwrap(or: Abort(.notFound))
@@ -107,7 +119,7 @@ extension API {
                 )
         }
 
-        guard includeMessages || includeSource else {
+        guard includeMessages || includeProperties.0 else {
             return responseFuture
         }
 
@@ -124,3 +136,20 @@ extension API {
 }
 
 extension API.TestStatus: AnyJSONCaseIterable {}
+
+fileprivate typealias SerializedTestDescriptor = (descriptor: API.APITestDescriptor, properties: API.APITestProperties?, source: API.OpenAPISource?, messages: [API.APITestMessage])
+
+fileprivate func propertiesIncludes(from serializedDescriptor: SerializedTestDescriptor) -> [API.BatchAPITestDescriptorDocument.Include] {
+    return serializedDescriptor.properties
+        .map(API.BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? []
+}
+
+fileprivate func sourceIncludes(from serializedDescriptor: SerializedTestDescriptor) -> [API.BatchAPITestDescriptorDocument.Include] {
+    return serializedDescriptor.source
+        .map(API.BatchAPITestDescriptorDocument.Include.init).map { [$0] } ?? []
+}
+
+fileprivate func messageIncludes(from serializedDescriptor: SerializedTestDescriptor) -> [API.BatchAPITestDescriptorDocument.Include] {
+    return serializedDescriptor.messages
+        .map(API.BatchAPITestDescriptorDocument.Include.init)
+}

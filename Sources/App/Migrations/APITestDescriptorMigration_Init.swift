@@ -40,11 +40,11 @@ public struct APITestDescriptorMigration_Init: Migration {
                     .required
             )
                 .field(
-                    "openapi_source_id",
+                    "test_properties_id",
                     .uuid,
                     .required,
                     .references(
-                        DB.OpenAPISource.schema,
+                        DB.APITestProperties.schema,
                         "id",
                         onDelete: .restrict,
                         onUpdate: .cascade

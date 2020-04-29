@@ -99,7 +99,7 @@ final class DatabaseAPITestWatchController: APITestWatchController {
         let result = testController.showResults(
             id: testId.rawValue,
             shouldIncludeMessages: false,
-            shouldIncludeSource: false,
+            shouldIncludeProperties: (false, alsoIncludeSource: false),
             db: db as! Database
         )
 
