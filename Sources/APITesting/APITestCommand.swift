@@ -10,6 +10,7 @@ import Yams
 import Vapor
 import SwiftGen
 import OpenAPIKit
+import JSONAPISwiftGen
 
 public final class APITestCommand: Command {
     public struct Signature: CommandSignature {
@@ -52,6 +53,11 @@ public final class APITestCommand: Command {
         let source = openAPISource
         let path = outPath
 
+        let testProperties = APITestProperties(
+            openAPISource: source,
+            apiHostOverride: nil // NOTE: This would be a good addition to the CLI API
+        )
+
         context.console.print()
 
         let cwd = FileManager.default.currentDirectoryPath
@@ -60,7 +66,7 @@ public final class APITestCommand: Command {
         let testLogPath = cwd + "/out/api_test.log"
 
         try Self.kickTestsOff(
-            source: source,
+            testProperties: testProperties,
             outPath: path,
             zipPath: zipToArg,
             testLogPath: testLogPath,
@@ -71,7 +77,7 @@ public final class APITestCommand: Command {
     }
 
     public static func kickTestsOff(
-        source: OpenAPISource,
+        testProperties: APITestProperties,
         outPath: String,
         zipPath: String?,
         testLogPath: String,
@@ -80,7 +86,7 @@ public final class APITestCommand: Command {
     ) -> EventLoopFuture<Void> {
         return Self.kickTestsOff(
             testProgressTracking: nil as (NullTracker, Never)?,
-            source: source,
+            testProperties: testProperties,
             outPath: outPath,
             zipPath: zipPath,
             testLogPath: testLogPath,
@@ -96,7 +102,7 @@ public final class APITestCommand: Command {
     ///     - testProgressTracking: (Optional) If specified, tuple with both
     ///         a progress tracker and a persistence layer delegate. This is not required
     ///         to run tests.
-    ///     - source: The source of the OpenAPI documentation for which to generate tests.
+    ///     - testSuiteConfiguration: The configuration for the whole test suite, including the OpenAPI documentation source.
     ///     - outPath: The local path at which test files should be stored.
     ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
     ///     - testLogPath: The path and filename where plaintext test logs will be saved.
@@ -108,7 +114,7 @@ public final class APITestCommand: Command {
     ///     - testLogger: A logger to which test-related log messages will be recorded.
     public static func kickTestsOff<Persister, Tracker: TestProgressTracker>(
         testProgressTracking: (Tracker, Persister)?,
-        source: OpenAPISource,
+        testProperties: APITestProperties,
         outPath: String,
         zipPath: String?,
         testLogPath: String,
@@ -132,7 +138,7 @@ public final class APITestCommand: Command {
             logger: testLogger
         )
         .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
-        .flatMap { openAPIDoc(on: eventLoop, from: source) }
+        .flatMap { openAPIDoc(on: eventLoop, from: testProperties.openAPISource) }
         .flatMapError { error in
             let errorString: String
             if let error = error as? Abort {
@@ -149,6 +155,7 @@ public final class APITestCommand: Command {
                 given: openAPIDoc,
                 to: outPath,
                 zipToPath: zipPath,
+                testSuiteConfiguration: testProperties.testSuiteConfiguration,
                 logger: testLogger
             )
         }
@@ -309,25 +316,31 @@ public func openAPIDoc(
     }
 }
 
-public func produceAPITestPackage(on loop: EventLoop,
-                                  given openAPIDoc: OpenAPI.Document,
-                                  to outputPath: String,
-                                  zipToPath: String? = nil,
-                                  logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+public func produceAPITestPackage(
+    on loop: EventLoop,
+    given openAPIDoc: OpenAPI.Document,
+    to outputPath: String,
+    zipToPath: String? = nil,
+    testSuiteConfiguration: JSONAPISwiftGen.TestSuiteConfiguration,
+    logger: SwiftGen.Logger
+) -> EventLoopFuture<Void> {
     loop.submit {
         SwiftGen.produceAPITestPackage(
             from: openAPIDoc,
             outputTo: outputPath,
             zipToPath: zipToPath,
+            testSuiteConfiguration: testSuiteConfiguration,
             logger: logger
         )
     }
 }
 
-public func runAPITestPackage(on loop: EventLoop,
-                              at outputPath: String,
-                              testLogPath: String,
-                              logger: SwiftGen.Logger) -> EventLoopFuture<Void> {
+public func runAPITestPackage(
+    on loop: EventLoop,
+    at outputPath: String,
+    testLogPath: String,
+    logger: SwiftGen.Logger
+) -> EventLoopFuture<Void> {
     loop.submit {
         try SwiftGen.runAPITestPackage(
             at: outputPath,

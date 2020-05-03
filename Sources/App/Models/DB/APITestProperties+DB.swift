@@ -20,13 +20,13 @@ extension DB {
         public var id: UUID?
 
         @Field(key: "created_at")
-        var createdAt: Date
+        public var createdAt: Date
 
         @Field(key: "api_host_override")
-        var apiHostOverride: URL?
+        public var apiHostOverride: URL?
 
         @Parent(key: "openapi_source_id")
-        var openAPISource: OpenAPISource
+        public var openAPISource: OpenAPISource
 
         /// Create new test properties.
         public init(openAPISourceId: UUID, apiHostOverride: URL?) {

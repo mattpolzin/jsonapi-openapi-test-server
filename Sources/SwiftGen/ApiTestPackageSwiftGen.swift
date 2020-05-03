@@ -18,38 +18,53 @@ public protocol Logger {
 
 typealias HttpVerb = OpenAPI.HttpVerb
 
-public func produceAPITestPackage(from openAPIData: Data,
-                                  outputTo outPath: String,
-                                  zipToPath: String? = nil,
-                                  logger: Logger? = nil) throws {
+public func produceAPITestPackage(
+    from openAPIData: Data,
+    outputTo outPath: String,
+    zipToPath: String? = nil,
+    testSuiteConfiguration: TestSuiteConfiguration,
+    logger: Logger? = nil
+) throws {
     let jsonDecoder = JSONDecoder()
 
     let openAPIStructure = try jsonDecoder.decode(OpenAPI.Document.self, from: openAPIData)
 
-    produceAPITestPackage(from: openAPIStructure,
-                          outputTo: outPath,
-                          zipToPath: zipToPath,
-                          logger: logger)
+    produceAPITestPackage(
+        from: openAPIStructure,
+        outputTo: outPath,
+        zipToPath: zipToPath,
+        testSuiteConfiguration: testSuiteConfiguration,
+        logger: logger
+    )
 }
 
-public func produceAPITestPackage(from openAPIDocument: OpenAPI.Document,
-                                  outputTo outPath: String,
-                                  zipToPath: String? = nil,
-                                  logger: Logger? = nil) {
+public func produceAPITestPackage(
+    from openAPIDocument: OpenAPI.Document,
+    outputTo outPath: String,
+    zipToPath: String? = nil,
+    testSuiteConfiguration: TestSuiteConfiguration,
+    logger: Logger? = nil
+) {
     let pathItems = openAPIDocument.paths
 
-    produceAPITestPackage(for: pathItems,
-                          originatingAt: openAPIDocument.servers.first!,
-                          outputTo: outPath,
-                          zipToPath: zipToPath,
-                          logger: logger)
+    produceAPITestPackage(
+        for: pathItems,
+        originatingAt: openAPIDocument.servers.first!,
+        outputTo: outPath,
+        zipToPath: zipToPath,
+        testSuiteConfiguration: testSuiteConfiguration,
+        logger: logger
+    )
 }
 
-public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
-                                  originatingAt server: OpenAPI.Server,
-                                  outputTo outPath: String,
-                                  zipToPath: String? = nil,
-                                  logger: Logger? = nil) {
+public func produceAPITestPackage(
+    for pathItems: OpenAPI.PathItem.Map,
+    originatingAt server: OpenAPI.Server,
+    outputTo outPath: String,
+    zipToPath: String? = nil,
+    testSuiteConfiguration: TestSuiteConfiguration,
+    logger: Logger? = nil
+) {
 
     let testDir = outPath + "/Tests/GeneratedAPITests"
     let resourceObjDir = testDir + "/resourceObjects"
@@ -106,17 +121,22 @@ public func produceAPITestPackage(for pathItems: OpenAPI.PathItem.Map,
 
             let parameters = operation.parameters
 
-            let apiRequestTest = try? APIRequestTestSwiftGen(server: server,
-                                                             pathComponents: path,
-                                                             parameters: parameters.compactMap { $0.b })
+            let apiRequestTest = try? APIRequestTestSwiftGen(
+                server: server,
+                pathComponents: path,
+                parameters: parameters.compactMap { $0.b }
+            )
 
             let responses = operation.responses
-            let responseDocuments = documents(from: responses,
-                                              for: httpVerb,
-                                              at: path,
-                                              on: server,
-                                              given: parameters.compactMap { $0.b },
-                                              logger: logger)
+            let responseDocuments = documents(
+                from: responses,
+                for: httpVerb,
+                at: path,
+                on: server,
+                given: parameters.compactMap { $0.b },
+                testSuiteConfiguration: testSuiteConfiguration,
+                logger: logger
+            )
 
             let requestDocument: DataDocumentSwiftGen?
             do {
@@ -457,12 +477,15 @@ func namespaceDecls(for pathItems: OpenAPI.PathItem.Map) -> [DeclNode] {
     return paths
 }
 
-func documents(from responses: OpenAPI.Response.Map,
-               for httpVerb: HttpVerb,
-               at path: OpenAPI.Path,
-               on server: OpenAPI.Server,
-               given params: [OpenAPI.PathItem.Parameter],
-               logger: Logger?) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
+func documents(
+    from responses: OpenAPI.Response.Map,
+    for httpVerb: HttpVerb,
+    at path: OpenAPI.Path,
+    on server: OpenAPI.Server,
+    given params: [OpenAPI.PathItem.Parameter],
+    testSuiteConfiguration: TestSuiteConfiguration,
+    logger: Logger?
+) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
     var responseDocuments = [OpenAPI.Response.StatusCode: DataDocumentSwiftGen]()
     for (statusCode, response) in responses {
 
@@ -495,13 +518,16 @@ func documents(from responses: OpenAPI.Response.Map,
 
         let testExampleFuncs: [SwiftFunctionGenerator]
         do {
-            testExampleFuncs = try exampleTests(server: server,
-                                                pathComponents: path,
-                                                parameters: params,
-                                                jsonResponse: jsonResponse,
-                                                exampleDataPropName: example.map { _ in examplePropName },
-                                                bodyType: .init(.init(name: responseBodyTypeName)),
-                                                expectedHttpStatus: statusCode)
+            testExampleFuncs = try exampleTests(
+                testSuiteConfiguration: testSuiteConfiguration,
+                server: server,
+                pathComponents: path,
+                parameters: params,
+                jsonResponse: jsonResponse,
+                exampleDataPropName: example.map { _ in examplePropName },
+                bodyType: .init(.init(name: responseBodyTypeName)),
+                expectedHttpStatus: statusCode
+            )
         } catch let err as ExampleTestGenError {
             switch err {
             case .incorrectTestParameterFormat:
@@ -589,13 +615,16 @@ func document(from request: OpenAPI.Request,
                                     testExampleFuncs: testExampleFuncs)
 }
 
-func exampleTests(server: OpenAPI.Server,
-                  pathComponents: OpenAPI.Path,
-                  parameters: [OpenAPI.PathItem.Parameter],
-                  jsonResponse: OpenAPI.Content,
-                  exampleDataPropName: String?,
-                  bodyType: SwiftTypeRep,
-                  expectedHttpStatus: OpenAPI.Response.StatusCode) throws -> [SwiftFunctionGenerator] {
+func exampleTests(
+    testSuiteConfiguration: TestSuiteConfiguration,
+    server: OpenAPI.Server,
+    pathComponents: OpenAPI.Path,
+    parameters: [OpenAPI.PathItem.Parameter],
+    jsonResponse: OpenAPI.Content,
+    exampleDataPropName: String?,
+    bodyType: SwiftTypeRep,
+    expectedHttpStatus: OpenAPI.Response.StatusCode
+) throws -> [SwiftFunctionGenerator] {
     guard let testsExtension = jsonResponse.vendorExtensions["x-tests"]?.value as? [String: Any] else {
         return try exampleDataPropName.map {
             try [exampleTest(exampleDataPropName: $0,
@@ -612,6 +641,7 @@ func exampleTests(server: OpenAPI.Server,
                     server: server,
                     pathComponents: pathComponents,
                     parameters: parameters,
+                    testSuiteConfiguration: testSuiteConfiguration,
                     testProperties: properties,
                     exampleResponseDataPropName: exampleDataPropName,
                     responseBodyType: bodyType,

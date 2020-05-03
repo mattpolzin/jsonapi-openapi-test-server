@@ -15,11 +15,11 @@ import APIModels
 import JSONAPI
 
 /// Controls basic CRUD operations on OpenAPI Sources.
-final class APITestPropertiesController: Controller {
+public final class APITestPropertiesController: Controller {
 
     let defaultOpenAPISource: OpenAPISource?
 
-    init(openAPISource: OpenAPISource?) {
+    public init(openAPISource: OpenAPISource?) {
         self.defaultOpenAPISource = openAPISource
     }
 
@@ -74,6 +74,7 @@ extension APITestPropertiesController {
 
         let properties = req.eventLoop.makeSucceededFuture(())
             .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
+            .recover { _ in nil }
             .unwrap(or: Abort(.badRequest))
 
         let givenOpenAPISourceId = properties
@@ -191,5 +192,22 @@ extension APITestPropertiesController {
             = Controller.jsonServerError()
 
         static let shared = Self()
+    }
+}
+
+// MARK: - Route Configuration
+extension APITestPropertiesController {
+    public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.on(.POST, rootPath, use: self.create)
+            .tags("Test Properties")
+            .summary("Create a new API Test Properties resource")
+
+        app.on(.GET, rootPath, use: self.index)
+            .tags("Test Properties")
+            .summary("Retrieve all API Test Properties resources")
+
+        app.on(.GET, rootPath + [":id"], use: self.show)
+            .tags("Test Properties")
+            .summary("Retrieve a single Test Properties resource")
     }
 }

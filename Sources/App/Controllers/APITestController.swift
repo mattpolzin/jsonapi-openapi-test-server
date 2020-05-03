@@ -212,6 +212,12 @@ extension APITestController {
             let zipPath = self.zipPath(for: descriptor)
             let eventLoop = self.testEventLoop()
 
+            let swiftGenSource = OpenAPISource(source)
+            let testProperties = APITestProperties(
+                openAPISource: swiftGenSource,
+                apiHostOverride: properties.apiHostOverride
+            )
+
             let testLogger = Controller.Logger(
                 systemLogger: req.logger,
                 descriptor: descriptor,
@@ -219,10 +225,9 @@ extension APITestController {
                 database: req.db
             )
 
-            #warning("pass the `properties` to the kickoff!")
             let _ = APITestCommand.kickTestsOff(
                 testProgressTracking: (descriptor, req.db),
-                source: .init(source),
+                testProperties: testProperties,
                 outPath: outPath,
                 zipPath: zipPath,
                 testLogPath: testLogPath,
@@ -428,5 +433,37 @@ extension APITestController {
             = Controller.jsonServerError()
 
         static let shared = Self()
+    }
+}
+
+// MARK: - Route Configuration
+extension APITestController {
+    public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.on(.POST, rootPath, use: self.create)
+            .tags("Testing")
+            .summary("Run tests")
+            .description("""
+Running tests is an asynchronous operation. This route will return immediately if it was able to queue up a new test run.
+
+You can monitor the status of your test run with the `GET` `/api_test/{id}` endpoint (the object returned has a `status` attribute).
+"""
+        )
+
+        app.on(.GET, rootPath, use: self.index)
+            .tags("Testing")
+            .summary("Retrieve all test results")
+
+        app.on(.GET, rootPath + [":id"], use: self.show)
+            .tags("Testing")
+            .summary("Retrieve a single test result")
+
+        // MARK: File Retrieval
+        app.on(.GET, rootPath + [":id", "files"], use: self.files)
+            .tags("Test Files")
+            .summary("Retrieve the test files for the given test run.")
+
+        app.on(.GET, rootPath + [":id", "logs"], use: self.logs)
+            .tags("Test Files")
+            .summary("Retrieve the test logs for the given test run.")
     }
 }

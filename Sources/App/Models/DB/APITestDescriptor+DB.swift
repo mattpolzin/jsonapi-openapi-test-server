@@ -13,19 +13,19 @@ extension DB {
         public var id: UUID?
 
         @Field(key: "created_at")
-        var createdAt: Date
+        public var createdAt: Date
 
         @Field(key: "finished_at")
-        var finishedAt: Date?
+        public var finishedAt: Date?
 
         @Enum(key: "status")
-        var status: API.TestStatus
+        public var status: API.TestStatus
 
         @Children(for: \.$apiTestDescriptor)
-        var messages: [APITestMessage]
+        public var messages: [APITestMessage]
 
         @Parent(key: "test_properties_id")
-        var testProperties: APITestProperties
+        public var testProperties: APITestProperties
 
         /// Create a new test descriptor. It is strongly recommended that
         /// the id be set to that of the originating API request because

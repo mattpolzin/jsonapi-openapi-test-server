@@ -140,3 +140,20 @@ extension OpenAPISourceController {
         static let shared = Self()
     }
 }
+
+// MARK: - Route Configuration
+extension OpenAPISourceController {
+    public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.on(.POST, rootPath, use: self.create)
+            .tags("Sources")
+            .summary("Create a new OpenAPI Source")
+
+        app.on(.GET, rootPath, use: self.index)
+            .tags("Sources")
+            .summary("Retrieve all OpenAPI Sources")
+
+        app.on(.GET, rootPath + [":id"], use: self.show)
+            .tags("Sources")
+            .summary("Retrieve a single OpenAPI Source")
+    }
+}

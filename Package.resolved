@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "c92320b7f2d3b6f291db4c11c5ede27d69da555b",
-          "version": "1.0.0-rc.1.23"
+          "revision": "36d8ba6d026ac3363f5cd4d158fe7d082741bdab",
+          "version": "1.0.0-rc.1.25"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "673c52cc65fa51fb50e874641664b543c6afc6de",
-          "version": "0.15.1"
+          "revision": "110e29d94364f86100fdcfc325a1f52601222443",
+          "version": "0.16.0"
         }
       },
       {

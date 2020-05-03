@@ -7,11 +7,30 @@ import APITesting
 /// Register your application's routes here.
 public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
 
+    // MARK: - OpenAPI Sources
     let sourceController = OpenAPISourceController()
 
-    let testController = APITestController(outputPath: Environment.outPath,
-                                           openAPISource: try? .detect())
+    sourceController.mount(on: app, at: "openapi_sources")
 
+    let defaultOpenAPISource = try? OpenAPISource.detect()
+
+
+    // MARK: - API Test Properties
+    let testPropertiesController = APITestPropertiesController(
+        openAPISource: defaultOpenAPISource
+    )
+
+    testPropertiesController.mount(on: app, at: "api_test_properties")
+
+    // MARK: - API Testing
+    let testController = APITestController(
+        outputPath: Environment.outPath,
+        openAPISource: defaultOpenAPISource
+    )
+
+    testController.mount(on: app, at: "api_tests")
+
+    // MARK: - Watching (via WebSockets)
     let testWatchController: APITestWatchController
     if hobbled {
         testWatchController = APITestWatchController.dummyWatcher()
@@ -19,61 +38,8 @@ public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
         testWatchController = DatabaseAPITestWatchController(watching: app.db as! PostgresDatabase, with: testController)
     }
 
-    // MARK: - OpenAPI Sources
-    app.post("openapi_sources", use: sourceController.create)
-        .tags("Sources")
-        .summary("Create a new OpenAPI Source")
-
-    app.get("openapi_sources", use: sourceController.index)
-        .tags("Sources")
-        .summary("Retrieve all OpenAPI Sources")
-
-    app.get("openapi_sources", ":id", use: sourceController.show)
-        .tags("Sources")
-        .summary("Retrieve a single OpenAPI Source")
-
-    // MARK: - API Testing
-    app.post("api_tests", use: testController.create)
-        .tags("Testing")
-        .summary("Run tests")
-        .description(
-"""
-Running tests is an asynchronous operation. This route will return immediately if it was able to queue up a new test run.
-
-You can monitor the status of your test run with the `GET` `/api_test/{id}` endpoint (the object returned has a `status` attribute).
-"""
-    )
-
-    app.get("api_tests", use: testController.index)
-        .tags("Testing")
-        .summary("Retrieve all test results")
-
-    app.get("api_tests", ":id", use: testController.show)
-        .tags("Testing")
-        .summary("Retrieve a single test result")
-
-    app.webSocket("watch", onUpgrade: testWatchController.watch)
-        .tags("Monitoring")
-        .summary("Watch for progress on API Tests")
-        .description(
-"""
-This **WebSocket** route will send a message every time a test starts, progresses, finishes, etc.
-
-The message will contain a JSON:API response payload with the APITestDescriptor for the updated test.
-"""
-    )
-
-    // MARK: Test File Retrieval
-    app.get("api_tests", ":id", "files", use: testController.files)
-        .tags("Test Files")
-        .summary("Retrieve the test files for the given test run.")
-
-    app.get("api_tests", ":id", "logs", use: testController.logs)
-        .tags("Test Files")
-        .summary("Retrieve the test logs for the given test run.")
+    testWatchController.mount(on: app, at: "watch")
 
     // MARK: - Documentation
-    app.get("docs", use: DocumentationController.show)
-        .tags("Documentation")
-        .summary("Show Documentation")
+    DocumentationController.mount(on: app, at: "docs")
 }

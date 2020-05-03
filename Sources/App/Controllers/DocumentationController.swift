@@ -45,3 +45,11 @@ final class DocumentationController {
         return response
     }
 }
+
+extension DocumentationController {
+    public static func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.on(.GET, rootPath, use: Self.show)
+            .tags("Documentation")
+            .summary("Show Documentation")
+    }
+}

@@ -11,7 +11,7 @@ import FluentKit
 import SwiftGen
 import APIModels
 
-class Controller {}
+public class Controller {}
 
 // MARK: - Canned Responses
 extension Controller {

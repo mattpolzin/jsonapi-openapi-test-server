@@ -14,22 +14,22 @@ extension DB {
         public var id: UUID?
 
         @Field(key: "created_at")
-        var createdAt: Date
+        public var createdAt: Date
 
         @Enum(key: "message_type")
-        var messageType: API.MessageType
+        public var messageType: API.MessageType
 
         @Field(key: "path")
-        var path: String?
+        public var path: String?
 
         @Field(key: "context")
-        var context: String?
+        public var context: String?
 
         @Field(key: "message")
-        var message: String
+        public var message: String
 
         @Parent(key: "api_test_descriptor_id")
-        var apiTestDescriptor: APITestDescriptor
+        public var apiTestDescriptor: APITestDescriptor
 
         public init(testDescriptor: APITestDescriptor, messageType: API.MessageType, path: String?, context: String?, message: String) throws {
             id = UUID()

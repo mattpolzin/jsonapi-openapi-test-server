@@ -159,3 +159,17 @@ final class DatabaseAPITestWatchController: APITestWatchController {
         }
     }
 }
+
+extension APITestWatchController {
+    public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.webSocket("watch", onUpgrade: self.watch)
+            .tags("Monitoring")
+            .summary("Watch for progress on API Tests")
+            .description("""
+This **WebSocket** route will send a message every time a test starts, progresses, finishes, etc.
+
+The message will contain a JSON:API response payload with the APITestDescriptor for the updated test.
+"""
+        )
+    }
+}

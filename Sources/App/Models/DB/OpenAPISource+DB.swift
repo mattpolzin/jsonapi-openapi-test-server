@@ -19,13 +19,13 @@ extension DB {
         public var id: UUID?
 
         @Field(key: "created_at")
-        var createdAt: Date
+        public var createdAt: Date
 
         @Field(key: "uri")
-        var uri: String
+        public var uri: String
 
         @Enum(key: "source_type")
-        var sourceType: API.SourceType
+        public var sourceType: API.SourceType
 
         public init(uri: String, sourceType: API.SourceType) {
             id = UUID()
