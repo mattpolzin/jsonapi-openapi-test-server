@@ -4,6 +4,7 @@ import Vapor
 
 private let migrationList: [Migration] = [
     OpenAPISourceMigration_Init(),
+    APITestPropertiesMigration_Init(),
     APITestDescriptorMigration_Init(),
     APITestMessageMigration_Init(),
     TestUpdateNotificationMigration()
