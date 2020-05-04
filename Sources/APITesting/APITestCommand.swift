@@ -19,7 +19,7 @@ public final class APITestCommand: Command {
             name: "dump-files",
             help: "Dump produced test files in a zipped file at the current working directory."
         )
-        var dumpFiles: Bool
+        var shouldDumpFiles: Bool
 
         @Flag(
             name: "fail-hard",
@@ -27,6 +27,12 @@ public final class APITestCommand: Command {
             help: "Produce a non-zero exit code if any tests fail."
         )
         var shouldFailHard: Bool
+
+        @Flag(
+            name: "ignore-warnings",
+            help: "Do not print warnings in the output."
+        )
+        var shouldIgnoreWarnings: Bool
 
         public init() {}
     }
@@ -54,7 +60,7 @@ public final class APITestCommand: Command {
     }
 
     public func run(using context: CommandContext, signature: APITestCommand.Signature) throws {
-        let logger = Logger(console: context.console)
+        let logger = Logger(console: context.console, enableWarnings: !signature.shouldIgnoreWarnings)
 
         let eventLoop = testEventLoop()
         let source = openAPISource
@@ -69,7 +75,7 @@ public final class APITestCommand: Command {
 
         let cwd = FileManager.default.currentDirectoryPath
 
-        let zipToArg = signature.dumpFiles ? cwd + "/out/api_test_files.zip" : nil
+        let zipToArg = signature.shouldDumpFiles ? cwd + "/out/api_test_files.zip" : nil
         let testLogPath = cwd + "/out/api_test.log"
 
         let future = Self.kickTestsOff(
@@ -213,9 +219,11 @@ public final class APITestCommand: Command {
 extension APITestCommand {
     final class Logger: SwiftGen.Logger {
         let console: Console
+        let enableWarnings: Bool
 
-        init(console: Console) {
+        init(console: Console, enableWarnings: Bool = true) {
             self.console = console
+            self.enableWarnings = enableWarnings
         }
 
         public func error(path: String?, context: String, message: String) {
@@ -232,6 +240,8 @@ extension APITestCommand {
         }
 
         public func warning(path: String?, context: String, message: String) {
+            guard enableWarnings else { return }
+
             console.warning("-> \(message)")
             console.print("--")
             console.print("-- \(context)")
