@@ -21,6 +21,13 @@ public final class APITestCommand: Command {
         )
         var dumpFiles: Bool
 
+        @Flag(
+            name: "fail-hard",
+            short: "f",
+            help: "Produce a non-zero exit code if any tests fail."
+        )
+        var shouldFailHard: Bool
+
         public init() {}
     }
 
@@ -65,17 +72,26 @@ public final class APITestCommand: Command {
         let zipToArg = signature.dumpFiles ? cwd + "/out/api_test_files.zip" : nil
         let testLogPath = cwd + "/out/api_test.log"
 
-        try Self.kickTestsOff(
+        let future = Self.kickTestsOff(
             testProperties: testProperties,
             outPath: path,
             zipPath: zipToArg,
             testLogPath: testLogPath,
             eventLoop: eventLoop,
             testLogger: logger
-        )
+        ).recover { _ in
+            if signature.shouldFailHard {
+                exit(1)
+            }
+        }
+
+        try future
         .wait()
     }
 
+    /// Kick off API Tests.
+    ///
+    /// - returns: An `EventLoopFuture` that will have failed if any tests have failed.
     public static func kickTestsOff(
         testProperties: APITestProperties,
         outPath: String,
@@ -112,6 +128,8 @@ public final class APITestCommand: Command {
     ///         notable exception of test summaries on failure (although if this logger is `nil`,
     ///         the test summary will be logged to the testLogger).
     ///     - testLogger: A logger to which test-related log messages will be recorded.
+    ///
+    /// - returns: An `EventLoopFuture` that will have failed if any tests have failed.
     public static func kickTestsOff<Persister, Tracker: TestProgressTracker>(
         testProgressTracking: (Tracker, Persister)?,
         testProperties: APITestProperties,
@@ -172,10 +190,10 @@ public final class APITestCommand: Command {
             try? cleanupOutFolder(outPath, logger: testLogger)
             requestLogger?.info("Cleaning up tests in \(outPath)")
         }
-        .recover { error in
+        .flatMapError { error in
             if let requestLogger = requestLogger {
                 requestLogger.error("Testing Failed",
-                                     metadata: ["error": .stringConvertible(String(describing: error))])
+                                    metadata: ["error": .stringConvertible(String(describing: error))])
                 // following is tmp to workaround above metadata not being dumped to console with previous call:
                 requestLogger.error("\(String(describing: error))")
             } else {
@@ -184,7 +202,9 @@ public final class APITestCommand: Command {
                                  message: String(describing: error))
             }
 
-            let _ = trackProgress(testProgressTracker?.markFailed())
+            // once finished tracking progress, just recreate a new failed future to return.
+            return trackProgress(testProgressTracker?.markFailed())
+                .flatMap { eventLoop.makeFailedFuture(error) }
         }
     }
 }
