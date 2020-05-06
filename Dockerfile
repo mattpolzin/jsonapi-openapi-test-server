@@ -54,6 +54,8 @@ COPY --from=builder /build/bin/APITest .
 COPY --from=builder /app/Public ./Public
 COPY --from=builder /build/lib/* /usr/lib/
 
+RUN mkdir -p ./out
+
 ##
 ## ENV vars
 ##
