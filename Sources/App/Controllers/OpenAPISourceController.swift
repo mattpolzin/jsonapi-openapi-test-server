@@ -30,7 +30,6 @@ extension OpenAPISourceController {
             query: DB.OpenAPISource.query(on: req.db)
         )
             .flatMap(req.response.success.encode)
-            .flatMapError { _ in req.response.serverError }
     }
 
     func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
@@ -45,20 +44,13 @@ extension OpenAPISourceController {
             query: query
         )
             .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .notFound else {
-                        return req.response.serverError
-                }
-                return req.response.notFound
-        }
     }
 
     /// Create an `OpenAPISource`.
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
 
         let source = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
+            .flatMapThrowing { try req.decodeBody(using: JSONDecoder.custom(dates: .iso8601)).body.primaryResource?.value }
             .unwrap(or: Abort(.badRequest))
 
         let sourceModel = source
@@ -77,13 +69,6 @@ extension OpenAPISourceController {
                 )
             }
             .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .badRequest else {
-                        return req.response.serverError
-                }
-                return req.response.badRequest
-        }
     }
 }
 
@@ -92,13 +77,10 @@ extension OpenAPISourceController {
     struct IndexContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
-        let success: ResponseContext<API.BatchOpenAPISourceDocument.SuccessDocument> =
-            .init { response in
-                response.status = .ok
+        let success: ResponseContext<API.BatchOpenAPISourceDocument.SuccessDocument> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .jsonAPI
         }
-
-        let serverError: CannedResponse<API.BatchOpenAPISourceDocument.ErrorDocument>
-            = Controller.jsonServerError()
 
         static let shared = Self()
     }
@@ -106,9 +88,9 @@ extension OpenAPISourceController {
     struct ShowContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
-        let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> =
-            .init { response in
-                response.status = .ok
+        let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .jsonAPI
         }
 
         let notFound: CannedResponse<API.SingleOpenAPISourceDocument.ErrorDocument>
@@ -117,25 +99,19 @@ extension OpenAPISourceController {
         let badRequest: CannedResponse<API.SingleOpenAPISourceDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "OpenAPISource ID not specified in path")
 
-        let serverError: CannedResponse<API.SingleOpenAPISourceDocument.ErrorDocument>
-            = Controller.jsonServerError()
-
         static let shared = Self()
     }
 
     struct CreateContext: RouteContext {
         typealias RequestBodyType = API.CreateOpenAPISourceDocument.SuccessDocument
 
-        let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> =
-            .init { response in
-                response.status = .created
+        let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> = .init { response in
+            response.status = .created
+            response.headers.contentType = .jsonAPI
         }
 
         let badRequest: CannedResponse<API.SingleOpenAPISourceDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "Request body could not be parsed as an 'openapi_source' resource")
-
-        let serverError: CannedResponse<API.SingleOpenAPISourceDocument.ErrorDocument>
-            = Controller.jsonServerError()
 
         static let shared = Self()
     }

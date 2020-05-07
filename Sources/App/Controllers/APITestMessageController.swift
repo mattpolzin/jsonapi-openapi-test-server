@@ -31,13 +31,6 @@ final class APITestMessageController: Controller {
             db: req.db
         )
             .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .notFound else {
-                        return req.response.serverError
-                }
-                return req.response.notFound
-        }
     }
 
     static func showResults(id: UUID, shouldIncludeTestDescriptor: Bool, db: Database) -> EventLoopFuture<API.SingleAPITestMessageDocument.SuccessDocument> {
@@ -63,9 +56,9 @@ extension APITestMessageController {
             allowedValues: ["apiTestDescriptor"]
         )
 
-        let success: ResponseContext<API.SingleAPITestMessageDocument.SuccessDocument> =
-            .init { response in
-                response.status = .ok
+        let success: ResponseContext<API.SingleAPITestMessageDocument.SuccessDocument> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .jsonAPI
         }
 
         let notFound: CannedResponse<API.SingleAPITestMessageDocument.ErrorDocument>
@@ -73,9 +66,6 @@ extension APITestMessageController {
 
         let badRequest: CannedResponse<API.SingleAPITestMessageDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "Test ID not specified in path")
-
-        let serverError: CannedResponse<API.SingleAPITestMessageDocument.ErrorDocument>
-            = Controller.jsonServerError()
 
         static let shared = Self()
     }

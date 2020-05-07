@@ -107,7 +107,6 @@ final class DatabaseAPITestWatchController: APITestWatchController {
             let typedRequest = TypedRequest<APITestController.ShowContext>(underlyingRequest: watcher.request)
 
             result.flatMap(typedRequest.response.success.encode)
-                .flatMapError { _ in typedRequest.response.serverError }
                 .whenSuccess { response in
                     guard let responseString = response.body.string else {
                         // error?
@@ -130,7 +129,6 @@ final class DatabaseAPITestWatchController: APITestWatchController {
             let typedRequest = TypedRequest<APITestMessageController.ShowContext>(underlyingRequest: watcher.request)
 
             result.flatMap(typedRequest.response.success.encode)
-                .flatMapError { _ in typedRequest.response.serverError }
                 .whenSuccess { response in
                     guard let responseString = response.body.string else {
                         // error?

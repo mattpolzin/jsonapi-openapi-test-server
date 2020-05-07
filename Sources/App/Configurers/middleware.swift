@@ -8,9 +8,7 @@
 import Vapor
 
 func addMiddleware(_ app: Application) {
-    app.middleware.use(
-        ErrorMiddleware.default(environment: app.environment)
-    )
+    app.middleware.use(JSONAPIErrorMiddleware())
     app.middleware.use(
         FileMiddleware(
             publicDirectory: DirectoryConfiguration.detect()

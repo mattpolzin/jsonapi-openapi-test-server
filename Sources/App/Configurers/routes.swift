@@ -33,7 +33,7 @@ public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
     // MARK: - Watching (via WebSockets)
     let testWatchController: APITestWatchController
     if hobbled {
-        testWatchController = APITestWatchController.dummyWatcher()
+        testWatchController = .dummyWatcher()
     } else {
         testWatchController = DatabaseAPITestWatchController(watching: app.db as! PostgresDatabase, with: testController)
     }

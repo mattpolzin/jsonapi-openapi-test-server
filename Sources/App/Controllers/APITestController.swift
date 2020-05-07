@@ -66,7 +66,6 @@ extension APITestController {
             db: req.db
         )
             .flatMap(req.response.success.encode)
-            .flatMapError { _ in req.response.serverError }
     }
 
     func indexResults(shouldIncludeMessages: Bool, shouldIncludeProperties: (Bool, alsoIncludeSource: Bool), db: Database) -> EventLoopFuture<API.BatchAPITestDescriptorDocument.SuccessDocument> {
@@ -99,13 +98,6 @@ extension APITestController {
             db: req.db
         )
         .flatMap(req.response.success.encode)
-        .flatMapError { error in
-            guard let abortError = error as? Abort,
-                abortError.status == .notFound else {
-                    return req.response.serverError
-            }
-            return req.response.notFound
-        }
     }
 
     func showResults(id: UUID, shouldIncludeMessages: Bool, shouldIncludeProperties: (Bool, alsoIncludeSource: Bool), db: Database) -> EventLoopFuture<API.SingleAPITestDescriptorDocument.SuccessDocument> {
@@ -132,13 +124,6 @@ extension APITestController {
             .map(self.zipPath)
             .flatMap(req.fileio.collectFile)
             .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .notFound else {
-                        return req.response.serverError
-                }
-                return req.response.notFound
-        }
     }
 
     func logs(_ req: TypedRequest<LogsContext>) throws -> EventLoopFuture<Response> {
@@ -154,13 +139,6 @@ extension APITestController {
             .map(self.testLogPath)
             .flatMap(req.fileio.collectFile)
             .flatMap(req.response.success.encode)
-            .flatMapError { error in
-                guard let abortError = error as? Abort,
-                    abortError.status == .notFound else {
-                        return req.response.serverError
-                }
-                return req.response.notFound
-        }
     }
 
     /// Create an `APITestDescriptor` and run new tests.
@@ -171,17 +149,16 @@ extension APITestController {
             .flatMap(UUID.init(uuidString:))
 
         let requestedTestProperties = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
+            .flatMapThrowing { try req.decodeBody(using: JSONDecoder.custom(dates: .iso8601)).body.primaryResource?.value }
             .optionalMap { $0 ~> \.testProperties }
             .optionalFlatMap { Self.givenProperties(with: $0, on: req.db) }
 
-        let futureTestProperties: EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> = requestedTestProperties
-            .flatMap {
-                if let properties = $0 {
-                    return req.eventLoop.makeSucceededFuture(properties)
-                }
+        let futureTestProperties: EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> = requestedTestProperties.flatMap {
+            if let properties = $0 {
+                return req.eventLoop.makeSucceededFuture(properties)
+            }
 
-                return self.defaultProperties(on: req.db)
+            return self.defaultProperties(on: req.db)
         }
 
         let descriptorFuture = futureTestProperties.flatMapThrowing { (testProperties, source) in
@@ -247,33 +224,13 @@ extension APITestController {
             )
         }
         .flatMap(req.response.success.encode)
-        .flatMapError { err in
-            switch err {
-            case is DecodingError,
-                 is JSONAPI.DocumentDecodingError:
-                return req.response.malformedRequestBody
-
-            case let error as AbortError:
-                switch error.status {
-                case .badRequest:
-                    return req.response.noOpenAPIDocumentSpecified
-                case .unprocessableEntity:
-                    return req.response.malformedRequestBody
-                default:
-                    return req.response.serverError
-                }
-
-            default:
-                return req.response.serverError
-            }
-        }
     }
 }
 
 extension APITestController {
-    static func givenProperties(with
-        testPropertiesId: API.APITestProperties.Id,
-                                on db: Database
+    static func givenProperties(
+        with testPropertiesId: API.APITestProperties.Id,
+        on db: Database
     ) -> EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> {
         return DB.APITestProperties
             .query(on: db)
@@ -318,13 +275,10 @@ extension APITestController {
             allowedValues: ["testProperties", "testProperties.openAPISource", "messages"]
         )
 
-        let success: ResponseContext<API.BatchAPITestDescriptorDocument.SuccessDocument> =
-            .init { response in
-                response.status = .ok
+        let success: ResponseContext<API.BatchAPITestDescriptorDocument.SuccessDocument> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .jsonAPI
         }
-
-        let serverError: CannedResponse<API.BatchAPITestDescriptorDocument.ErrorDocument>
-            = Controller.jsonServerError()
 
         static let shared = Self()
     }
@@ -338,9 +292,9 @@ extension APITestController {
             allowedValues: ["testProperties", "testProperties.openAPISource", "messages"]
         )
 
-        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =
-            .init { response in
-                response.status = .ok
+        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .jsonAPI
         }
 
         let notFound: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
@@ -349,37 +303,23 @@ extension APITestController {
         let badRequest: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "Test ID not specified in path")
 
-        let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
-            = Controller.jsonServerError()
-
         static let shared = Self()
     }
 
     struct FilesContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
-        let success: ResponseContext<ByteBuffer> =
-            .init { response in
-                response.status = .ok
-                response.headers.contentType = .zip
+        let success: ResponseContext<ByteBuffer> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .zip
         }
 
-        let notFound: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .notFound
-            )
+        let notFound: CannedResponse<EmptyResponseBody> = .init(
+            response: Response(status: .notFound)
         )
 
-        let badRequest: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .badRequest
-            )
-        )
-
-        let serverError: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .internalServerError
-            )
+        let badRequest: CannedResponse<EmptyResponseBody> = .init(
+            response: Response(status: .badRequest)
         )
 
         static let shared = Self()
@@ -388,28 +328,17 @@ extension APITestController {
     struct LogsContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
-        let success: ResponseContext<ByteBuffer> =
-            .init { response in
-                response.status = .ok
-                response.headers.contentType = .plainText
+        let success: ResponseContext<ByteBuffer> = .init { response in
+            response.status = .ok
+            response.headers.contentType = .plainText
         }
 
-        let notFound: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .notFound
-                )
+        let notFound: CannedResponse<EmptyResponseBody> = .init(
+                response: Response(status: .notFound)
         )
 
-        let badRequest: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .badRequest
-                )
-        )
-
-        let serverError: CannedResponse<EmptyResponseBody> =
-            .init(response: Response(
-                status: .internalServerError
-                )
+        let badRequest: CannedResponse<EmptyResponseBody> = .init(
+            response: Response(status: .badRequest)
         )
 
         static let shared = Self()
@@ -418,9 +347,9 @@ extension APITestController {
     struct CreateContext: RouteContext {
         typealias RequestBodyType = API.NewAPITestDescriptorDocument
 
-        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> =
-            .init { response in
-                response.status = .accepted
+        let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> = .init { response in
+            response.status = .accepted
+            response.headers.contentType = .jsonAPI
         }
 
         let noOpenAPIDocumentSpecified: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
@@ -428,9 +357,6 @@ extension APITestController {
 
         let malformedRequestBody: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
             = Controller.jsonBadRequestError(details: "The request body could not be parsed as a document with primary resource of type \(RequestBodyType.PrimaryResourceBody.PrimaryResource.jsonType)")
-
-        let serverError: CannedResponse<API.SingleAPITestDescriptorDocument.ErrorDocument>
-            = Controller.jsonServerError()
 
         static let shared = Self()
     }

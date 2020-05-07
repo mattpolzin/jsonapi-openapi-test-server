@@ -14,6 +14,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
+        app.middleware.use(JSONAPIErrorMiddleware())
+
         app.get("hello") { req in
             return "hello"
         }
@@ -27,6 +29,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
+        app.middleware.use(JSONAPIErrorMiddleware())
+
         let testDatabase = ArrayTestDatabase()
 
         app.databases.use(testDatabase.configuration, as: .psql)
@@ -38,13 +42,15 @@ final class APITestPropertiesControllerTests: XCTestCase {
         propertiesController.mount(on: app, at: "api_test_properties")
 
         try app.testable().test(.POST, "api_test_properties") { res in
-            XCTAssertEqual(res.status, HTTPStatus.badRequest)
+            XCTAssertEqual(res.status, HTTPStatus.unprocessableEntity)
         }
     }
 
     func test_createEndpoint_withoutSourceOrDefault_fails() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()
 
@@ -81,6 +87,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
     func test_createEndpoint_withoutSourceButWithDefault_succeeds() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()
 
@@ -136,6 +144,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
+        app.middleware.use(JSONAPIErrorMiddleware())
+
         let testDatabase = ArrayTestDatabase()
 
         testDatabase.append([])
@@ -151,7 +161,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         try app.testable().test(.GET, "api_test_properties") { res in
             XCTAssertEqual(res.status, HTTPStatus.ok)
 
-            let body = try res.content.decode(API.BatchAPITestPropertiesDocument.SuccessDocument.self)
+            let body = try res.content.decode(API.BatchAPITestPropertiesDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
 
             XCTAssertEqual(body.data?.primary.values, [])
             XCTAssertEqual(body.data?.includes.values, [])
@@ -161,6 +171,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
     func test_indexEndpoint_populatedResult_succeeds() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()
 
@@ -207,7 +219,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         try app.testable().test(.GET, "api_test_properties") { res in
             XCTAssertEqual(res.status, HTTPStatus.ok)
 
-            let body = try res.content.decode(API.BatchAPITestPropertiesDocument.SuccessDocument.self)
+            let body = try res.content.decode(API.BatchAPITestPropertiesDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
 
             let bodyData = try XCTUnwrap(body.data)
             let comparisons = zip(bodyData.primary.values, expectedValues).map { $0.0.compare(to: $0.1) }
@@ -221,6 +233,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
     func test_showEnpoint_missingResult_fails() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()
 
@@ -244,6 +258,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
     func test_showEndpoint_foundResult_succeeds() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()
 
@@ -275,7 +291,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         try app.testable().test(.GET, "api_test_properties/\(testProperty.id!.uuidString)") { res in
             XCTAssertEqual(res.status, HTTPStatus.ok)
 
-            let body = try res.content.decode(API.SingleAPITestPropertiesDocument.SuccessDocument.self)
+            let body = try res.content.decode(API.SingleAPITestPropertiesDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
 
             let bodyData = try XCTUnwrap(body.data)
             let comparison = bodyData.primary.value.compare(to: expectedValue)

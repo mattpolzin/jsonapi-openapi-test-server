@@ -326,7 +326,7 @@ public func openAPIDoc(
             } else {
                 let data = try Data(contentsOf: filePath)
 
-                let decoder = JSONDecoder()
+                let decoder = JSONDecoder.custom(dates: .iso8601)
 
                 return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: data))
             }
