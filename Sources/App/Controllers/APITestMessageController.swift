@@ -47,7 +47,7 @@ final class APITestMessageController: Controller {
 // MARK: - Route Contexts
 extension APITestMessageController {
 
-    struct ShowContext: RouteContext {
+    struct ShowContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let include: CSVQueryParam<String> = .init(

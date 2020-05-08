@@ -10,25 +10,12 @@ import APIModels
 import JSONAPITesting
 
 final class APITestPropertiesControllerTests: XCTestCase {
-    func test_sanityCheck() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
-        app.middleware.use(JSONAPIErrorMiddleware())
-
-        app.get("hello") { req in
-            return "hello"
-        }
-
-        try app.testable().test(.GET, "hello") { res in
-            XCTAssertEqual(res.status, HTTPStatus.ok)
-        }
-    }
 
     func test_createEndpoint_emptyRequestBody_fails() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
+        try configureDefaults(for: app)
         app.middleware.use(JSONAPIErrorMiddleware())
 
         let testDatabase = ArrayTestDatabase()

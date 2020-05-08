@@ -15,10 +15,12 @@ import APITesting
 ///         database.
 public func configure(_ app: Application, hobbled: Bool = false) throws {
 
-    if !hobbled {
-        // Register middleware
-        addMiddleware(app)
+    try configureDefaults(for: app)
 
+    // Register middleware
+    addMiddleware(app)
+
+    if !hobbled {
         // Configure databases
         try addDatabases(app)
 

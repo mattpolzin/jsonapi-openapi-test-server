@@ -14,9 +14,9 @@ import struct Logging.Logger
 import APIModels
 
 /// Controls basic CRUD operations on OpenAPI Sources.
-final class OpenAPISourceController: Controller {
+public final class OpenAPISourceController: Controller {
 
-    override init() {}
+    public override init() {}
 
     deinit {}
 }
@@ -50,7 +50,7 @@ extension OpenAPISourceController {
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
 
         let source = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody(using: JSONDecoder.custom(dates: .iso8601)).body.primaryResource?.value }
+            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
             .unwrap(or: Abort(.badRequest))
 
         let sourceModel = source
@@ -74,7 +74,7 @@ extension OpenAPISourceController {
 
 // MARK: - Route Contexts
 extension OpenAPISourceController {
-    struct IndexContext: RouteContext {
+    struct IndexContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let success: ResponseContext<API.BatchOpenAPISourceDocument.SuccessDocument> = .init { response in
@@ -85,7 +85,7 @@ extension OpenAPISourceController {
         static let shared = Self()
     }
 
-    struct ShowContext: RouteContext {
+    struct ShowContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> = .init { response in
@@ -102,7 +102,7 @@ extension OpenAPISourceController {
         static let shared = Self()
     }
 
-    struct CreateContext: RouteContext {
+    struct CreateContext: JSONAPIRouteContext {
         typealias RequestBodyType = API.CreateOpenAPISourceDocument.SuccessDocument
 
         let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> = .init { response in

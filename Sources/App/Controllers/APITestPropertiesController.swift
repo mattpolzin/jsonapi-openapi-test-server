@@ -65,7 +65,7 @@ extension APITestPropertiesController {
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
 
         let properties = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody(using: JSONDecoder.custom(dates: .iso8601)).body.primaryResource?.value }
+            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
             .unwrap(or: Abort(.badRequest))
 
         let givenOpenAPISourceId = properties
@@ -118,7 +118,7 @@ extension APITestPropertiesController {
 
 // MARK: - Route Contexts
 extension APITestPropertiesController {
-    struct IndexContext: RouteContext {
+    struct IndexContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let include: CSVQueryParam<String> = .init(
@@ -135,7 +135,7 @@ extension APITestPropertiesController {
         static let shared = Self()
     }
 
-    struct ShowContext: RouteContext {
+    struct ShowContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let include: CSVQueryParam<String> = .init(
@@ -158,7 +158,7 @@ extension APITestPropertiesController {
         static let shared = Self()
     }
 
-    struct CreateContext: RouteContext {
+    struct CreateContext: JSONAPIRouteContext {
         typealias RequestBodyType = API.CreateAPITestPropertiesDocument.SuccessDocument
 
         let success: ResponseContext<API.SingleAPITestPropertiesDocument.SuccessDocument> = .init { response in

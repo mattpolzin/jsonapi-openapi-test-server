@@ -149,7 +149,7 @@ extension APITestController {
             .flatMap(UUID.init(uuidString:))
 
         let requestedTestProperties = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody(using: JSONDecoder.custom(dates: .iso8601)).body.primaryResource?.value }
+            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
             .optionalMap { $0 ~> \.testProperties }
             .optionalFlatMap { Self.givenProperties(with: $0, on: req.db) }
 
@@ -266,7 +266,7 @@ extension APITestController {
 
 // MARK: - Route Contexts
 extension APITestController {
-    struct IndexContext: RouteContext {
+    struct IndexContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let include: CSVQueryParam<String> = .init(
@@ -283,7 +283,7 @@ extension APITestController {
         static let shared = Self()
     }
 
-    struct ShowContext: RouteContext {
+    struct ShowContext: JSONAPIRouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
         let include: CSVQueryParam<String> = .init(
@@ -309,6 +309,8 @@ extension APITestController {
     struct FilesContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
+        static let defaultContentType: HTTPMediaType? = .zip
+
         let success: ResponseContext<ByteBuffer> = .init { response in
             response.status = .ok
             response.headers.contentType = .zip
@@ -328,6 +330,8 @@ extension APITestController {
     struct LogsContext: RouteContext {
         typealias RequestBodyType = EmptyRequestBody
 
+        static let defaultContentType: HTTPMediaType? = .plainText
+
         let success: ResponseContext<ByteBuffer> = .init { response in
             response.status = .ok
             response.headers.contentType = .plainText
@@ -344,7 +348,7 @@ extension APITestController {
         static let shared = Self()
     }
 
-    struct CreateContext: RouteContext {
+    struct CreateContext: JSONAPIRouteContext {
         typealias RequestBodyType = API.NewAPITestDescriptorDocument
 
         let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> = .init { response in

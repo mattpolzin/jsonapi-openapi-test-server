@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "a5916ec4ffcc1482096e91f652911fc33ba9a7fb",
-          "version": "4.0.0-rc.2.1"
+          "revision": "dba22d5a6115092482669efe5492d800ace4da38",
+          "version": "4.0.0-rc.2.2"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "36d8ba6d026ac3363f5cd4d158fe7d082741bdab",
-          "version": "1.0.0-rc.1.25"
+          "revision": "c73570c85d6661c04b8ea29a9f8eede67f6d4aae",
+          "version": "1.0.0-rc.1.26"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
         "state": {
           "branch": null,
-          "revision": "a7b7e341fe998ac1a20eac21962af934146a5de1",
-          "version": "2.0.0-rc.1.1"
+          "revision": "2df7722d2bddc470a9b7080b8d88c9976f237a81",
+          "version": "2.0.0-rc.2"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-kit.git",
         "state": {
           "branch": null,
-          "revision": "b465e9e36802e8525571fc6757ceef6acfd47f6c",
-          "version": "2.0.0-rc.1.2"
+          "revision": "e43a32baec80ebbcfed4d0330d0be50eb73434c7",
+          "version": "2.0.1"
         }
       },
       {
@@ -276,8 +276,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "e876fb37410e0036b98b5361bb18e6854739572b",
-          "version": "2.16.0"
+          "revision": "40bdad80882d307abe2c0bb36cf3bd4d3e03fe04",
+          "version": "2.16.1"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "b4dbfacff47fb8d0f9e0a422d8d37935a9f10570",
-          "version": "1.4.0"
+          "revision": "e0e76733600a2806b3dc4feae8cfebace858c1a2",
+          "version": "1.4.1"
         }
       },
       {
@@ -348,8 +348,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "c70d45fe9cce525df5b5f4793a232596cd85484b",
-          "version": "4.5.0"
+          "revision": "74bbf36fe0378fafe5413762affe8db6b871a380",
+          "version": "4.5.1"
         }
       },
       {
@@ -357,8 +357,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "9869ef1be2264a1e69a8c427e4f343f927aa6328",
-          "version": "0.0.7"
+          "revision": "47557969e7f2f47451e5d8848861695a58517c91",
+          "version": "0.0.8"
         }
       },
       {
@@ -366,8 +366,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes.git",
         "state": {
           "branch": null,
-          "revision": "d04a5460142e7a5085d8296b0b5be2f7f1c0236f",
-          "version": "0.5.0"
+          "revision": "9ab3cda6ec0177576f4e49c2b194bf3b52b1f157",
+          "version": "0.6.1"
         }
       },
       {
@@ -375,8 +375,8 @@
         "repositoryURL": "https://github.com/vapor/websocket-kit.git",
         "state": {
           "branch": null,
-          "revision": "f46778e3f1452cc80a0a6c422cdc52a5d0258795",
-          "version": "2.0.0"
+          "revision": "021edd1ca55451ad15b3e84da6b4064e4b877b34",
+          "version": "2.1.0"
         }
       },
       {
