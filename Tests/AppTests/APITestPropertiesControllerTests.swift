@@ -217,7 +217,24 @@ final class APITestPropertiesControllerTests: XCTestCase {
         }
     }
 
-    func test_showEnpoint_missingResult_fails() throws {
+    func test_showEndpoint_malformedId_fails() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
+
+        let propertiesController = APITestPropertiesController(
+            openAPISource: nil
+        )
+
+        propertiesController.mount(on: app, at: "api_test_properties")
+
+        try app.testable().test(.GET, "api_test_properties/1234") { res in
+            XCTAssertEqual(res.status, HTTPStatus.badRequest)
+        }
+    }
+
+    func test_showEndpoint_missingResult_fails() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
@@ -237,7 +254,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
 
         propertiesController.mount(on: app, at: "api_test_properties")
 
-        try app.testable().test(.POST, "api_test_properties/1234") { res in
+        try app.testable().test(.GET, "api_test_properties/B40806D3-B71E-4626-9878-0DE98EFC6CEC") { res in
             XCTAssertEqual(res.status, HTTPStatus.notFound)
         }
     }
