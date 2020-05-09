@@ -20,15 +20,6 @@
         }
       },
       {
-        "package": "Chalk",
-        "repositoryURL": "https://github.com/mxcl/Chalk.git",
-        "state": {
-          "branch": null,
-          "revision": "9aa9f348b86db3cf6702a3e43c081ecec80cf3c7",
-          "version": "0.4.0"
-        }
-      },
-      {
         "package": "Commandant",
         "repositoryURL": "https://github.com/Carthage/Commandant.git",
         "state": {
@@ -44,15 +35,6 @@
           "branch": null,
           "revision": "7a97a5ea7fefe61cf2c943242113125b0f396a98",
           "version": "4.1.0"
-        }
-      },
-      {
-        "package": "FileCheck",
-        "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
-        "state": {
-          "branch": null,
-          "revision": "9ed91cc30a1a325d989fac117f3f3065a16b9f76",
-          "version": "0.2.3"
         }
       },
       {
@@ -96,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
         "state": {
           "branch": null,
-          "revision": "6ab4237c97e27ab0b5e3e1fe34738fa031a8dab9",
-          "version": "3.0.0"
+          "revision": "bbd6db6d7a999c4109b4166a726a59157d16d875",
+          "version": "4.0.0-alpha.2"
         }
       },
       {
@@ -105,17 +87,17 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "110e29d94364f86100fdcfc325a1f52601222443",
-          "version": "0.16.0"
+          "revision": "b138be868b0c55e8fde6e62a9b8896ac649bebe0",
+          "version": "0.17.0"
         }
       },
       {
         "package": "JSONAPIViz",
-        "repositoryURL": "https://github.com/mattpolzin/JSONAPIViz.git",
+        "repositoryURL": "https://github.com/mattpolzin/JSONAPIViz",
         "state": {
           "branch": null,
-          "revision": "c11b79a029c74ed72f86857f0da4f1e2b113ded8",
-          "version": "0.0.2"
+          "revision": "578000fd8a2f16bcb24c964bec3bea61f078a62a",
+          "version": "0.0.3"
         }
       },
       {
@@ -132,22 +114,22 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
           "branch": null,
-          "revision": "3c7e9f497229507f7ba775759c141407f0e8e1da",
-          "version": "0.29.1"
+          "revision": "5c18f9c57617d8b0232a50fcfd1568e4f1d1da6c",
+          "version": "0.30.1"
         }
       },
       {
         "package": "OpenAPIReflection",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection.git",
+        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
         "state": {
           "branch": null,
-          "revision": "253abc5da0c275dca1ad4e618cc1039ab1a4b8c9",
-          "version": "0.1.0"
+          "revision": "d2f1e5e0b26c97c458543818ce251c56d8ed5e78",
+          "version": "0.2.0"
         }
       },
       {
         "package": "Poly",
-        "repositoryURL": "https://github.com/mattpolzin/Poly.git",
+        "repositoryURL": "https://github.com/mattpolzin/Poly",
         "state": {
           "branch": null,
           "revision": "9031b8497e025cbcfae196e59eecad5ba988e267",
@@ -210,7 +192,7 @@
       },
       {
         "package": "Sampleable",
-        "repositoryURL": "https://github.com/mattpolzin/Sampleable.git",
+        "repositoryURL": "https://github.com/mattpolzin/Sampleable",
         "state": {
           "branch": null,
           "revision": "df44bf1a860481109dcf455e3c6daf0a0f1bc259",
@@ -219,7 +201,7 @@
       },
       {
         "package": "SourceKitten",
-        "repositoryURL": "https://github.com/jpsim/SourceKitten.git",
+        "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
           "branch": null,
           "revision": "cc1f16acc70630d27498e81078789f5fa55d7463",
@@ -309,29 +291,11 @@
       },
       {
         "package": "NonEmpty",
-        "repositoryURL": "https://github.com/pointfreeco/swift-nonempty.git",
+        "repositoryURL": "https://github.com/pointfreeco/swift-nonempty",
         "state": {
           "branch": null,
           "revision": "9ef8c4aea57b8da7fedd5303d29470ea2a00c08d",
           "version": "0.2.2"
-        }
-      },
-      {
-        "package": "swift-tools-support-core",
-        "repositoryURL": "https://github.com/apple/swift-tools-support-core.git",
-        "state": {
-          "branch": null,
-          "revision": "693aba4c4c9dcc4767cc853a0dd38bf90ad8c258",
-          "version": "0.0.1"
-        }
-      },
-      {
-        "package": "SwiftCheck",
-        "repositoryURL": "https://github.com/typelift/SwiftCheck.git",
-        "state": {
-          "branch": null,
-          "revision": "077c096c3ddfc38db223ac8e525ad16ffb987138",
-          "version": "0.12.0"
         }
       },
       {
@@ -357,8 +321,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "47557969e7f2f47451e5d8848861695a58517c91",
-          "version": "0.0.8"
+          "revision": "24e36a43ca3a08d44efe5d85f141b1f8c52ff130",
+          "version": "0.0.9"
         }
       },
       {

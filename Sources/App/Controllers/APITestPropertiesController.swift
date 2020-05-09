@@ -65,8 +65,7 @@ extension APITestPropertiesController {
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
 
         let properties = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
-            .unwrap(or: Abort(.badRequest))
+            .flatMapThrowing { try req.decodeBody().primaryResource.value }
 
         let givenOpenAPISourceId = properties
             .map { ($0 ~> \.openAPISource)?.rawValue }
@@ -159,7 +158,7 @@ extension APITestPropertiesController {
     }
 
     struct CreateContext: JSONAPIRouteContext {
-        typealias RequestBodyType = API.CreateAPITestPropertiesDocument.SuccessDocument
+        typealias RequestBodyType = API.CreateAPITestPropertiesDocument
 
         let success: ResponseContext<API.SingleAPITestPropertiesDocument.SuccessDocument> = .init { response in
             response.status = .created

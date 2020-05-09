@@ -75,5 +75,5 @@ extension API {
 
     public typealias SingleAPITestPropertiesDocument = SingleDocument<APITestProperties, Include1<OpenAPISource>>
 
-    public typealias CreateAPITestPropertiesDocument = SingleDocument<NewAPITestProperties, NoIncludes>
+    public typealias CreateAPITestPropertiesDocument = SingleDocument<NewAPITestProperties, NoIncludes>.SuccessDocument
 }

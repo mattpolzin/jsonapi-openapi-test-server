@@ -50,8 +50,7 @@ extension OpenAPISourceController {
     func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
 
         let source = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
-            .unwrap(or: Abort(.badRequest))
+            .flatMapThrowing { try req.decodeBody().primaryResource.value }
 
         let sourceModel = source
             .map(DB.OpenAPISource.init(apiModel:))
@@ -103,7 +102,7 @@ extension OpenAPISourceController {
     }
 
     struct CreateContext: JSONAPIRouteContext {
-        typealias RequestBodyType = API.CreateOpenAPISourceDocument.SuccessDocument
+        typealias RequestBodyType = API.CreateOpenAPISourceDocument
 
         let success: ResponseContext<API.SingleOpenAPISourceDocument.SuccessDocument> = .init { response in
             response.status = .created

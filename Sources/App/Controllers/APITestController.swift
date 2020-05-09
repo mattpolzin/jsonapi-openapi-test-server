@@ -149,8 +149,8 @@ extension APITestController {
             .flatMap(UUID.init(uuidString:))
 
         let requestedTestProperties = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().body.primaryResource?.value }
-            .optionalMap { $0 ~> \.testProperties }
+            .flatMapThrowing { try req.decodeBody().primaryResource.value }
+            .map { $0 ~> \.testProperties }
             .optionalFlatMap { Self.givenProperties(with: $0, on: req.db) }
 
         let futureTestProperties: EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> = requestedTestProperties.flatMap {
@@ -349,7 +349,7 @@ extension APITestController {
     }
 
     struct CreateContext: JSONAPIRouteContext {
-        typealias RequestBodyType = API.NewAPITestDescriptorDocument
+        typealias RequestBodyType = API.CreateAPITestDescriptorDocument
 
         let success: ResponseContext<API.SingleAPITestDescriptorDocument.SuccessDocument> = .init { response in
             response.status = .accepted

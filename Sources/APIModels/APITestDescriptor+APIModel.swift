@@ -68,7 +68,7 @@ extension API {
     public typealias BatchAPITestDescriptorDocument = BatchDocument<APITestDescriptor, Include3<APITestProperties, OpenAPISource, APITestMessage>>
 
     public typealias SingleAPITestDescriptorDocument = SingleDocument<APITestDescriptor, Include3<APITestProperties, OpenAPISource, APITestMessage>>
-    public typealias NewAPITestDescriptorDocument = SingleDocument<NewAPITestDescriptor, NoIncludes>
+    public typealias CreateAPITestDescriptorDocument = SingleDocument<NewAPITestDescriptor, NoIncludes>.SuccessDocument
 }
 
 extension API {

@@ -103,8 +103,8 @@ final class OpenAPISourceControllerTests: XCTestCase {
 
             let body = try res.content.decode(API.BatchOpenAPISourceDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
 
-            XCTAssertEqual(body.data?.primary.values, [])
-            XCTAssertEqual(body.data?.includes.values, [])
+            XCTAssertEqual(body.data.primary.values, [])
+            XCTAssertEqual(body.data.includes.values, [])
         }
     }
 
@@ -159,7 +159,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
             for comparison in comparisons {
                 XCTAssert(comparison.isSame, String(describing: comparison))
             }
-            XCTAssertEqual(body.data?.includes.values, [])
+            XCTAssertEqual(body.data.includes.values, [])
         }
     }
 
@@ -240,7 +240,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
             let bodyData = try XCTUnwrap(body.data)
             let comparison = bodyData.primary.value.compare(to: expectedValue)
             XCTAssert(comparison.isSame, String(describing: comparison))
-            XCTAssertEqual(body.data?.includes.values, [])
+            XCTAssertEqual(body.data.includes.values, [])
         }
     }
 }

@@ -19,14 +19,14 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.0.0-rc.1.25"),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.6.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.0.8")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.0.9")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.16.0")),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.17.0")),
         // .package(name: "JSONAPI-OpenAPI", path: "../JSONAPI-OpenAPI"),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.29.0")),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "3.0.0")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.30.0")),
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "4.0.0-alpha.2"),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "2.0.0"))
     ],
     targets: [

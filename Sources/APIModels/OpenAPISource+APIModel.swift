@@ -43,7 +43,7 @@ extension API {
 
     public typealias SingleOpenAPISourceDocument = SingleDocument<OpenAPISource, NoIncludes>
 
-    public typealias CreateOpenAPISourceDocument = SingleDocument<NewOpenAPISource, NoIncludes>
+    public typealias CreateOpenAPISourceDocument = SingleDocument<NewOpenAPISource, NoIncludes>.SuccessDocument
 }
 
 extension API {
