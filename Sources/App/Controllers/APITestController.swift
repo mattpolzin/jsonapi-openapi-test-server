@@ -1,5 +1,6 @@
 import Vapor
 import VaporTypedRoutes
+import VaporOpenAPI
 import FluentKit
 import SwiftGen
 import APITesting
@@ -366,10 +367,31 @@ extension APITestController {
     }
 }
 
+extension Vapor.PathComponent {
+    var openAPIPathComponent: OpenAPIPathComponent {
+        switch self {
+        case .anything:
+            return .anything
+        case .catchall:
+            return .catchall
+        case .constant(let value):
+            return .constant(value)
+        case .parameter(let name):
+            return .parameter(name)
+        }
+    }
+}
+
 // MARK: - Route Configuration
 extension APITestController {
     public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
-        app.on(.POST, rootPath, use: self.create)
+        let idDescription = "Id of the API Test descriptor."
+
+        app.openAPI.on(
+            .POST,
+            rootPath.map(\.openAPIPathComponent),
+            use: self.create
+        )
             .tags("Testing")
             .summary("Run tests")
             .description("""
@@ -379,20 +401,36 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
 """
         )
 
-        app.on(.GET, rootPath, use: self.index)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent),
+            use: self.index
+        )
             .tags("Testing")
             .summary("Retrieve all test results")
 
-        app.on(.GET, rootPath + [":id"], use: self.show)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription)],
+            use: self.show
+        )
             .tags("Testing")
             .summary("Retrieve a single test result")
 
         // MARK: File Retrieval
-        app.on(.GET, rootPath + [":id", "files"], use: self.files)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription), "files"],
+            use: self.files
+        )
             .tags("Test Files")
             .summary("Retrieve the test files for the given test run.")
 
-        app.on(.GET, rootPath + [":id", "logs"], use: self.logs)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription), "logs"],
+            use: self.logs
+        )
             .tags("Test Files")
             .summary("Retrieve the test logs for the given test run.")
     }

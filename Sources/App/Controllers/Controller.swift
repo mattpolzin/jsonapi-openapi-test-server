@@ -44,6 +44,7 @@ extension Controller {
 
         return .init(response: Response(
             status: .badRequest,
+            headers: headers,
             body: .init(data: try! JSONEncoder().encode(
                 API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,
@@ -66,6 +67,7 @@ extension Controller {
 
         return .init(response: Response(
             status: .notFound,
+            headers: headers,
             body: .init(data: try! JSONEncoder().encode(
                 API.SingleAPITestDescriptorDocument.ErrorDocument(
                     apiDescription: .none,

@@ -175,15 +175,27 @@ extension APITestPropertiesController {
 // MARK: - Route Configuration
 extension APITestPropertiesController {
     public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
-        app.on(.POST, rootPath, use: self.create)
+        app.openAPI.on(
+            .POST,
+            rootPath.map(\.openAPIPathComponent),
+            use: self.create
+        )
             .tags("Test Properties")
             .summary("Create a new API Test Properties resource")
 
-        app.on(.GET, rootPath, use: self.index)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent),
+            use: self.index
+        )
             .tags("Test Properties")
             .summary("Retrieve all API Test Properties resources")
 
-        app.on(.GET, rootPath + [":id"], use: self.show)
+        app.openAPI.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent) + [":id".description("Id of the API Test Properties.")],
+            use: self.show
+        )
             .tags("Test Properties")
             .summary("Retrieve a single Test Properties resource")
     }
