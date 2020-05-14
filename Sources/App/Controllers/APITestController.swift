@@ -368,7 +368,7 @@ extension APITestController {
 }
 
 extension Vapor.PathComponent {
-    var openAPIPathComponent: OpenAPIPathComponent {
+    var openAPIPathComponent: TypedPathComponent {
         switch self {
         case .anything:
             return .anything
@@ -387,7 +387,7 @@ extension APITestController {
     public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
         let idDescription = "Id of the API Test descriptor."
 
-        app.openAPI.on(
+        app.on(
             .POST,
             rootPath.map(\.openAPIPathComponent),
             use: self.create
@@ -401,7 +401,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
 """
         )
 
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent),
             use: self.index
@@ -409,7 +409,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
             .tags("Testing")
             .summary("Retrieve all test results")
 
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription)],
             use: self.show
@@ -418,7 +418,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
             .summary("Retrieve a single test result")
 
         // MARK: File Retrieval
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription), "files"],
             use: self.files
@@ -426,7 +426,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
             .tags("Test Files")
             .summary("Retrieve the test files for the given test run.")
 
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription), "logs"],
             use: self.logs

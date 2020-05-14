@@ -5,14 +5,6 @@ import Foundation
 import OpenAPIKit
 import JSONAPIOpenAPI
 
-extension URL: OpenAPISchemaType {
-    public static var openAPISchema: JSONSchema { .string(format: .extended(.uri)) }
-}
-
-extension UUID: OpenAPISchemaType {
-    public static var openAPISchema: JSONSchema { .string(format: .extended(.uuid)) }
-}
-
 public struct OpenAPIDocs {
 
     public let document: OpenAPI.Document

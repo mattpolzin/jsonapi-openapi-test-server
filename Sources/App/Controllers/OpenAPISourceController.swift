@@ -119,7 +119,7 @@ extension OpenAPISourceController {
 // MARK: - Route Configuration
 extension OpenAPISourceController {
     public func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
-        app.openAPI.on(
+        app.on(
             .POST,
             rootPath.map(\.openAPIPathComponent),
             use: self.create
@@ -127,7 +127,7 @@ extension OpenAPISourceController {
             .tags("Sources")
             .summary("Create a new OpenAPI Source")
 
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent),
             use: self.index
@@ -135,7 +135,7 @@ extension OpenAPISourceController {
             .tags("Sources")
             .summary("Retrieve all OpenAPI Sources")
 
-        app.openAPI.on(
+        app.on(
             .GET,
             rootPath.map(\.openAPIPathComponent) + [":id".description("Id of OpenAPI Source.")],
             use: self.show)

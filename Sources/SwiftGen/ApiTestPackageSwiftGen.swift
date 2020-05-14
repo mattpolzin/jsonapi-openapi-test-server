@@ -16,7 +16,7 @@ public protocol Logger {
     func success(path: String?, context: String, message: String)
 }
 
-typealias HttpVerb = OpenAPI.HttpVerb
+typealias HttpVerb = OpenAPI.HttpMethod
 
 public func produceAPITestPackage(
     from openAPIData: Data,
@@ -482,7 +482,7 @@ func documents(
     for httpVerb: HttpVerb,
     at path: OpenAPI.Path,
     on server: OpenAPI.Server,
-    given params: [OpenAPI.PathItem.Parameter],
+    given params: [OpenAPI.Parameter],
     testSuiteConfiguration: TestSuiteConfiguration,
     logger: Logger?
 ) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
@@ -619,7 +619,7 @@ func exampleTests(
     testSuiteConfiguration: TestSuiteConfiguration,
     server: OpenAPI.Server,
     pathComponents: OpenAPI.Path,
-    parameters: [OpenAPI.PathItem.Parameter],
+    parameters: [OpenAPI.Parameter],
     jsonResponse: OpenAPI.Content,
     exampleDataPropName: String?,
     bodyType: SwiftTypeRep,

@@ -1,4 +1,5 @@
 // swift-tools-version:5.2
+
 import PackageDescription
 
 let package = Package(
@@ -13,21 +14,22 @@ let package = Package(
         .library(name: "TestServerModels", targets: ["APIModels"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.5.0")),
-        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-rc.1"),
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc.2"),
-        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.0.0-rc.1.25"),
+        .package(url: "https://github.com/vapor/vapor", .upToNextMajor(from: "4.5.0")),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver", from: "2.0.0-rc.2"),
+        .package(url: "https://github.com/vapor/fluent", from: "4.0.0-rc.2.2"),
+        .package(url: "https://github.com/vapor/fluent-kit", from: "1.0.0-rc.1.26"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.6.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.0.10")),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes", .upToNextMinor(from: "0.7.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI", .upToNextMinor(from: "0.0.13")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.17.0")),
+//        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI", .upToNextMinor(from: "0.18.1")),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI", .branch("master")),
         // .package(name: "JSONAPI-OpenAPI", path: "../JSONAPI-OpenAPI"),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .upToNextMinor(from: "0.30.0")),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "4.0.0-alpha.2"),
-        .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "2.0.0"))
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "1.0.0"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI", from: "4.0.0-alpha.2"),
+        .package(url: "https://github.com/jpsim/Yams", from: "3.0.0")
     ],
     targets: [
         /// MARK: Server App library

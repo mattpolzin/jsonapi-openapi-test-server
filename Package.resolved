@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/Carthage/Commandant.git",
         "state": {
           "branch": null,
-          "revision": "2cd0210f897fe46c6ce42f52ccfa72b3bbb621a0",
-          "version": "0.16.0"
+          "revision": "ab68611013dec67413628ac87c1f29e8427bc8e4",
+          "version": "0.17.0"
         }
       },
       {
@@ -48,7 +48,7 @@
       },
       {
         "package": "fluent",
-        "repositoryURL": "https://github.com/vapor/fluent.git",
+        "repositoryURL": "https://github.com/vapor/fluent",
         "state": {
           "branch": null,
           "revision": "dba22d5a6115092482669efe5492d800ace4da38",
@@ -57,7 +57,7 @@
       },
       {
         "package": "fluent-kit",
-        "repositoryURL": "https://github.com/vapor/fluent-kit.git",
+        "repositoryURL": "https://github.com/vapor/fluent-kit",
         "state": {
           "branch": null,
           "revision": "c73570c85d6661c04b8ea29a9f8eede67f6d4aae",
@@ -66,7 +66,7 @@
       },
       {
         "package": "fluent-postgres-driver",
-        "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
+        "repositoryURL": "https://github.com/vapor/fluent-postgres-driver",
         "state": {
           "branch": null,
           "revision": "2df7722d2bddc470a9b7080b8d88c9976f237a81",
@@ -75,7 +75,7 @@
       },
       {
         "package": "JSONAPI",
-        "repositoryURL": "https://github.com/mattpolzin/JSONAPI.git",
+        "repositoryURL": "https://github.com/mattpolzin/JSONAPI",
         "state": {
           "branch": null,
           "revision": "bbd6db6d7a999c4109b4166a726a59157d16d875",
@@ -84,11 +84,11 @@
       },
       {
         "package": "JSONAPI-OpenAPI",
-        "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
+        "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
-          "branch": null,
-          "revision": "b138be868b0c55e8fde6e62a9b8896ac649bebe0",
-          "version": "0.17.0"
+          "branch": "master",
+          "revision": "ab7393513d3d6a63840b643b19012f70ac1d6010",
+          "version": null
         }
       },
       {
@@ -111,11 +111,11 @@
       },
       {
         "package": "OpenAPIKit",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
+        "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": null,
-          "revision": "5c18f9c57617d8b0232a50fcfd1568e4f1d1da6c",
-          "version": "0.30.1"
+          "revision": "732251ae2eb1965c9323ae4f8024df908979b7cf",
+          "version": "1.0.1"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
         "state": {
           "branch": null,
-          "revision": "d2f1e5e0b26c97c458543818ce251c56d8ed5e78",
-          "version": "0.2.0"
+          "revision": "34eb557d0ab49a95d3a39e7a821fcb12ff50ba8a",
+          "version": "0.3.0"
         }
       },
       {
@@ -164,15 +164,6 @@
         }
       },
       {
-        "package": "Result",
-        "repositoryURL": "https://github.com/antitypical/Result.git",
-        "state": {
-          "branch": null,
-          "revision": "2ca499ba456795616fbc471561ff1d963e6ae160",
-          "version": "4.1.0"
-        }
-      },
-      {
         "package": "RichJSONParser",
         "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
         "state": {
@@ -203,9 +194,9 @@
         "package": "SourceKitten",
         "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
-          "branch": null,
-          "revision": "cc1f16acc70630d27498e81078789f5fa55d7463",
-          "version": "0.26.0"
+          "branch": "master",
+          "revision": "be4af15681951a090cf92c1ce345549cb15c536b",
+          "version": null
         }
       },
       {
@@ -258,8 +249,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "40bdad80882d307abe2c0bb36cf3bd4d3e03fe04",
-          "version": "2.16.1"
+          "revision": "c5fa0b456524cd73dc3ddbb263d4f46c20b86ca3",
+          "version": "2.17.0"
         }
       },
       {
@@ -267,8 +258,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "e0e76733600a2806b3dc4feae8cfebace858c1a2",
-          "version": "1.4.1"
+          "revision": "f21a87da1353b97ab914d4e36599a09bd06e936b",
+          "version": "1.5.0"
         }
       },
       {
@@ -276,8 +267,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "82eb3fa0974b838358ee46bc6c5381e5ae5de6b9",
-          "version": "1.11.0"
+          "revision": "b66a08e4bc53ab7c39fb03ab3678132e6ba5d12d",
+          "version": "1.12.0"
         }
       },
       {
@@ -285,8 +276,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "ae213938e151964aa691f0e902462fbe06baeeb6",
-          "version": "2.7.1"
+          "revision": "67303bd6d8c8b2bb69c44626156cfe802d6cff28",
+          "version": "2.7.2"
         }
       },
       {
@@ -309,7 +300,7 @@
       },
       {
         "package": "vapor",
-        "repositoryURL": "https://github.com/vapor/vapor.git",
+        "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
           "revision": "74bbf36fe0378fafe5413762affe8db6b871a380",
@@ -318,20 +309,20 @@
       },
       {
         "package": "VaporOpenAPI",
-        "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
+        "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI",
         "state": {
           "branch": null,
-          "revision": "70528c813cd179f9f6e754a27a7aee34103a5683",
-          "version": "0.0.10"
+          "revision": "36e4e35234341c94eedef837421bf48c144476bd",
+          "version": "0.0.13"
         }
       },
       {
         "package": "VaporTypedRoutes",
-        "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes.git",
+        "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes",
         "state": {
           "branch": null,
-          "revision": "9ab3cda6ec0177576f4e49c2b194bf3b52b1f157",
-          "version": "0.6.1"
+          "revision": "e51d8f49aa4a262ca76dc152a8f8be0f1060f3aa",
+          "version": "0.7.0"
         }
       },
       {
@@ -345,11 +336,11 @@
       },
       {
         "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams.git",
+        "repositoryURL": "https://github.com/jpsim/Yams",
         "state": {
           "branch": null,
-          "revision": "c947a306d2e80ecb2c0859047b35c73b8e1ca27f",
-          "version": "2.0.0"
+          "revision": "81a65c4069c28011ee432f2858ba0de49b086677",
+          "version": "3.0.1"
         }
       },
       {
