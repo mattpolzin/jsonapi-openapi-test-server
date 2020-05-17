@@ -52,7 +52,7 @@ extension DB.APITestMessage: JSONAPIConvertible {
     typealias JSONAPIModel = API.APITestMessage
     typealias JSONAPIIncludeType = API.SingleAPITestMessageDocument.IncludeType
 
-    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
+    func jsonApiResources() throws -> CompoundResource<JSONAPIModel, JSONAPIIncludeType> {
         let testDescriptor = try $apiTestDescriptor.value?.jsonApiResources().primary
 
         let attributes = API.APITestMessage.Attributes(
@@ -64,7 +64,7 @@ extension DB.APITestMessage: JSONAPIConvertible {
         )
         let relationships = API.APITestMessage.Relationships(apiTestDescriptorId: .init(rawValue: $apiTestDescriptor.id))
 
-        return (
+        return .init(
             primary: API.APITestMessage(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,

@@ -90,22 +90,22 @@ extension DB.OpenAPISource: JSONAPIConvertible {
     typealias JSONAPIModel = API.OpenAPISource
     typealias JSONAPIIncludeType = API.SingleOpenAPISourceDocument.IncludeType
 
-    func jsonApiResources() throws -> (primary: API.OpenAPISource, relatives: [API.SingleOpenAPISourceDocument.IncludeType]) {
+    func jsonApiResources() throws -> CompoundResource<JSONAPIModel, JSONAPIIncludeType> {
         let attributes = API.OpenAPISource.Attributes(
             createdAt: createdAt,
             uri: uri,
             sourceType: sourceType
         )
 
-        return (
-            API.OpenAPISource(
+        return .init(
+            primary: API.OpenAPISource(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,
                 relationships: .none,
                 meta: .none,
                 links: .none
             ),
-            []
+            relatives: []
         )
     }
 }

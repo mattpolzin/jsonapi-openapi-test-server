@@ -54,7 +54,7 @@ extension DB.APITestProperties: JSONAPIConvertible {
     typealias JSONAPIModel = API.APITestProperties
     typealias JSONAPIIncludeType = API.SingleAPITestPropertiesDocument.IncludeType
 
-    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
+    func jsonApiResources() throws -> CompoundResource<JSONAPIModel, JSONAPIIncludeType> {
         let sourceId = API.OpenAPISource.Id(rawValue: $openAPISource.id)
         let source = try $openAPISource.value?.jsonApiResources().primary
 
@@ -67,7 +67,7 @@ extension DB.APITestProperties: JSONAPIConvertible {
             openAPISourceId: sourceId
         )
 
-        return (
+        return .init(
             primary: API.APITestProperties(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,

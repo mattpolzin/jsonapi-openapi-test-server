@@ -85,7 +85,7 @@ extension DB.APITestDescriptor: JSONAPIConvertible {
     typealias JSONAPIModel = API.APITestDescriptor
     typealias JSONAPIIncludeType = API.SingleAPITestDescriptorDocument.IncludeType
 
-    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
+    func jsonApiResources() throws -> CompoundResource<JSONAPIModel, JSONAPIIncludeType> {
         let propertiesId = API.APITestProperties.Id(rawValue: $testProperties.id)
         let properties = try $testProperties.value?.jsonApiResources()
 
@@ -105,12 +105,12 @@ extension DB.APITestDescriptor: JSONAPIConvertible {
             messageIds: messages.map { $0.id }
         )
 
-        let relatives: [JSONAPIIncludeType] = messages.map { JSONAPIIncludeType($0) } + [
+        let relatives: [JSONAPIIncludeType] = [
             properties.map { .init($0.primary) },
             properties?.relatives.compactMap { $0.a }.first.map { .init($0) },
-        ].compactMap { $0 }
+        ].compactMap { $0 } + messages.map { JSONAPIIncludeType($0) }
 
-        return (
+        return .init(
             primary: API.APITestDescriptor(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,
