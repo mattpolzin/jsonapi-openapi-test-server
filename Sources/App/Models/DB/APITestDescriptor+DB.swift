@@ -4,6 +4,7 @@ import FluentKit
 import APITesting
 import OpenAPIReflection
 import APIModels
+import JSONAPI
 
 extension DB {
     public final class APITestDescriptor: Model {
@@ -80,15 +81,17 @@ extension DB.APITestDescriptor: TestProgressTracker {
     }
 }
 
-extension DB.APITestDescriptor {
-    func serializable() throws -> (descriptor: API.APITestDescriptor, properties: API.APITestProperties?, source: API.OpenAPISource?, messages: [API.APITestMessage]) {
+extension DB.APITestDescriptor: JSONAPIConvertible {
+    typealias JSONAPIModel = API.APITestDescriptor
+    typealias JSONAPIIncludeType = API.SingleAPITestDescriptorDocument.IncludeType
 
+    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
         let propertiesId = API.APITestProperties.Id(rawValue: $testProperties.id)
-        let properties = try $testProperties.value?.serializable()
+        let properties = try $testProperties.value?.jsonApiResources()
 
         let messages = try $messages
             .value?
-            .map { try $0.serializable().0 }
+            .map { try $0.jsonApiResources().primary }
             ?? []
 
         let attributes = API.APITestDescriptor.Attributes(
@@ -102,17 +105,20 @@ extension DB.APITestDescriptor {
             messageIds: messages.map { $0.id }
         )
 
+        let relatives: [JSONAPIIncludeType] = messages.map { JSONAPIIncludeType($0) } + [
+            properties.map { .init($0.primary) },
+            properties?.relatives.compactMap { $0.a }.first.map { .init($0) },
+        ].compactMap { $0 }
+
         return (
-            API.APITestDescriptor(
+            primary: API.APITestDescriptor(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,
                 relationships: relationships,
                 meta: .none,
                 links: .none
             ),
-            properties?.properties,
-            properties?.source,
-            messages
+            relatives: relatives
         )
     }
 }

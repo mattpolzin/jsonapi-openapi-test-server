@@ -22,17 +22,7 @@ extension API {
 
         let primaryFuture = query.all()
 
-        let resourcesFuture = primaryFuture
-            .flatMapThrowing { descriptors -> [(APITestProperties, [BatchAPITestPropertiesDocument.Include])] in
-                try descriptors
-                    .map { try $0.serializable() }
-                    .map {
-                        (
-                            $0.properties,
-                            sourceIncludes(from: $0)
-                        )
-                }
-        }
+        let resourcesFuture = primaryFuture.flatMapThrowing { descriptors in try descriptors.map { try $0.jsonApiResources() } }
 
         let responseFuture = resourcesFuture.map { resources in
             BatchAPITestPropertiesDocument.SuccessDocument(
@@ -75,17 +65,8 @@ extension API {
 
         let primaryFuture = query.first()
 
-        let resourceFuture = primaryFuture
-            .flatMapThrowing { descriptor -> (APITestProperties, [SingleAPITestPropertiesDocument.Include])? in
-                try descriptor
-                    .map { try $0.serializable() }
-                    .map {
-                        (
-                            $0.properties,
-                            sourceIncludes(from: $0)
-                        )
-                }
-        }.unwrap(or: Abort(.notFound))
+        let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
+            .unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
             .map { resource in

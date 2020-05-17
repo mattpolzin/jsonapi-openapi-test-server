@@ -10,6 +10,7 @@ import Fluent
 import APITesting
 import OpenAPIReflection
 import APIModels
+import JSONAPI
 
 extension DB {
     public final class OpenAPISource: Model {
@@ -85,17 +86,26 @@ extension OpenAPISource {
     }
 }
 
-extension DB.OpenAPISource {
-    func serializable() throws -> API.OpenAPISource {
+extension DB.OpenAPISource: JSONAPIConvertible {
+    typealias JSONAPIModel = API.OpenAPISource
+    typealias JSONAPIIncludeType = API.SingleOpenAPISourceDocument.IncludeType
 
-        let attributes = API.OpenAPISource.Attributes(createdAt: createdAt,
-                                                      uri: uri,
-                                                      sourceType: sourceType)
+    func jsonApiResources() throws -> (primary: API.OpenAPISource, relatives: [API.SingleOpenAPISourceDocument.IncludeType]) {
+        let attributes = API.OpenAPISource.Attributes(
+            createdAt: createdAt,
+            uri: uri,
+            sourceType: sourceType
+        )
 
-        return API.OpenAPISource(id: .init(rawValue: try requireID()),
-                                 attributes: attributes,
-                                 relationships: .none,
-                                 meta: .none,
-                                 links: .none)
+        return (
+            API.OpenAPISource(
+                id: .init(rawValue: try requireID()),
+                attributes: attributes,
+                relationships: .none,
+                meta: .none,
+                links: .none
+            ),
+            []
+        )
     }
 }

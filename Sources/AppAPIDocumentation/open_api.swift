@@ -28,19 +28,11 @@ public struct OpenAPIDocs {
             version: "1.0"
         )
 
-        // TODO: get hostname & port from environment
         let servers = [
             OpenAPI.Server(url: URL(string: "http://localhost")!)
         ]
 
-        let components = OpenAPI.Components(
-            schemas: [:],
-            responses: [:],
-            parameters: [:],
-            examples: [:],
-            requestBodies: [:],
-            headers: [:]
-        )
+        let components = OpenAPI.Components()
 
         let paths = try routes.openAPIPathItems(using: jsonEncoder)
 

@@ -94,7 +94,7 @@ extension APITestPropertiesController {
             .flatMapThrowing { responseModel in
                 API.SingleAPITestPropertiesDocument.SuccessDocument(
                     apiDescription: .none,
-                    body: .init(resourceObject: try responseModel.serializable().0),
+                    body: .init(resourceObject: try responseModel.jsonApiResources().primary),
                     includes: .none,
                     meta: .none,
                     links: .none

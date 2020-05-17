@@ -34,18 +34,7 @@ extension API {
         let primaryFuture = query.all()
 
         let resourcesFuture = primaryFuture
-            .flatMapThrowing { descriptors -> [(APITestDescriptor, [BatchAPITestDescriptorDocument.Include])] in
-                try descriptors
-                    .map { try $0.serializable() }
-                    .map {
-                        (
-                            $0.descriptor,
-                            propertiesIncludes(from: $0)
-                                + sourceIncludes(from: $0)
-                                + messageIncludes(from: $0)
-                        )
-                }
-        }
+            .flatMapThrowing { descriptors in try descriptors.map { try $0.jsonApiResources() } }
 
         let responseFuture = resourcesFuture.map { resources in
             BatchAPITestDescriptorDocument.SuccessDocument(apiDescription: .none,
@@ -94,19 +83,8 @@ extension API {
 
         let primaryFuture = query.first()
 
-        let resourceFuture = primaryFuture
-            .flatMapThrowing { descriptor -> (APITestDescriptor, [SingleAPITestDescriptorDocument.Include])? in
-                try descriptor
-                    .map { try $0.serializable() }
-                    .map {
-                        (
-                            $0.descriptor,
-                            propertiesIncludes(from: $0)
-                                + sourceIncludes(from: $0)
-                                + messageIncludes(from: $0)
-                        )
-                }
-        }.unwrap(or: Abort(.notFound))
+        let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
+                .unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
             .map { resource in

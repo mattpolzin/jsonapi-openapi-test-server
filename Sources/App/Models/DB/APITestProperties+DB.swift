@@ -11,6 +11,7 @@ import FluentKit
 import APITesting
 import OpenAPIReflection
 import APIModels
+import JSONAPI
 
 extension DB {
     public final class APITestProperties: Model {
@@ -49,11 +50,13 @@ extension DB {
     }
 }
 
-extension DB.APITestProperties {
-    func serializable() throws -> (properties: API.APITestProperties, source: API.OpenAPISource?) {
+extension DB.APITestProperties: JSONAPIConvertible {
+    typealias JSONAPIModel = API.APITestProperties
+    typealias JSONAPIIncludeType = API.SingleAPITestPropertiesDocument.IncludeType
 
+    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
         let sourceId = API.OpenAPISource.Id(rawValue: $openAPISource.id)
-        let source = try $openAPISource.value?.serializable()
+        let source = try $openAPISource.value?.jsonApiResources().primary
 
         let attributes = API.APITestProperties.Attributes(
             createdAt: createdAt,
@@ -65,14 +68,14 @@ extension DB.APITestProperties {
         )
 
         return (
-            API.APITestProperties(
+            primary: API.APITestProperties(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,
                 relationships: relationships,
                 meta: .none,
                 links: .none
             ),
-            source
+            relatives: [source.map { .init($0) }].compactMap { $0 }
         )
     }
 }

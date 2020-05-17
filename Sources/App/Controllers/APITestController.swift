@@ -218,7 +218,7 @@ extension APITestController {
         return savedDescriptorTuple.flatMapThrowing { (descriptor, _, _) in
             API.SingleAPITestDescriptorDocument.SuccessDocument(
                 apiDescription: .none,
-                body: .init(resourceObject: try descriptor.serializable().0),
+                body: .init(resourceObject: try descriptor.jsonApiResources().primary),
                 includes: .none,
                 meta: .none,
                 links: .none

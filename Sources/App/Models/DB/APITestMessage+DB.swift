@@ -5,6 +5,7 @@ import SQLKit
 import PostgresKit
 import OpenAPIReflection
 import APIModels
+import JSONAPI
 
 extension DB {
     public final class APITestMessage: Model {
@@ -47,30 +48,31 @@ extension DB {
     }
 }
 
-extension DB.APITestMessage {
-    func serializable() throws -> (message: API.APITestMessage, descriptor: API.APITestDescriptor?) {
+extension DB.APITestMessage: JSONAPIConvertible {
+    typealias JSONAPIModel = API.APITestMessage
+    typealias JSONAPIIncludeType = API.SingleAPITestMessageDocument.IncludeType
 
-        let testDescriptor = try $apiTestDescriptor.value?.serializable().descriptor
+    func jsonApiResources() throws -> (primary: JSONAPIModel, relatives: [JSONAPIIncludeType]) {
+        let testDescriptor = try $apiTestDescriptor.value?.jsonApiResources().primary
 
-        let attributes = API.APITestMessage.Attributes(createdAt: createdAt,
-                                                       messageType: messageType,
-                                                       path: path,
-                                                       context: context,
-                                                       message: message)
+        let attributes = API.APITestMessage.Attributes(
+            createdAt: createdAt,
+            messageType: messageType,
+            path: path,
+            context: context,
+            message: message
+        )
         let relationships = API.APITestMessage.Relationships(apiTestDescriptorId: .init(rawValue: $apiTestDescriptor.id))
 
         return (
-            API.APITestMessage(
+            primary: API.APITestMessage(
                 id: .init(rawValue: try requireID()),
                 attributes: attributes,
                 relationships: relationships,
                 meta: .none,
                 links: .none
             ),
-            testDescriptor
+            relatives: [testDescriptor.map { .init($0) }].compactMap { $0 }
         )
     }
 }
-
-/// Allows `APITestDescriptor` to be used as a dynamic parameter in route definitions.
-//extension APITestDescriptor: Parameter { }

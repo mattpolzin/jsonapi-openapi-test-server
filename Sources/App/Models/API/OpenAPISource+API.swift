@@ -18,16 +18,18 @@ extension API {
         let resourcesFuture: EventLoopFuture<[OpenAPISource]> = primaryFuture
             .flatMapThrowing {
                 try $0.map { openAPISource -> OpenAPISource in
-                    try openAPISource.serializable()
+                    try openAPISource.jsonApiResources().primary
                 }
         }
 
         let responseFuture = resourcesFuture.map { resources in
-            BatchOpenAPISourceDocument.SuccessDocument(apiDescription: .none,
-                                                       body: .init(resourceObjects: resources),
-                                                       includes: .none,
-                                                       meta: .none,
-                                                       links: .none)
+            BatchOpenAPISourceDocument.SuccessDocument(
+                apiDescription: .none,
+                body: .init(resourceObjects: resources),
+                includes: .none,
+                meta: .none,
+                links: .none
+            )
         }
 
         return responseFuture
@@ -38,18 +40,18 @@ extension API {
 
         let primaryFuture = query.first()
 
-        let resourceFuture = primaryFuture
-            .flatMapThrowing {
-                try $0?.serializable()
-        }.unwrap(or: Abort(.notFound))
+        let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources().primary }
+            .unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
             .map { resource in
-                SingleOpenAPISourceDocument.SuccessDocument(apiDescription: .none,
-                                                            body: .init(resourceObject: resource),
-                                                            includes: .none,
-                                                            meta: .none,
-                                                            links: .none)
+                SingleOpenAPISourceDocument.SuccessDocument(
+                    apiDescription: .none,
+                    body: .init(resourceObject: resource),
+                    includes: .none,
+                    meta: .none,
+                    links: .none
+                )
         }
 
         return responseFuture

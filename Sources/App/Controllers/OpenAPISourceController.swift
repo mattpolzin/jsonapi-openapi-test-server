@@ -61,7 +61,7 @@ extension OpenAPISourceController {
             .flatMapThrowing { responseModel in
                 API.SingleOpenAPISourceDocument.SuccessDocument(
                     apiDescription: .none,
-                    body: .init(resourceObject: try responseModel.serializable()),
+                    body: .init(resourceObject: try responseModel.jsonApiResources().primary),
                     includes: .none,
                     meta: .none,
                     links: .none

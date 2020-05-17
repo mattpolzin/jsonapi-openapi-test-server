@@ -26,17 +26,8 @@ extension API {
 
         let primaryFuture = query.first()
 
-        let resourceFuture = primaryFuture
-            .flatMapThrowing { message -> (APITestMessage, [SingleAPITestMessageDocument.Include])? in
-                try message
-                    .map { try $0.serializable() }
-                    .map {
-                        (
-                            $0.message,
-                            ($0.descriptor.map(SingleAPITestMessageDocument.Include.init).map { [$0] } ?? [])
-                        )
-                }
-        }.unwrap(or: Abort(.notFound))
+        let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
+            .unwrap(or: Abort(.notFound))
 
         let responseFuture = resourceFuture
             .map { resource in
