@@ -29,25 +29,15 @@ extension API {
         let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
             .unwrap(or: Abort(.notFound))
 
-        let responseFuture = resourceFuture
-            .map { resource in
-                SingleAPITestMessageDocument.SuccessDocument(
-                    apiDescription: .none,
-                    body: .init(resourceObject: resource.0),
-                    includes: .none,
-                    meta: .none,
-                    links: .none
-                )
-        }
+        let responseFuture = resourceFuture.map(\.primary)
+            .map(SingleResourceBody.init)
+            .map(SingleAPITestMessageDocument.SuccessDocument.init)
 
         guard includeTestDescriptor else {
             return responseFuture
         }
 
-        let includesFuture = resourceFuture
-            .map { resource in
-                Includes(values: resource.1)
-        }
+        let includesFuture = resourceFuture.map(\.relatives).map(Includes.init)
 
         return responseFuture.and(includesFuture)
             .map { (response, includes) in

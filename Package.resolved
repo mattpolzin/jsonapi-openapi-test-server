@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI",
         "state": {
           "branch": null,
-          "revision": "bbd6db6d7a999c4109b4166a726a59157d16d875",
-          "version": "4.0.0-alpha.2"
+          "revision": "0fd4e7396e6faa1e86bfc999c6fc0d6c1f420213",
+          "version": "4.0.0-alpha.2.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "7fd118ec8795888bcbbebc1a41f6984454c4cd6f",
-          "version": "8.0.7"
+          "revision": "bbc079f558ccadfa9cd430c6c8d250d93bbccff1",
+          "version": "8.0.8"
         }
       },
       {
@@ -276,8 +276,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "67303bd6d8c8b2bb69c44626156cfe802d6cff28",
-          "version": "2.7.2"
+          "revision": "10e0e17dd47b594c3d864a063f343d716e33e5c1",
+          "version": "2.7.3"
         }
       },
       {

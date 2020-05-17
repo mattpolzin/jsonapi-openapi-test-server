@@ -79,4 +79,3 @@ extension DB.APITestProperties: JSONAPIConvertible {
         )
     }
 }
-

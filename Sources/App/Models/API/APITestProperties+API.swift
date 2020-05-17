@@ -24,35 +24,20 @@ extension API {
 
         let resourcesFuture = primaryFuture.flatMapThrowing { descriptors in try descriptors.map { try $0.jsonApiResources() } }
 
-        let responseFuture = resourcesFuture.map { resources in
-            BatchAPITestPropertiesDocument.SuccessDocument(
-                apiDescription: .none,
-                body: .init(resourceObjects: resources.map { $0.0 }),
-                includes: .none,
-                meta: .none,
-                links: .none
-            )
-        }
+        let responseFuture = resourcesFuture.map { $0.map(\.primary) }
+            .map(ManyResourceBody.init)
+            .map(BatchAPITestPropertiesDocument.SuccessDocument.init)
 
         guard includeSource else {
             return responseFuture
         }
 
         let includesFuture = resourcesFuture.map { resources in
-            Includes(
-                values: resources
-                    .flatMap { $0.1 }
-            )
+            Includes(values: resources.flatMap(\.relatives))
         }
 
-        return resourcesFuture.and(includesFuture).map { (resources, includes) in
-            BatchAPITestPropertiesDocument.SuccessDocument(
-                apiDescription: .none,
-                body: .init(resourceObjects: resources.map { $0.0 }),
-                includes: includes,
-                meta: .none,
-                links: .none
-            )
+        return responseFuture.and(includesFuture).map { (response, includes) in
+            response.including(includes)
         }
     }
 
@@ -68,25 +53,15 @@ extension API {
         let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
             .unwrap(or: Abort(.notFound))
 
-        let responseFuture = resourceFuture
-            .map { resource in
-                SingleAPITestPropertiesDocument.SuccessDocument(
-                    apiDescription: .none,
-                    body: .init(resourceObject: resource.0),
-                    includes: .none,
-                    meta: .none,
-                    links: .none
-                )
-        }
+        let responseFuture = resourceFuture.map(\.primary)
+            .map(SingleResourceBody.init)
+            .map(SingleAPITestPropertiesDocument.SuccessDocument.init)
 
         guard includeSource else {
             return responseFuture
         }
 
-        let includesFuture = resourceFuture
-            .map { resource in
-                Includes(values: resource.1)
-        }
+        let includesFuture = resourceFuture.map(\.relatives).map(Includes.init)
 
         return responseFuture.and(includesFuture)
             .map { (response, includes) in
