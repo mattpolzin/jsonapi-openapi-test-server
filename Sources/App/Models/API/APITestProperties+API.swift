@@ -24,21 +24,10 @@ extension API {
 
         let resourcesFuture = primaryFuture.flatMapThrowing { descriptors in try descriptors.map { try $0.jsonApiResources() } }
 
-        let responseFuture = resourcesFuture.map { $0.map(\.primary) }
-            .map(ManyResourceBody.init)
+        let responseFuture = resourcesFuture
             .map(BatchAPITestPropertiesDocument.SuccessDocument.init)
 
-        guard includeSource else {
-            return responseFuture
-        }
-
-        let includesFuture = resourcesFuture.map { resources in
-            Includes(values: resources.flatMap(\.relatives))
-        }
-
-        return responseFuture.and(includesFuture).map { (response, includes) in
-            response.including(includes)
-        }
+        return responseFuture
     }
 
     /// Pass a query builder where the first result will be used.
@@ -53,20 +42,10 @@ extension API {
         let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
             .unwrap(or: Abort(.notFound))
 
-        let responseFuture = resourceFuture.map(\.primary)
-            .map(SingleResourceBody.init)
+        let responseFuture = resourceFuture
             .map(SingleAPITestPropertiesDocument.SuccessDocument.init)
 
-        guard includeSource else {
-            return responseFuture
-        }
-
-        let includesFuture = resourceFuture.map(\.relatives).map(Includes.init)
-
-        return responseFuture.and(includesFuture)
-            .map { (response, includes) in
-                response.including(includes)
-        }
+        return responseFuture
     }
 }
 

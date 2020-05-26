@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor/async-kit.git",
         "state": {
           "branch": null,
-          "revision": "48a719dec79ea3cbbc71ca9b29f69df7cd5794cd",
-          "version": "1.0.1"
+          "revision": "635a259c57ba682b60bebf005c52a92cfafc73f5",
+          "version": "1.1.0"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit",
         "state": {
           "branch": null,
-          "revision": "c73570c85d6661c04b8ea29a9f8eede67f6d4aae",
-          "version": "1.0.0-rc.1.26"
+          "revision": "27288c2399f2d7d198f321ef184ce59f3fd5d250",
+          "version": "1.0.0-rc.1.27"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI",
         "state": {
           "branch": null,
-          "revision": "0fd4e7396e6faa1e86bfc999c6fc0d6c1f420213",
-          "version": "4.0.0-alpha.2.1"
+          "revision": "2940be31002e1a26a9715d3c33975f73d321046e",
+          "version": "4.0.0-rc.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "bbc079f558ccadfa9cd430c6c8d250d93bbccff1",
-          "version": "8.0.8"
+          "revision": "72f5a90d573f7f7d70aa6b8ad84b3e1e02eabb4d",
+          "version": "8.0.9"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": null,
-          "revision": "732251ae2eb1965c9323ae4f8024df908979b7cf",
-          "version": "1.0.1"
+          "revision": "b1b2ad648ca983bd012391ad61d3ab246a104836",
+          "version": "1.1.0"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Poly",
         "state": {
           "branch": null,
-          "revision": "9031b8497e025cbcfae196e59eecad5ba988e267",
-          "version": "2.4.0"
+          "revision": "36ba3f624bffa34f5f9b9c7648eab3cfdcab4748",
+          "version": "2.5.0"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/vapor/sql-kit.git",
         "state": {
           "branch": null,
-          "revision": "1e0239616134dd45fa4894bfe83750d196e3a83d",
-          "version": "3.0.0"
+          "revision": "3800a6f5fe5cb781420ebe059ff93392bc67cb9c",
+          "version": "3.1.0"
         }
       },
       {
@@ -258,8 +258,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "f21a87da1353b97ab914d4e36599a09bd06e936b",
-          "version": "1.5.0"
+          "revision": "7cd24c0efcf9700033f671b6a8eaa64a77dd0b72",
+          "version": "1.5.1"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
-          "revision": "74bbf36fe0378fafe5413762affe8db6b871a380",
-          "version": "4.5.1"
+          "revision": "a049aff03acf7801fd91fe7e71761437055a805f",
+          "version": "4.6.0"
         }
       },
       {

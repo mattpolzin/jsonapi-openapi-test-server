@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  OpenAPISource+API.swift
 //  
 //
 //  Created by Mathew Polzin on 4/8/20.
@@ -19,8 +19,7 @@ extension API {
         let resourcesFuture = primaryFuture
             .flatMapThrowing { sources in try sources.map { try $0.jsonApiResources() } }
 
-        let responseFuture = resourcesFuture.map { $0.map(\.primary) }
-            .map(ManyResourceBody.init)
+        let responseFuture = resourcesFuture
             .map(BatchOpenAPISourceDocument.SuccessDocument.init)
 
         return responseFuture
@@ -34,8 +33,7 @@ extension API {
         let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
             .unwrap(or: Abort(.notFound))
 
-        let responseFuture = resourceFuture.map(\.primary)
-            .map(SingleResourceBody.init)
+        let responseFuture = resourceFuture
             .map(SingleOpenAPISourceDocument.SuccessDocument.init)
 
         return responseFuture

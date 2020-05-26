@@ -35,6 +35,13 @@ extension DB {
             self.sourceType = sourceType
         }
 
+        public init(id: UUID, uri: String, sourceType: API.SourceType) {
+            self.id = id
+            createdAt = Date()
+            self.uri = uri
+            self.sourceType = sourceType
+        }
+
         init(apiModel: API.NewOpenAPISource) {
             self.id = UUID()
             self.createdAt = apiModel.createdAt
@@ -43,7 +50,7 @@ extension DB {
         }
 
         /// Used to construct Model from Database
-        @available(*, deprecated, renamed: "init(uri:)")
+        @available(*, deprecated, renamed: "init(uri:sourceType:)")
         public init() {}
     }
 }

@@ -14,6 +14,7 @@ import App
 import APITesting
 import APIModels
 
+import JSONAPI
 import JSONAPITesting
 
 final class AppTests: XCTestCase {

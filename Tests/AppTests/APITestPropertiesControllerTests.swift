@@ -217,6 +217,106 @@ final class APITestPropertiesControllerTests: XCTestCase {
         }
     }
 
+    func test_indexEndpoint_populatedResultWithIncludes_succeeds() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
+
+        let testDatabase = ArrayTestDatabase()
+
+        app.databases.use(testDatabase.configuration, as: .psql)
+
+        let openAPISourceUUIDs = [
+            UUID(),
+            UUID()
+        ]
+
+        let testProperties = [
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
+        ]
+
+        let testSources = [
+            DB.OpenAPISource(id: openAPISourceUUIDs[0], uri: "http://website.com/source.yml", sourceType: .url),
+            DB.OpenAPISource(id: openAPISourceUUIDs[1], uri: "http://the.website.com/other.yml", sourceType: .url)
+        ]
+
+        testDatabase.append([
+            TestOutput(testProperties[0]),
+            TestOutput(testProperties[1])
+        ])
+
+        testDatabase.append([
+            TestOutput(testSources[0]),
+            TestOutput(testSources[1])
+        ])
+
+        let propertiesController = APITestPropertiesController(
+            openAPISource: nil
+        )
+
+        propertiesController.mount(on: app, at: "api_test_properties")
+
+        let expectedPrimaries = [
+            API.APITestProperties(
+                id: .init(rawValue: testProperties[0].id!),
+                attributes: .init(createdAt: testProperties[0].createdAt, apiHostOverride: testProperties[0].apiHostOverride),
+                relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[0]))),
+                meta: .none,
+                links: .none
+            ),
+            API.APITestProperties(
+                id: .init(rawValue: testProperties[1].id!),
+                attributes: .init(createdAt: testProperties[1].createdAt, apiHostOverride: testProperties[1].apiHostOverride),
+                relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[1]))),
+                meta: .none,
+                links: .none
+            )
+        ]
+
+        let expectedIncludes = [
+            API.OpenAPISource(
+                id: .init(rawValue: openAPISourceUUIDs[0]),
+                attributes: .init(
+                    createdAt: testSources[0].createdAt,
+                    uri: testSources[0].uri,
+                    sourceType: testSources[0].sourceType
+                ),
+                relationships: .none,
+                meta: .none,
+                links: .none
+            ),
+            API.OpenAPISource(
+                id: .init(rawValue: openAPISourceUUIDs[1]),
+                attributes: .init(
+                    createdAt: testSources[1].createdAt,
+                    uri: testSources[1].uri,
+                    sourceType: testSources[1].sourceType
+                ),
+                relationships: .none,
+                meta: .none,
+                links: .none
+            )
+        ]
+
+        try app.testable().test(.GET, "api_test_properties?include=openAPISource") { res in
+            XCTAssertEqual(res.status, HTTPStatus.ok, "with body:\n\(res.body.string)")
+
+            let body = try res.content.decode(API.BatchAPITestPropertiesDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
+
+            let bodyData = try XCTUnwrap(body.data)
+            let comparison1 = bodyData.primary.values[0].compare(to: expectedPrimaries[0])
+            XCTAssert(comparison1.isSame, String(describing: comparison1))
+            let comparison2 = bodyData.primary.values[1].compare(to: expectedPrimaries[1])
+            XCTAssert(comparison2.isSame, String(describing: comparison2))
+            let includeComparison1 = bodyData.includes.values[0].a?.compare(to: expectedIncludes[0])
+            XCTAssert(includeComparison1?.isSame ?? false, String(describing: includeComparison1))
+            let includeComparison2 = bodyData.includes.values[1].a?.compare(to: expectedIncludes[1])
+            XCTAssert(includeComparison2?.isSame ?? false, String(describing: includeComparison2))
+        }
+    }
+
     func test_showEndpoint_malformedId_fails() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -301,6 +401,69 @@ final class APITestPropertiesControllerTests: XCTestCase {
             let comparison = bodyData.primary.value.compare(to: expectedValue)
             XCTAssert(comparison.isSame, String(describing: comparison))
             XCTAssertEqual(body.data.includes.values, [])
+        }
+    }
+
+    func test_showEndpoint_foundResultWithIncludes_succeeds() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        app.middleware.use(JSONAPIErrorMiddleware())
+
+        let testDatabase = ArrayTestDatabase()
+
+        app.databases.use(testDatabase.configuration, as: .psql)
+
+        let sourceUUID = UUID()
+        let testProperty = DB.APITestProperties(openAPISourceId: sourceUUID, apiHostOverride: nil)
+        let testSource = DB.OpenAPISource(id: sourceUUID, uri: "http://website.com/source.yml", sourceType: .url)
+
+        // expect a database query to find the properties resource
+        // and respond with a resource
+        testDatabase.append([
+            TestOutput(testProperty)
+        ])
+        // expect a database query to find the related openapi source.
+        testDatabase.append([
+            TestOutput(testSource)
+        ])
+
+        let propertiesController = APITestPropertiesController(
+            openAPISource: nil
+        )
+
+        propertiesController.mount(on: app, at: "api_test_properties")
+
+        let expectedPrimary = API.APITestProperties(
+            id: .init(rawValue: testProperty.id!),
+            attributes: .init(createdAt: testProperty.createdAt, apiHostOverride: testProperty.apiHostOverride),
+            relationships: .init(openAPISource: .init(id: .init(rawValue: sourceUUID))),
+            meta: .none,
+            links: .none
+        )
+
+        let expectedInclude = API.OpenAPISource(
+            id: .init(rawValue: sourceUUID),
+            attributes: .init(
+                createdAt: testSource.createdAt,
+                uri: testSource.uri,
+                sourceType: testSource.sourceType
+            ),
+            relationships: .none,
+            meta: .none,
+            links: .none
+        )
+
+        try app.testable().test(.GET, "api_test_properties/\(testProperty.id!.uuidString)?include=openAPISource") { res in
+            XCTAssertEqual(res.status, HTTPStatus.ok, "with body:\n\(res.body.string)")
+
+            let body = try res.content.decode(API.SingleAPITestPropertiesDocument.SuccessDocument.self, using: JSONDecoder.custom(dates: .iso8601))
+
+            let bodyData = try XCTUnwrap(body.data)
+            let comparison = bodyData.primary.value.compare(to: expectedPrimary)
+            XCTAssert(comparison.isSame, String(describing: comparison))
+            let includeComparison = bodyData.includes.values[0].a?.compare(to: expectedInclude)
+            XCTAssert(includeComparison?.isSame ?? false, String(describing: includeComparison))
         }
     }
 }
