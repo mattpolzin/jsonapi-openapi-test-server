@@ -56,6 +56,10 @@ Visit the `/docs` API endpoint to see what endpoints the server provides.
 
 ## Building
 Note that Vapor 4 (and therefore this server) requires Swift 5.2.
+
+### Running and Testing
+As of this writing, you need to run `swift package generate-xcodeproj` and then open that project in Xcode. Using Xcode's built-in Swift Package Manager support is currently broken for libraries like swift-syntax that require dynamic libraries from the Swift toolchain. `swift build`, `swift test`, etc. from the command line will work fine, though.
+
 ### Generating API Documentation
 To generate API documentation, run the `GenAPIDocumenation` target and save the output to `Public/openapi.yml`. This file is not committed to the repository but it will be picked up by the ReDoc UI served at the `/docs` API endpoint.
 
