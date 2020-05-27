@@ -9,15 +9,17 @@ import struct Logging.Logger
 import APIModels
 
 /// Controls basic CRUD operations on API Tests.
-final class APITestController: Controller {
+public final class APITestController: Controller {
 
     static let zipPathPrefix = Environment.archivesPath
     let outputPath: String
     let defaultOpenAPISource: OpenAPISource?
     let testEventLoopGroup: MultiThreadedEventLoopGroup
 
-    init(outputPath: String,
-         openAPISource: OpenAPISource?) {
+    public init(
+        outputPath: String,
+        openAPISource: OpenAPISource?
+    ) {
         self.outputPath = outputPath
         self.defaultOpenAPISource = openAPISource
         self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)

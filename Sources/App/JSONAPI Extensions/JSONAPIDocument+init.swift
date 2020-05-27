@@ -29,16 +29,3 @@ extension Document.SuccessDocument where PrimaryResourceBody: ManyResourceBodyPr
         )
     }
 }
-
-// TODO: delete following after fully adopting prior two alternatives
-extension Document.SuccessDocument where MetaType == NoMetadata, LinksType == NoLinks, APIDescription == NoAPIDescription {
-    init(body: PrimaryResourceBody) {
-        self.init(
-            apiDescription: .none,
-            body: body,
-            includes: .none,
-            meta: .none,
-            links: .none
-        )
-    }
-}

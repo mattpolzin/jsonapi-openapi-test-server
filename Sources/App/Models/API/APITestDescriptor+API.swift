@@ -26,31 +26,30 @@ extension API {
             }
         }
 
-        // TODO: fix so that you can not include messages but still return IDs for this relationship.
-        //        if includeMessages {
+        // we need to request all messages ragardless of whether they will be included so we have access
+        // to the IDs for the Test Descriptor to-many relationship.
         query = query.with(\.$messages)
-        //        }
+
+        // we only need to explicitly filter out messages if not included.
+        // any other include will be there or not based on whether the query
+        // includes it above.
+        let includeFilter: (BatchAPITestDescriptorDocument.Include) -> Bool
+        if !includeMessages {
+            includeFilter = { !($0.value is API.APITestMessage) }
+        } else {
+            includeFilter = { _ in true }
+        }
 
         let primaryFuture = query.all()
 
-        let resourcesFuture = primaryFuture
-            .flatMapThrowing { descriptors in try descriptors.map { try $0.jsonApiResources() } }
+        let resourcesFuture = primaryFuture.flatMapThrowing { descriptors in
+            try descriptors.map { try $0.jsonApiResources().filteringRelatives(by: includeFilter) }
+        }
 
-        let responseFuture = resourcesFuture.map { $0.map(\.primary) }
-            .map(ManyResourceBody.init)
+        let responseFuture = resourcesFuture
             .map(BatchAPITestDescriptorDocument.SuccessDocument.init)
 
-        guard includeMessages || includeProperties.0 else {
-            return responseFuture
-        }
-
-        let includesFuture = resourcesFuture.map { resources in
-            Includes(values: resources.flatMap(\.relatives))
-        }
-
-        return responseFuture.and(includesFuture).map { (response, includes) in
-            response.including(includes)
-        }
+        return responseFuture
     }
 
     /// Pass a query builder where the first result will be used.
@@ -65,30 +64,31 @@ extension API {
                 }
             }
         }
-        // TODO: fix so that you can not include messages but still return IDs for this relationship.
-        //        if includeMessages {
+
+        // we need to request all messages ragardless of whether they will be included so we have access
+        // to the IDs for the Test Descriptor to-many relationship.
         query = query.with(\.$messages)
-        //        }
+
+        // we only need to explicitly filter out messages if not included.
+        // any other include will be there or not based on whether the query
+        // includes it above.
+        let includeFilter: (BatchAPITestDescriptorDocument.Include) -> Bool
+        if !includeMessages {
+            includeFilter = { !($0.value is API.APITestMessage) }
+        } else {
+            includeFilter = { _ in true }
+        }
 
         let primaryFuture = query.first()
 
-        let resourceFuture = primaryFuture.flatMapThrowing { try $0?.jsonApiResources() }
-            .unwrap(or: Abort(.notFound))
+        let resourceFuture = primaryFuture.flatMapThrowing { descriptor in
+            try descriptor?.jsonApiResources().filteringRelatives(by: includeFilter)
+        }.unwrap(or: Abort(.notFound))
 
-        let responseFuture = resourceFuture.map(\.primary)
-            .map(SingleResourceBody.init)
+        let responseFuture = resourceFuture
             .map(SingleAPITestDescriptorDocument.SuccessDocument.init)
 
-        guard includeMessages || includeProperties.0 else {
-            return responseFuture
-        }
-
-        let includesFuture = resourceFuture.map(\.relatives).map(Includes.init)
-
-        return responseFuture.and(includesFuture)
-            .map { (response, includes) in
-                response.including(includes)
-        }
+        return responseFuture
     }
 }
 

@@ -31,6 +31,12 @@ public final class JSONAPIErrorMiddleware: Vapor.Middleware {
         }
 
         guard let abortError = error as? Abort else {
+            if let continueError = error as? AsyncKit.EventLoopFutureQueue.ContinueError {
+                return request.eventLoop.makeSucceededFuture(
+                    Self.serverError(details: String(describing: continueError))
+                )
+            }
+
             return request.eventLoop.makeSucceededFuture(
                 Self.serverError(details: error.localizedDescription)
             )

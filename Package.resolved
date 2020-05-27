@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI",
         "state": {
           "branch": null,
-          "revision": "2940be31002e1a26a9715d3c33975f73d321046e",
-          "version": "4.0.0-rc.1"
+          "revision": "1e2a87a2e4d52b66566d59677c75583046a7bc74",
+          "version": "4.0.0-rc.2"
         }
       },
       {
@@ -332,15 +332,6 @@
           "branch": null,
           "revision": "021edd1ca55451ad15b3e84da6b4064e4b877b34",
           "version": "2.1.0"
-        }
-      },
-      {
-        "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams",
-        "state": {
-          "branch": null,
-          "revision": "81a65c4069c28011ee432f2858ba0de49b086677",
-          "version": "3.0.1"
         }
       },
       {
