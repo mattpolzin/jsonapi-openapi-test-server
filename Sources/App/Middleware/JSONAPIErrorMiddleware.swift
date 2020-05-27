@@ -18,6 +18,8 @@ public final class JSONAPIErrorMiddleware: Vapor.Middleware {
 
     func response(for error: Error, given request: Request) -> EventLoopFuture<Response> {
 
+        request.logger.report(error: error)
+
         if error is DecodingError {
             return request.eventLoop.makeSucceededFuture(
                 Self.unprocessableEntityError(details: error.localizedDescription)

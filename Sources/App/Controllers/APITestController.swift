@@ -125,6 +125,8 @@ extension APITestController {
         return query.first()
             .unwrap(or: Abort(.notFound))
             .map(self.zipPath)
+            .map { FileManager.default.fileExists(atPath: $0) ? $0 : nil }
+            .unwrap(or: Abort(.notFound))
             .flatMap(req.fileio.collectFile)
             .flatMap(req.response.success.encode)
     }
@@ -140,6 +142,8 @@ extension APITestController {
         return query.first()
             .unwrap(or: Abort(.notFound))
             .map(self.testLogPath)
+            .map { FileManager.default.fileExists(atPath: $0) ? $0 : nil }
+            .unwrap(or: Abort(.notFound))
             .flatMap(req.fileio.collectFile)
             .flatMap(req.response.success.encode)
     }
