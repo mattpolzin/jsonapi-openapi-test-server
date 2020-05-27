@@ -20,15 +20,6 @@
         }
       },
       {
-        "package": "Commandant",
-        "repositoryURL": "https://github.com/Carthage/Commandant.git",
-        "state": {
-          "branch": null,
-          "revision": "ab68611013dec67413628ac87c1f29e8427bc8e4",
-          "version": "0.17.0"
-        }
-      },
-      {
         "package": "console-kit",
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
@@ -86,9 +77,9 @@
         "package": "JSONAPI-OpenAPI",
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
-          "branch": "master",
-          "revision": "ab7393513d3d6a63840b643b19012f70ac1d6010",
-          "version": null
+          "branch": null,
+          "revision": "ffdd09e817d12b647b55c00c52aa8922a3df4432",
+          "version": "0.18.2"
         }
       },
       {
@@ -98,15 +89,6 @@
           "branch": null,
           "revision": "578000fd8a2f16bcb24c964bec3bea61f078a62a",
           "version": "0.0.3"
-        }
-      },
-      {
-        "package": "Nimble",
-        "repositoryURL": "https://github.com/Quick/Nimble.git",
-        "state": {
-          "branch": null,
-          "revision": "72f5a90d573f7f7d70aa6b8ad84b3e1e02eabb4d",
-          "version": "8.0.9"
         }
       },
       {
@@ -155,15 +137,6 @@
         }
       },
       {
-        "package": "Quick",
-        "repositoryURL": "https://github.com/Quick/Quick.git",
-        "state": {
-          "branch": null,
-          "revision": "33682c2f6230c60614861dfc61df267e11a1602f",
-          "version": "2.2.0"
-        }
-      },
-      {
         "package": "RichJSONParser",
         "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
         "state": {
@@ -191,21 +164,21 @@
         }
       },
       {
-        "package": "SourceKitten",
-        "repositoryURL": "https://github.com/jpsim/SourceKitten",
-        "state": {
-          "branch": "master",
-          "revision": "be4af15681951a090cf92c1ce345549cb15c536b",
-          "version": null
-        }
-      },
-      {
         "package": "sql-kit",
         "repositoryURL": "https://github.com/vapor/sql-kit.git",
         "state": {
           "branch": null,
           "revision": "3800a6f5fe5cb781420ebe059ff93392bc67cb9c",
           "version": "3.1.0"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
+        "state": {
+          "branch": null,
+          "revision": "223d62adc52d51669ae2ee19bdb8b7d9fd6fcd9c",
+          "version": "0.0.6"
         }
       },
       {
@@ -224,6 +197,15 @@
           "branch": null,
           "revision": "d67ac68d09a95443303e9d6e37b34e7ba101d5f1",
           "version": "1.0.1"
+        }
+      },
+      {
+        "package": "swift-format",
+        "repositoryURL": "https://github.com/apple/swift-format",
+        "state": {
+          "branch": null,
+          "revision": "f22aade8a6ee061b4a7041601ededd8ad7bc2122",
+          "version": "0.50200.1"
         }
       },
       {
@@ -290,12 +272,12 @@
         }
       },
       {
-        "package": "SWXMLHash",
-        "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
+        "package": "SwiftSyntax",
+        "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
-          "version": "5.0.1"
+          "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
+          "version": "0.50200.0"
         }
       },
       {
@@ -332,6 +314,15 @@
           "branch": null,
           "revision": "021edd1ca55451ad15b3e84da6b4064e4b877b34",
           "version": "2.1.0"
+        }
+      },
+      {
+        "package": "Yams",
+        "repositoryURL": "https://github.com/jpsim/Yams",
+        "state": {
+          "branch": null,
+          "revision": "81a65c4069c28011ee432f2858ba0de49b086677",
+          "version": "3.0.1"
         }
       },
       {
