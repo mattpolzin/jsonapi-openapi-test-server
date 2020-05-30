@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/fluent",
         "state": {
           "branch": null,
-          "revision": "dba22d5a6115092482669efe5492d800ace4da38",
-          "version": "4.0.0-rc.2.2"
+          "revision": "f97d9ed3c8172585421112f1eb37b1b0e2246f51",
+          "version": "4.0.0-rc.3"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit",
         "state": {
           "branch": null,
-          "revision": "27288c2399f2d7d198f321ef184ce59f3fd5d250",
-          "version": "1.0.0-rc.1.27"
+          "revision": "9e2f7825c4512846380a22cfdcaf66a3b70205cd",
+          "version": "1.0.0-rc.2"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-postgres-driver",
         "state": {
           "branch": null,
-          "revision": "2df7722d2bddc470a9b7080b8d88c9976f237a81",
-          "version": "2.0.0-rc.2"
+          "revision": "8828d56fe7d9568bf8e779451ccee915f1ac8ab5",
+          "version": "2.0.0-rc.3"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI",
         "state": {
           "branch": null,
-          "revision": "1e2a87a2e4d52b66566d59677c75583046a7bc74",
-          "version": "4.0.0-rc.2"
+          "revision": "5b0a01620954ba89c7d1d8f82dfcbf6fd777d17e",
+          "version": "4.0.0-rc.3.2"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": null,
-          "revision": "ffdd09e817d12b647b55c00c52aa8922a3df4432",
-          "version": "0.18.2"
+          "revision": "15269178a851df91217dd425a438f0b4ae2c1e01",
+          "version": "0.18.4"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPIViz",
         "state": {
           "branch": null,
-          "revision": "578000fd8a2f16bcb24c964bec3bea61f078a62a",
-          "version": "0.0.3"
+          "revision": "4bc91378028b7f42d91e42c1673b3b671934aa36",
+          "version": "0.0.4"
         }
       },
       {
@@ -98,15 +98,6 @@
           "branch": null,
           "revision": "b1b2ad648ca983bd012391ad61d3ab246a104836",
           "version": "1.1.0"
-        }
-      },
-      {
-        "package": "OpenAPIReflection",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
-        "state": {
-          "branch": null,
-          "revision": "34eb557d0ab49a95d3a39e7a821fcb12ff50ba8a",
-          "version": "0.3.0"
         }
       },
       {
@@ -285,8 +276,8 @@
         "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
-          "revision": "a049aff03acf7801fd91fe7e71761437055a805f",
-          "version": "4.6.0"
+          "revision": "6dfdb3445308c40280bf1c071fe14c1c92f98a0d",
+          "version": "4.7.1"
         }
       },
       {
