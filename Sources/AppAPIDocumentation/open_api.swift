@@ -59,7 +59,7 @@ public struct OpenAPIDocs {
 You can add annotations to your OpenAPI that instruct the Test Server to make requests and check that the response fits the documented schema or even that the response exactly matches a particular example.
 
 ### Response Test Configuration
-You specify test parameters under an `x-tests` specification extension on the OpenAPI Media Type Object within a Response Object (e.g. `responses/'200'/content/'application/json'/x-tests`). `x-tests` has the following structure:
+You specify test parameters under an `x-tests` Specification Extension on the OpenAPI Media Type Object within a Response Object (e.g. `responses/'200'/content/'application/json'/x-tests`). `x-tests` has the following structure:
 ```json
 {
     "test_name": {

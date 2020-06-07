@@ -4,7 +4,31 @@
 The test server requires a Postgres database.
 
 ## Usage
-### As A Tool
+
+The test server and commandline tool will execute tests against an OpenAPI document. Out of box, you get errors for unprocessable OpenAPI documentation, warnings for certain unhandled types of APIs, and a test that every OpenAPI Example parses under the corresponding request/response body schema. 
+
+You can additionally create tests that make API calls and verify that the actual responses from your server are parseable under the corresponding response schema. You do this with the `x-tests` Specification Extension on the OpenAPI Media Type Object within a Response Object (e.g. `responses/'200'/content/'application/json'/x-tests`). `x-tests` has the following structure:
+```json
+{
+    "test_name": {
+        "test_host": "url", (optional, if omitted then default server for API will be used.
+        "skip_example": true | false, (optional, defaults to false)
+        "ignore_missing_parameter_warnings": true | false, (optional, defaults to false)
+        "parameters": {
+            "path_param_name": "value",
+            "header_param_name": "value" (must be a string, even if the parameter type is Int or other)
+        },
+        "query_parameters": [
+            {
+                "name": "param_name",
+                "value": "param_value"
+            }
+        ]
+    }
+}
+```  
+
+### The Commandline Tool
 #### Against a URL
 You can point the test tool at a URL serving up OpenAPI documentation. The URL can either require HTTP Basic Authentication or no authentication.
 
@@ -19,13 +43,23 @@ docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_URL=https://website.co
 ```
 
 #### Against a local file
-You can point the test tool at a local file if you mount that file into the docker container and specify the mount destination with the `API_TEST_IN_FILE` environment variable.
+You can point the test tool at a local file if you mount that file into the docker container and specify the mount destination with the `API_TEST_IN_FILE` environment variable or the `--openapi-file` option for the `test` command.
 ```shell
+# command option
+docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json
+
+# ENV var
 docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server
 ```
+
 Note that you cannot use relative paths with bind mounts but if, for example, your `openapi.json` file is in the current working directory then you could invoke as:
 ```shell
 docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v "$(pwd)/openapi.json:/api/openapi.json" mattpolzin2/api-test-server
+```
+
+You can specify an override test server URL if you want to make API test requests against a different URL than is specified bu the OpenAPI documentation. You use the `test` command's `--override-server` option for this.
+```shell
+docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json -- override-server https://test.server.com
 ```
 
 #### Dumping test files
@@ -37,7 +71,7 @@ docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' -v
 
 You will find the dumped files at `./out/api_test_files.zip`.
 
-### As A Server
+### The Test Server
 You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable.
 
 First you need to run the migrator against your Postgres database.

@@ -12,8 +12,17 @@ public enum OpenAPISource {
     case unauthenticated(url: URI)
     case basicAuth(url: URI, username: String, password: String)
 
-    public enum Error: Swift.Error {
+    public enum Error: Swift.Error, CustomStringConvertible {
         case noInputSpecified
         case fileReadError(String)
+
+        public var description: String {
+            switch self {
+            case .noInputSpecified:
+                return "No OpenAPI input source was specified."
+            case .fileReadError(let error):
+                return "Failed to read OpenAPI file with error: \(error)"
+            }
+        }
     }
 }

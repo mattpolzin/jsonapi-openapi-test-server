@@ -40,6 +40,13 @@ public final class APITestCommand: Command {
         )
         var serverOverride: URLOption?
 
+        @Option(
+            name: "openapi-file",
+            help: "Specify a filename from the local filesystem from which to read OpenAPI documentation.",
+            completion: .files(withExtensions: ["json", "yml", "yaml"])
+        )
+        var openAPIFile: String?
+
         public init() {}
     }
 
@@ -49,12 +56,10 @@ public final class APITestCommand: Command {
 
     let testEventLoopGroup: MultiThreadedEventLoopGroup
     let outPath: String
-    let openAPISource: OpenAPISource
 
     public init() throws {
         self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         self.outPath = Environment.outPath
-        self.openAPISource = try .detect()
     }
 
     deinit {
@@ -69,7 +74,7 @@ public final class APITestCommand: Command {
         let logger = Logger(console: context.console, enableWarnings: !signature.shouldIgnoreWarnings)
 
         let eventLoop = testEventLoop()
-        let source = openAPISource
+        let source: OpenAPISource = try signature.openAPIFile.map { .file(path: $0) } ?? .detect()
         let path = outPath
 
         let testProperties = APITestProperties(
