@@ -54,7 +54,7 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
             return "Parse Example Test Case"
 
         } else if line.contains("test_example_request") {
-            return "Request Example Test Case"
+            return "Request Test Case"
         }
         return "Test Case"
     }

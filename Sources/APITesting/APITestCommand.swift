@@ -34,6 +34,12 @@ public final class APITestCommand: Command {
         )
         var shouldIgnoreWarnings: Bool
 
+        @Option(
+            name: "override-server",
+            help: "Override the server definition(s) in the OpenAPI document for the purposes of this test run."
+        )
+        var serverOverride: URLOption?
+
         public init() {}
     }
 
@@ -68,7 +74,7 @@ public final class APITestCommand: Command {
 
         let testProperties = APITestProperties(
             openAPISource: source,
-            apiHostOverride: nil // NOTE: This would be a good addition to the CLI API
+            apiHostOverride: signature.serverOverride?.value
         )
 
         context.console.print()
@@ -377,5 +383,20 @@ public func runAPITestPackage(
             testLogPath: testLogPath,
             logger: logger
         )
+    }
+}
+
+internal struct URLOption: LosslessStringConvertible {
+    let value: URL
+
+    init?(_ description: String) {
+        guard let url = URL(string: description) else {
+            return nil
+        }
+        value = url
+    }
+
+    var description: String {
+        return value.absoluteString
     }
 }
