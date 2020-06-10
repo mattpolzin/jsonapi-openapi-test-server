@@ -52,12 +52,17 @@ extension OpenAPISourceController {
         let source = req.eventLoop.makeSucceededFuture(())
             .flatMapThrowing { try req.decodeBody().primaryResource.value }
 
-        let sourceModel = source
+        let requestedSourceModel = source
             .map(DB.OpenAPISource.init(apiModel:))
 
+        let sourceModel = requestedSourceModel.flatMap { model in
+            DB.OpenAPISource.query(on: req.db)
+                .filter(\.$sourceType == model.sourceType)
+                .filter(\.$uri == model.uri)
+                .first(orCreate: model)
+        }
+
         return sourceModel
-            .flatMap { $0.save(on: req.db) }
-            .flatMap { sourceModel }
             .flatMapThrowing { responseModel in
                 API.SingleOpenAPISourceDocument.SuccessDocument(
                     apiDescription: .none,
