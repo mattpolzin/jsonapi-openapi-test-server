@@ -85,12 +85,17 @@ extension APITestPropertiesController {
                     .unwrap(or: Abort(.badRequest, reason: "There was no OpenAPI source specified and no default was found."))
         }
 
-        let propertiesModel = properties.and(openAPISourceId)
+        let requestedPropertiesModel = properties.and(openAPISourceId)
             .map { DB.APITestProperties.init(apiModel: $0.0, openAPISourceId: $0.1) }
 
+        let propertiesModel = requestedPropertiesModel.flatMap { properties in
+            DB.APITestProperties.query(on: req.db)
+                .filter(\.$openAPISource.$id == properties.$openAPISource.id)
+                .filter(\.$apiHostOverride == properties.apiHostOverride)
+                .first(orCreate: properties)
+        }
+
         return propertiesModel
-            .flatMap { $0.save(on: req.db) }
-            .flatMap { propertiesModel }
             .flatMapThrowing { responseModel in
                 API.SingleAPITestPropertiesDocument.SuccessDocument(
                     apiDescription: .none,

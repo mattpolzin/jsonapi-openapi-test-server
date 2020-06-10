@@ -3,10 +3,10 @@ import FluentPostgresDriver
 import Vapor
 
 private let migrationList: [Migration] = [
-    OpenAPISourceMigration_Init(),
-    APITestPropertiesMigration_Init(),
-    APITestDescriptorMigration_Init(),
-    APITestMessageMigration_Init(),
+    DB.OpenAPISource.Migrations.Create(),
+    DB.APITestProperties.Migrations.Create(),
+    DB.APITestDescriptor.Migrations.Create(),
+    DB.APITestMessage.Migrations.Create(),
     TestUpdateNotificationMigration()
 ]
 
