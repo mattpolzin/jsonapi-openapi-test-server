@@ -15,12 +15,12 @@ jobs:
         image:
           - swift:5.2-xenial
           - swift:5.2-bionic
+          - swift:5.2-focal
+          - swift:5.2-amazonlinux2
+          - swift:5.2-centos8
           - swiftlang/swift:nightly-master-focal
-        include:
-          - image: swiftlang/swift:nightly-master-centos8
-            depscmd: dnf install -y zlib-devel
-          - image: swiftlang/swift:nightly-master-amazonlinux2
-            depscmd: yum install -y zlib-devel
+          - swiftlang/swift:nightly-master-centos8
+          - swiftlang/swift:nightly-master-amazonlinux2
     container: ${{ matrix.image }}
     steps:
     - name: Install dependencies if needed
