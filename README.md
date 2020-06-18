@@ -57,9 +57,10 @@ Note that you cannot use relative paths with bind mounts but if, for example, yo
 docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v "$(pwd)/openapi.json:/api/openapi.json" mattpolzin2/api-test-server
 ```
 
+#### API Host Override
 You can specify an override test server URL if you want to make API test requests against a different URL than is specified bu the OpenAPI documentation. You use the `test` command's `--override-server` option for this.
 ```shell
-docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json -- override-server https://test.server.com
+docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json --override-server https://test.server.com
 ```
 
 #### Dumping test files
