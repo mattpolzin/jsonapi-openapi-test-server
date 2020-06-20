@@ -293,9 +293,9 @@ public func prepOutputFolder(
 public func openAPIDoc(
     on loop: EventLoop,
     from source: OpenAPISource
-) -> EventLoopFuture<OpenAPI.Document> {
+) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
-    func get(_ url: URI, credentials: (username: String, password: String)? = nil) -> EventLoopFuture<OpenAPI.Document> {
+    func get(_ url: URI, credentials: (username: String, password: String)? = nil) -> EventLoopFuture<ResolvedDocument> {
         let client = HTTPClient(eventLoopGroupProvider: .shared(loop))
 
         var headers = HTTPHeaders()
@@ -319,7 +319,10 @@ public func openAPIDoc(
             return loop.makeSucceededFuture(response)
         }.flatMapThrowing { response in
             return try ClientResponse(status: response.status, headers: response.headers, body: response.body)
-                .content.decode(OpenAPI.Document.self)
+                .content
+                .decode(OpenAPI.Document.self)
+                .locallyDereferenced()
+                .resolved()
         }.always { _ in try! client.syncShutdown() }
     }
 
@@ -333,13 +336,21 @@ public func openAPIDoc(
 
                 let decoder = YAMLDecoder()
 
-                return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: string))
+                return try loop.makeSucceededFuture(
+                    decoder.decode(OpenAPI.Document.self, from: string)
+                        .locallyDereferenced()
+                        .resolved()
+                )
             } else {
                 let data = try Data(contentsOf: filePath)
 
                 let decoder = JSONDecoder.custom(dates: .iso8601)
 
-                return try loop.makeSucceededFuture(decoder.decode(OpenAPI.Document.self, from: data))
+                return try loop.makeSucceededFuture(
+                    decoder.decode(OpenAPI.Document.self, from: data)
+                        .locallyDereferenced()
+                        .resolved()
+                )
             }
 
         } catch let error {
@@ -359,7 +370,7 @@ public func openAPIDoc(
 
 public func produceAPITestPackage(
     on loop: EventLoop,
-    given openAPIDoc: OpenAPI.Document,
+    given openAPIDoc: ResolvedDocument,
     to outputPath: String,
     zipToPath: String? = nil,
     testSuiteConfiguration: JSONAPISwiftGen.TestSuiteConfiguration,
