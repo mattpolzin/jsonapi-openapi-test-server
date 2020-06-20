@@ -53,8 +53,13 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
         if line.contains("test_example_parse") {
             return "Parse Example Test Case"
 
-        } else if line.contains("test_example_request") {
-            return "Request Test Case"
+        } else if line.contains("test_example_request_") {
+            guard let name = testFunctionName(for: line) else {
+                return "Request Test Case"
+            }
+            return "Request Test Case ("
+                + name.testName.dropFirst("test_example_request_".count)
+                + ")"
         }
         return "Test Case"
     }
@@ -66,7 +71,7 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
         return inString
     }
 
-    func testFunctionName(for line: String) -> TestFunctionName? {
+    func testFunctionName<S>(for line: S) -> TestFunctionName? where S: StringProtocol {
         let testFunctionNameRawValue = TestFunctionName.testPrefix + line
             .components(separatedBy: "__")
             .dropFirst()
@@ -128,8 +133,10 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
                          context: isolatedError,
                          message: "\(context(for: line)) Failed")
         }
-        throw TestPackageSwiftError.testsFailed(succeeded: succeededTestLines.count,
-                                                failed: failedTestLines.count)
+        throw TestPackageSwiftError.testsFailed(
+            succeeded: succeededTestLines.count,
+            failed: failedTestLines.count
+        )
     }
 
     guard exitCode == shellSuccessCode else {
