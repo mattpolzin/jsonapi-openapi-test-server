@@ -49,17 +49,16 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
 
     let testOutput = stdout.split(separator: "\n")
 
-    func context<S>(for line: S) -> String where S: StringProtocol {
-        if line.contains("test_example_parse") {
+    func context(for testFunctionName: TestFunctionName?) -> String {
+        guard let functionName = testFunctionName else {
+            return "Test Case"
+        }
+        if functionName.context.contextPrefix == "test_example_parse" {
             return "Parse Example Test Case"
 
-        } else if line.contains("test_example_request_") {
-            guard let name = testFunctionName(for: line) else {
-                return "Request Test Case"
-            }
-            return "Request Test Case ("
-                + name.testName.dropFirst("test_example_request_".count)
-                + ")"
+        } else if functionName.context.contextPrefix == "test_example_request" {
+            let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
+            return "Request Test Case\(slugString)"
         }
         return "Test Case"
     }
@@ -90,22 +89,24 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
             .map(dropBracket))
             .flatMap { zip($0.first, $0.last) }
 
-        let pathParseAttempt = pathAndTiming
-            .flatMap { testFunctionName(for: $0.0) }
-            .map { testFunctionName in
-                [
-                    testFunctionName.path.rawValue,
-                    testFunctionName.endpoint.rawValue,
-                    testFunctionName.direction.rawValue,
-                    testFunctionName.testStatusCodeGuess.map { "HTTP \($0.rawValue)" }
-                ].compactMap { $0 }.joined(separator: ", ")
+        let functionName = pathAndTiming.flatMap { testFunctionName(for: $0.0) }
+
+        let pathParseAttempt = functionName.map { testFunctionName in
+            [
+                testFunctionName.path.rawValue,
+                testFunctionName.endpoint.rawValue,
+                testFunctionName.direction.rawValue,
+                testFunctionName.testStatusCode.map { "HTTP \($0.rawValue)" }
+            ].compactMap { $0 }.joined(separator: ", ")
         }
 
         let isolatedTiming = pathAndTiming?.1 ?? String(line)
 
-        logger.success(path: pathParseAttempt ?? path,
-                       context: isolatedTiming,
-                       message: "\(context(for: line)) Passed")
+        logger.success(
+            path: pathParseAttempt ?? path,
+            context: isolatedTiming,
+            message: "\(context(for: functionName)) Passed"
+        )
     }
 
     guard failedTestLines.count == 0 else {
@@ -116,22 +117,24 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
                 .map(dropBracket))
                 .flatMap { zip($0.first, $0.last) }
 
-            let pathParseAttempt = pathAndError
-                .flatMap { testFunctionName(for: $0.0) }
-                .map { testFunctionName in
-                    [
-                        testFunctionName.path.rawValue,
-                        testFunctionName.endpoint.rawValue,
-                        testFunctionName.direction.rawValue,
-                        testFunctionName.testStatusCodeGuess.map { "HTTP \($0.rawValue)" }
-                        ].compactMap { $0 }.joined(separator: ", ")
+            let functionName = pathAndError.flatMap { testFunctionName(for: $0.0) }
+
+            let pathParseAttempt = functionName.map { testFunctionName in
+                [
+                    testFunctionName.path.rawValue,
+                    testFunctionName.endpoint.rawValue,
+                    testFunctionName.direction.rawValue,
+                    testFunctionName.testStatusCode.map { "HTTP \($0.rawValue)" }
+                ].compactMap { $0 }.joined(separator: ", ")
             }
 
             let isolatedError = pathAndError?.1 ?? String(line)
 
-            logger.error(path: pathParseAttempt ?? path,
-                         context: isolatedError,
-                         message: "\(context(for: line)) Failed")
+            logger.error(
+                path: pathParseAttempt ?? path,
+                context: isolatedError,
+                message: "\(context(for: functionName)) Failed"
+            )
         }
         throw TestPackageSwiftError.testsFailed(
             succeeded: succeededTestLines.count,

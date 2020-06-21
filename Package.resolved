@@ -78,7 +78,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": "resolved-openapi",
-          "revision": "282e9063294b484cefbd76701526d950c13c5bd4",
+          "revision": "bd55c0d49fb8abe92b81833c7d8944311f019960",
           "version": null
         }
       },
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/sql-kit.git",
         "state": {
           "branch": null,
-          "revision": "de3521641f659917b4a536e7fa13b213aa043d6b",
-          "version": "3.2.0"
+          "revision": "ced1bbf79d8df7bd106e3d898b28cbc77bd69100",
+          "version": "3.3.0"
         }
       },
       {

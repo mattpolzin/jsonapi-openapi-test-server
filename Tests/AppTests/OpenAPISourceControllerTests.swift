@@ -19,7 +19,7 @@ import JSONAPITesting
 final class OpenAPISourceControllerTests: XCTestCase {
 
     func test_createEndpoint_emptyRequestBody_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         try configureDefaults(for: app)
@@ -39,7 +39,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_createEndpoint_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -83,7 +83,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_emptyResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -109,7 +109,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -164,7 +164,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_malformedId_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -180,7 +180,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_missingResult_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -203,7 +203,7 @@ final class OpenAPISourceControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_foundResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())

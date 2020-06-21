@@ -158,26 +158,26 @@ public func produceAPITestPackage(
         let responseTestFunctionNames = responseDocuments
             .values
             .flatMap { doc in
-                doc.testExampleFuncs.map { $0.functionName }
-        }.map { testName in
+                doc.testExampleFuncs.map { $0.testFunctionContext }
+        }.map { context in
             TestFunctionName(
                 path: endpoint.path,
                 endpoint: endpoint.method,
                 direction: .response,
-                testName: testName
+                context: context
             )
         }
 
         let requestTestFunctionNames = requestDocument
             .map { doc in
                 doc.testExampleFuncs
-                    .map { $0.functionName }
-                    .map { testName in
+                    .map { $0.testFunctionContext }
+                    .map { context in
                         TestFunctionName(
                             path: endpoint.path,
                             endpoint: endpoint.method,
                             direction: .request,
-                            testName: testName
+                            context: context
                         )
                 }
         } ?? []
@@ -550,7 +550,7 @@ func documents(
             example = nil
         }
 
-        let testExampleFuncs: [SwiftFunctionGenerator]
+        let testExampleFuncs: [TestFunctionGenerator]
         do {
             testExampleFuncs = try exampleTests(
                 testSuiteConfiguration: testSuiteConfiguration,
@@ -640,11 +640,11 @@ func document(
         example = nil
     }
 
-    let testExampleFuncs: [SwiftFunctionGenerator]
+    let testExampleFuncs: [TestFunctionGenerator]
     do {
         testExampleFuncs = try example.map { _ in
             try [
-                exampleTest(
+                exampleParsingTest(
                     exampleDataPropName: examplePropName,
                     bodyType: .init(.init(name: requestBodyTypeName)),
                     expectedHttpStatus: nil
@@ -679,11 +679,13 @@ func exampleTests(
     exampleDataPropName: String?,
     bodyType: SwiftTypeRep,
     expectedHttpStatus: OpenAPI.Response.StatusCode
-) throws -> [SwiftFunctionGenerator] {
+) throws -> [TestFunctionGenerator] {
+    // if we have an x-tests extension, use it. otherwise, fall
+    // back to a test that just parses any given example.
     guard let testsExtension = jsonResponse.vendorExtensions["x-tests"]?.value as? [String: Any] else {
         return try exampleDataPropName.map {
             try [
-                exampleTest(
+                exampleParsingTest(
                     exampleDataPropName: $0,
                     bodyType: bodyType,
                     expectedHttpStatus: expectedHttpStatus
@@ -715,11 +717,14 @@ func exampleTests(
     }
 }
 
-func exampleTest(
+/// Create a test function generator that attempts to parse an
+/// example under the schema for the given request or response
+/// body.
+func exampleParsingTest(
     exampleDataPropName: String,
     bodyType: SwiftTypeRep,
     expectedHttpStatus: OpenAPI.Response.StatusCode?
-) throws -> SwiftFunctionGenerator {
+) throws -> TestFunctionGenerator {
     return try OpenAPIExampleParseTestSwiftGen(
         exampleDataPropName: exampleDataPropName,
         bodyType: bodyType,
