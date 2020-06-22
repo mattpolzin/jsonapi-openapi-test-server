@@ -78,7 +78,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": "resolved-openapi",
-          "revision": "bd55c0d49fb8abe92b81833c7d8944311f019960",
+          "revision": "81a2e201393a23a688cfb2366b447d39feac8c63",
           "version": null
         }
       },
@@ -96,7 +96,7 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": "dereferenced-components",
-          "revision": "afb3cdfada3d808493e9da1c2d2dafdf8fe8afea",
+          "revision": "e0fe7ec11f3e53a56453cc2d434868ddf7f35a63",
           "version": null
         }
       },
@@ -314,15 +314,6 @@
           "branch": null,
           "revision": "021edd1ca55451ad15b3e84da6b4064e4b877b34",
           "version": "2.1.0"
-        }
-      },
-      {
-        "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams",
-        "state": {
-          "branch": null,
-          "revision": "81a65c4069c28011ee432f2858ba0de49b086677",
-          "version": "3.0.1"
         }
       },
       {

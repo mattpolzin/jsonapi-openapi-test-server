@@ -597,7 +597,7 @@ func documents(
                 logger?.warning(
                     path: endpoint.path.rawValue,
                     context: contextString,
-                    message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary."
+                    message: "Found x-tests with parameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-tests dictionary."
                 )
             }
 
