@@ -14,6 +14,7 @@ public protocol Logger {
     func error(path: String?, context: String, message: String)
     func warning(path: String?, context: String, message: String)
     func success(path: String?, context: String, message: String)
+    func info(path: String?, context: String, message: String)
 }
 
 typealias HttpMethod = OpenAPI.HttpMethod
@@ -117,7 +118,7 @@ public func produceAPITestPackage(
             testFunctionNames: [TestFunctionName]
         )
     ]
-    results = routes.lazy.flatMap(\.endpoints).map { endpoint in
+    results = routes.flatMap(\.endpoints).map { endpoint in
 
         let documentFileNameString = documentTypeName(path: endpoint.path, verb: endpoint.method)
 
@@ -236,6 +237,16 @@ public func produceAPITestPackage(
     if let zipToPath = zipToPath {
         try! archive(from: outPath, to: zipToPath)
     }
+
+    // a bit of diagnostic info
+    let totalRouteCount = routes.count
+    let totalEndpointCount = routes.map { $0.endpoints.count }.reduce(0, +)
+    let totalTestCases = results.map { $0.testFunctionNames.count }.reduce(0, +)
+    logger?.info(
+        path: nil,
+        context: "Processing Entire OpenAPI Document",
+        message: "Created \(totalTestCases) test cases across \(totalEndpointCount) endpoints mounted at \(totalRouteCount) routes."
+    )
 }
 
 func swiftTypeName(from string: String) -> String {
@@ -520,7 +531,25 @@ func documents(
     var responseDocuments = [OpenAPI.Response.StatusCode: DataDocumentSwiftGen]()
     for (statusCode, response) in endpoint.responses {
 
+        let contextString = "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint"
+
         guard let jsonResponse = response.content[.json] else {
+            if response.content.isEmpty && ((statusCode == 200 && endpoint.method == .get) || (statusCode == 201 && endpoint.method == .post)) {
+                logger?.warning(
+                    path: endpoint.path.rawValue,
+                    context: contextString,
+                    message: "No response content found but endpoints of this type would generally have some form of response body."
+                )
+            } else {
+                let alternativesString = response.content.count > 0
+                    ? "Did find content with types: \(response.content.keys.map(\.rawValue))."
+                    : "No content options of any type found."
+                logger?.info(
+                    path: endpoint.path.rawValue,
+                    context: contextString,
+                    message: "Skipping response because no 'application/json' content found. \(alternativesString)"
+                )
+            }
             continue
         }
 
@@ -529,7 +558,7 @@ func documents(
         guard case .object = responseSchema else {
             logger?.warning(
                 path: endpoint.path.rawValue,
-                context: "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint",
+                context: contextString,
                 message: "Found non-object response schema root (expected JSON:API 'data' object). Skipping '\(String(describing: responseSchema.jsonTypeFormat?.jsonType))'."
             )
             continue
@@ -544,7 +573,7 @@ func documents(
         } catch let err {
             logger?.warning(
                 path: endpoint.path.rawValue,
-                context: "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint",
+                context: contextString,
                 message: String(describing: err)
             )
             example = nil
@@ -567,7 +596,7 @@ func documents(
             case .incorrectTestParameterFormat:
                 logger?.warning(
                     path: endpoint.path.rawValue,
-                    context: "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint",
+                    context: contextString,
                     message: "Found x-testParameters but it was not a dictionary with String keys and String values like expected. Non-String parameter values still need to be encoded as Strings in the x-testParameters dictionary."
                 )
             }
@@ -576,7 +605,7 @@ func documents(
         } catch let err {
             logger?.warning(
                 path: endpoint.path.rawValue,
-                context: "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint",
+                context: contextString,
                 message: String(describing: err)
             )
 
@@ -594,7 +623,7 @@ func documents(
         } catch let err {
             logger?.warning(
                 path: endpoint.path.rawValue,
-                context: "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint",
+                context: contextString,
                 message: String(describing: err)
             )
             continue

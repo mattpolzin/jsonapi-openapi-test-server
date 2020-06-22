@@ -129,5 +129,14 @@ extension Controller {
                                                           context: context.isEmpty ? nil : context,
                                                           message: message).save(on: self.database) }
         }
+
+        public func info(path: String?, context: String, message: String) {
+            systemLogger.info("\(message)", metadata: ["context": .string(context)])
+            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
+                                                             messageType: .info,
+                                                             path: path,
+                                                             context: context.isEmpty ? nil : context,
+                                                             message: message).save(on: self.database) }
+        }
     }
 }

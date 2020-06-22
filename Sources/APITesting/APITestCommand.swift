@@ -277,6 +277,19 @@ extension APITestCommand {
             console.print()
             console.print()
         }
+
+        public func info(path: String?, context: String, message: String) {
+            console.info("-> \(message)")
+            console.print("--")
+            console.print("-- \(context)")
+            if let path = path {
+                console.print("-- at [", newLine: false)
+                console.info(path, newLine:  false)
+                console.print("]")
+            }
+            console.print()
+            console.print()
+        }
     }
 }
 

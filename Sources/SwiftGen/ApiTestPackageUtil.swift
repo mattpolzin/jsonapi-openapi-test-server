@@ -51,16 +51,16 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
 
     func context(for testFunctionName: TestFunctionName?) -> String {
         guard let functionName = testFunctionName else {
-            return "Test Case"
+            return "Test"
         }
         if functionName.context.contextPrefix == "test_example_parse" {
-            return "Parse Example Test Case"
+            return "Example Parsing Test"
 
         } else if functionName.context.contextPrefix == "test_example_request" {
             let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
-            return "Request Test Case\(slugString)"
+            return "Request Test\(slugString)"
         }
-        return "Test Case"
+        return "Test"
     }
 
     func dropBracket(_ inString: String) -> String {
