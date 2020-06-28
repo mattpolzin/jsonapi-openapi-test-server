@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "4ffc23dd1d6454228f78194ef68d8b20fca9390a",
-          "version": "4.1.1"
+          "revision": "05c52a91631a6ca432275439f6456a5dace0d1db",
+          "version": "4.1.2"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit",
         "state": {
           "branch": null,
-          "revision": "8ac0bc2764d3c93e5a30e7799492ea518afd9cc0",
-          "version": "1.0.1"
+          "revision": "ad5eef38c5168fdb4b77d5a73794a90e0ce3b9a5",
+          "version": "1.0.2"
         }
       },
       {
@@ -78,7 +78,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": "resolved-openapi",
-          "revision": "81a2e201393a23a688cfb2366b447d39feac8c63",
+          "revision": "25120caf43ec6c66800627e648a48f2a91c30127",
           "version": null
         }
       },
@@ -96,7 +96,7 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": "dereferenced-components",
-          "revision": "e0fe7ec11f3e53a56453cc2d434868ddf7f35a63",
+          "revision": "c5384e1408d47b33b30a8de0dcff4ca3adf34221",
           "version": null
         }
       },
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/vapor/postgres-kit.git",
         "state": {
           "branch": null,
-          "revision": "e43a32baec80ebbcfed4d0330d0be50eb73434c7",
-          "version": "2.0.1"
+          "revision": "fca27ff90326e3612ed0197598a7ce467bfedfbd",
+          "version": "2.1.0"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/sql-kit.git",
         "state": {
           "branch": null,
-          "revision": "ced1bbf79d8df7bd106e3d898b28cbc77bd69100",
-          "version": "3.3.0"
+          "revision": "8b82edd5d918068f204e3ac4206d5d15f6740395",
+          "version": "3.5.0"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
-          "revision": "2bfe7149d9786e2e601898cb10b9ba9072f60c0b",
-          "version": "4.10.0"
+          "revision": "dc2aa1e02e04a47b67cb0dabed628fe844900f30",
+          "version": "4.14.0"
         }
       },
       {
@@ -314,6 +314,15 @@
           "branch": null,
           "revision": "021edd1ca55451ad15b3e84da6b4064e4b877b34",
           "version": "2.1.0"
+        }
+      },
+      {
+        "package": "Yams",
+        "repositoryURL": "https://github.com/jpsim/Yams",
+        "state": {
+          "branch": null,
+          "revision": "81a65c4069c28011ee432f2858ba0de49b086677",
+          "version": "3.0.1"
         }
       },
       {

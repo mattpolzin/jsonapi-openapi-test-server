@@ -49,7 +49,7 @@ public func produceAPITestPackage(
     logger: Logger? = nil
 ) {
     produceAPITestPackage(
-        for: openAPIDocument.routes.values,
+        for: openAPIDocument.routes,
         originatingAt: openAPIDocument.servers.first!,
         outputTo: outPath,
         zipToPath: zipToPath,
