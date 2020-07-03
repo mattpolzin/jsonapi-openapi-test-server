@@ -77,9 +77,9 @@
         "package": "JSONAPI-OpenAPI",
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
-          "branch": "resolved-openapi",
-          "revision": "178f80c718790d040838e9f0a491b6910a047edf",
-          "version": null
+          "branch": null,
+          "revision": "0872835e7e86a775b362758fb83707e1c9a56e1c",
+          "version": "0.20.0"
         }
       },
       {
@@ -95,9 +95,9 @@
         "package": "OpenAPIKit",
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
-          "branch": "dereferenced-components",
-          "revision": "93cc0f4c10cd15200357e584bfd2ecefc0d03f56",
-          "version": null
+          "branch": null,
+          "revision": "201586db9dcce99d148eed12cc556a0c86c3355e",
+          "version": "1.4.0"
         }
       },
       {
