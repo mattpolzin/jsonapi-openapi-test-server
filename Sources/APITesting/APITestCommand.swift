@@ -367,7 +367,7 @@ public func openAPIDoc(
             }
 
         } catch let error {
-            return loop.makeFailedFuture(OpenAPISource.Error.fileReadError(String(describing: error)))
+            return loop.makeFailedFuture(OpenAPISource.Error.fileReadError(error))
         }
 
     case .basicAuth(url: let url,
