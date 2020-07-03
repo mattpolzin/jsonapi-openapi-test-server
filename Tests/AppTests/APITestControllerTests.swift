@@ -12,7 +12,7 @@ import JSONAPITesting
 final class APITestControllerTests: XCTestCase {
 
     func test_createEndpoint_emptyRequestBody_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         try configureDefaults(for: app)
@@ -35,7 +35,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_createEndpoint_withoutSourceOrDefault_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -74,7 +74,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
 //    func test_createEndpoint_withoutSourceButWithDefault_succeeds() throws {
-//        let app = Application(.testing)
+//        let app = try testApp()
 //        defer { app.shutdown() }
 //
 //        app.middleware.use(JSONAPIErrorMiddleware())
@@ -130,7 +130,7 @@ final class APITestControllerTests: XCTestCase {
 //    }
 
     func test_indexEndpoint_emptyResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -161,7 +161,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -233,7 +233,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResultWithMessagesNotIncluded_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -314,7 +314,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResultWithMessageIncludes_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -417,7 +417,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResultWithPropertiesIncluded_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -549,7 +549,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_indexEndpoint_populatedResultWithSourceIncluded_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -725,7 +725,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_malformedId_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -743,7 +743,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_missingResult_fails() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -769,7 +769,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
     func test_showEndpoint_foundResult_succeeds() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
@@ -820,7 +820,7 @@ final class APITestControllerTests: XCTestCase {
     }
 
 //    func test_showEndpoint_foundResultWithIncludes_succeeds() throws {
-//        let app = Application(.testing)
+//        let app = try testApp()
 //        defer { app.shutdown() }
 //
 //        app.middleware.use(JSONAPIErrorMiddleware())

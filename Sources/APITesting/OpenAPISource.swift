@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import OpenAPIKit
 
 public enum OpenAPISource {
     case file(path: String)
@@ -14,14 +15,15 @@ public enum OpenAPISource {
 
     public enum Error: Swift.Error, CustomStringConvertible {
         case noInputSpecified
-        case fileReadError(String)
+        case fileReadError(Swift.Error)
 
         public var description: String {
             switch self {
             case .noInputSpecified:
                 return "No OpenAPI input source was specified."
             case .fileReadError(let error):
-                return "Failed to read OpenAPI file with error: \(error)"
+                let prettyError = OpenAPI.Error(from: error)
+                return "Failed to read OpenAPI file with error: \(prettyError.localizedDescription) (full path: \(prettyError.codingPathString))"
             }
         }
     }

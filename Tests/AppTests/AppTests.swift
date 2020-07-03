@@ -19,7 +19,7 @@ import JSONAPITesting
 
 final class AppTests: XCTestCase {
     func test_sanityCheck() throws {
-        let app = Application(.testing)
+        let app = try testApp()
         defer { app.shutdown() }
 
         app.middleware.use(JSONAPIErrorMiddleware())
