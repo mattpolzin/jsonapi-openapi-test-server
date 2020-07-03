@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor/async-kit.git",
         "state": {
           "branch": null,
-          "revision": "8e2cad80dd9f62f0349a2a78ab8c81fb456f4d4a",
-          "version": "1.1.1"
+          "revision": "7457413e57dbfac762b32dd30c1caf2c55a02a3d",
+          "version": "1.2.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "05c52a91631a6ca432275439f6456a5dace0d1db",
-          "version": "4.1.2"
+          "revision": "9b5842b47be1a3164a42811613dce09bf5bf1f91",
+          "version": "4.1.3"
         }
       },
       {
@@ -78,7 +78,7 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": "resolved-openapi",
-          "revision": "25120caf43ec6c66800627e648a48f2a91c30127",
+          "revision": "178f80c718790d040838e9f0a491b6910a047edf",
           "version": null
         }
       },
@@ -96,7 +96,7 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": "dereferenced-components",
-          "revision": "c5384e1408d47b33b30a8de0dcff4ca3adf34221",
+          "revision": "93cc0f4c10cd15200357e584bfd2ecefc0d03f56",
           "version": null
         }
       },
@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "120acb15c39aa3217e9888e515de160378fbcc1e",
-          "version": "2.18.0"
+          "revision": "8a865bd15e69526cbdfcfd7c47698eb20b2ba951",
+          "version": "2.19.0"
         }
       },
       {
@@ -258,8 +258,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "f0b118d9af6c4e78bc4f3f4fbb464020172b0bf4",
-          "version": "2.7.5"
+          "revision": "d381bc53edd9de88a75480a2b969bfc26d61ee76",
+          "version": "2.8.0"
         }
       },
       {
