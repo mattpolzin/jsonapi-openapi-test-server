@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": null,
-          "revision": "0872835e7e86a775b362758fb83707e1c9a56e1c",
-          "version": "0.20.0"
+          "revision": "a2b64e811149ef4619d378b84701bd8726a0e1ab",
+          "version": "0.21.0"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "c5d10f4165128c3d0cc0e3c0f0a8ef55947a73a6",
-          "version": "1.12.2"
+          "revision": "c76a9a5085bfc22882f8cff88189662af30806e8",
+          "version": "1.12.3"
         }
       },
       {
