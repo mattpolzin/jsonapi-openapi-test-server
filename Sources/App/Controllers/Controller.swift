@@ -91,12 +91,14 @@ extension Controller {
         let systemLogger: Logging.Logger
         let descriptor: DB.APITestDescriptor
         let eventLoop: EventLoop
-        let database: Database
+        let database: () -> Database
 
-        init(systemLogger: Logging.Logger,
-             descriptor: DB.APITestDescriptor,
-             eventLoop: EventLoop,
-             database: Database) {
+        init(
+            systemLogger: Logging.Logger,
+            descriptor: DB.APITestDescriptor,
+            eventLoop: EventLoop,
+            database: @escaping () -> Database
+        ) {
             self.systemLogger = systemLogger
             self.descriptor = descriptor
             self.eventLoop = eventLoop
@@ -105,38 +107,55 @@ extension Controller {
 
         public func error(path: String?, context: String, message: String) {
             systemLogger.error("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .error,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
+            let _ = eventLoop.submit {
+                try DB.APITestMessage(
+                    testDescriptor: self.descriptor,
+                    messageType: .error,
+                    path: path,
+                    context: context.isEmpty ? nil : context,
+                    message: message
+                ).save(on: self.database())
+            }
         }
 
         public func warning(path: String?, context: String, message: String) {
             systemLogger.warning("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .warning,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
+            let _ = eventLoop.submit {
+                try DB.APITestMessage(
+                    testDescriptor: self.descriptor,
+                    messageType: .warning,
+                    path: path,
+                    context: context.isEmpty ? nil : context,
+                    message: message
+                ).save(on: self.database())
+
+            }
         }
 
         public func success(path: String?, context: String, message: String) {
             systemLogger.info("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
-                                                          messageType: .success,
-                                                          path: path,
-                                                          context: context.isEmpty ? nil : context,
-                                                          message: message).save(on: self.database) }
+            let _ = eventLoop.submit {
+                try DB.APITestMessage(
+                    testDescriptor: self.descriptor,
+                    messageType: .success,
+                    path: path,
+                    context: context.isEmpty ? nil : context,
+                    message: message
+                ).save(on: self.database())
+            }
         }
 
         public func info(path: String?, context: String, message: String) {
             systemLogger.info("\(message)", metadata: ["context": .string(context)])
-            let _ = eventLoop.submit { try DB.APITestMessage(testDescriptor: self.descriptor,
-                                                             messageType: .info,
-                                                             path: path,
-                                                             context: context.isEmpty ? nil : context,
-                                                             message: message).save(on: self.database) }
+            let _ = eventLoop.submit {
+                try DB.APITestMessage(
+                    testDescriptor: self.descriptor,
+                    messageType: .info,
+                    path: path,
+                    context: context.isEmpty ? nil : context,
+                    message: message
+                ).save(on: self.database())
+            }
         }
     }
 }

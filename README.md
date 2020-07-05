@@ -1,7 +1,7 @@
 # JSON:API/OpenAPI Test Server
 ## Requirements
 ### Server
-The test server requires a Postgres database.
+The test server requires a Postgres database and Redis instace.
 
 ## Usage
 
@@ -73,16 +73,16 @@ docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' -v
 You will find the dumped files at `./out/api_test_files.zip`.
 
 ### The Test Server
-You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable.
+You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable. A Redis instance is required to queue up the test runs. You specify the Redis URL in the `API_TEST_REDIS_URL` environment variable.
 
 First you need to run the migrator against your Postgres database.
 ```shell
-docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' -p '8080:80' mattpolzin2/api-test-server migrate --yes
+docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' --env 'API_TEST_REDIS_URL=redis://host:port' -p '8080:80' mattpolzin2/api-test-server migrate --yes
 ```
 
 Then you can start the server.
 ```shell
-docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' -p '8080:80' mattpolzin2/api-test-server
+docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' --env 'API_TEST_REDIS_URL=redis://host:port' -p '8080:80' mattpolzin2/api-test-server
 ```
 
 **NOTE** We must explicitly expose the port to the host device. In this example, `http://localhost:8080` will point to the server which is listening on port `80` in the container.

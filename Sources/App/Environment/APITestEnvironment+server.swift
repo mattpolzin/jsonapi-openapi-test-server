@@ -22,7 +22,18 @@ public extension Environment {
         return config
     }
 
+    static func redisURL() throws -> String {
+        guard let url = Environment.get("API_TEST_REDIS_URL") else {
+            throw RedisError.invalidUrl("Not Set")
+        }
+        return url
+    }
+
     enum DatabaseError: Swift.Error {
+        case invalidUrl(String)
+    }
+
+    enum RedisError: Swift.Error {
         case invalidUrl(String)
     }
 }

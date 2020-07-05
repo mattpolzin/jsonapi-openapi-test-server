@@ -24,6 +24,7 @@ public func produceAPITestPackage(
     outputTo outPath: String,
     zipToPath: String? = nil,
     testSuiteConfiguration: TestSuiteConfiguration,
+    formatGeneratedSwift: Bool = true,
     logger: Logger? = nil
 ) throws {
     let jsonDecoder = JSONDecoder()
@@ -37,6 +38,7 @@ public func produceAPITestPackage(
         outputTo: outPath,
         zipToPath: zipToPath,
         testSuiteConfiguration: testSuiteConfiguration,
+        formatGeneratedSwift: formatGeneratedSwift,
         logger: logger
     )
 }
@@ -46,6 +48,7 @@ public func produceAPITestPackage(
     outputTo outPath: String,
     zipToPath: String? = nil,
     testSuiteConfiguration: TestSuiteConfiguration,
+    formatGeneratedSwift: Bool = true,
     logger: Logger? = nil
 ) {
     produceAPITestPackage(
@@ -54,6 +57,7 @@ public func produceAPITestPackage(
         outputTo: outPath,
         zipToPath: zipToPath,
         testSuiteConfiguration: testSuiteConfiguration,
+        formatGeneratedSwift: formatGeneratedSwift,
         logger: logger
     )
 }
@@ -64,15 +68,30 @@ public func produceAPITestPackage(
     outputTo outPath: String,
     zipToPath: String? = nil,
     testSuiteConfiguration: TestSuiteConfiguration,
+    formatGeneratedSwift: Bool = true,
     logger: Logger? = nil
 ) {
 
     let testDir = outPath + "/Tests/GeneratedAPITests"
     let resourceObjDir = testDir + "/resourceObjects"
 
+    func code<T: SwiftCodeRepresentable>(_ codeRepresentation: T) throws -> String {
+        if formatGeneratedSwift {
+            return try codeRepresentation.formattedSwiftCode()
+        }
+        return codeRepresentation.swiftCode
+    }
+
+    func code(for decl: Decl) throws -> String {
+        if formatGeneratedSwift {
+            return try decl.formattedSwiftCode()
+        }
+        return decl.swiftCode
+    }
+
     // generate namespaces first
     let contents = try! namespaceDecls(for: routes)
-        .map { try $0.enumDecl.formattedSwiftCode() }
+        .map { try code(for: $0.enumDecl) }
         .joined(separator: "\n\n")
     try! write(contents: contents,
           toFileAt: testDir + "/",
@@ -88,7 +107,7 @@ public func produceAPITestPackage(
         Import.FoundationNetworking,
         APIRequestTestSwiftGen.testFuncDecl,
         OpenAPIExampleParseTestSwiftGen.testFuncDecl
-        ].map { try $0.formattedSwiftCode() }
+        ].map(code)
         .joined(separator: "")
     try! write(
         contents: testHelperContents,
@@ -199,7 +218,8 @@ public func produceAPITestPackage(
             for: result.responseDocuments.values,
             extending: namespace(
                 for: OpenAPI.Path(result.endpoint.path.components + [result.endpoint.method.rawValue, "Response"])
-            )
+            ),
+            formatGeneratedSwift: formatGeneratedSwift
         )
 
         if let reqDoc = result.requestDocument {
@@ -208,7 +228,8 @@ public func produceAPITestPackage(
                 for: [reqDoc],
                 extending: namespace(
                     for: OpenAPI.Path(result.endpoint.path.components + [result.endpoint.method.rawValue, "Request"])
-                )
+                ),
+                formatGeneratedSwift: formatGeneratedSwift
             )
         }
 
@@ -219,7 +240,8 @@ public func produceAPITestPackage(
             reqDoc: result.requestDocument,
             respDocs: result.responseDocuments.values,
             httpVerb: result.endpoint.method,
-            extending: namespace(for: result.endpoint.path)
+            extending: namespace(for: result.endpoint.path),
+            formatGeneratedSwift: formatGeneratedSwift
         )
     }
 
@@ -229,7 +251,7 @@ public func produceAPITestPackage(
         testFunctionNames: results.flatMap { $0.testFunctionNames }
     )
     try! write(
-        contents: try! testClassFileContents.formattedSwiftCode(),
+        contents: try! code(testClassFileContents),
         toFileAt: testDir + "/",
         named: "GeneratedTests.swift"
     )
@@ -275,7 +297,8 @@ func documentTypeName(
 func writeResourceObjectFiles<T: Sequence>(
     toPath path: String,
     for documents: T,
-    extending namespace: String
+    extending namespace: String,
+    formatGeneratedSwift: Bool = true
 ) throws where T.Element == DataDocumentSwiftGen {
     for document in documents {
 
@@ -293,15 +316,21 @@ func writeResourceObjectFiles<T: Sequence>(
                     .forEach { stubGen in
 
                         // write relationship stub files
-                        try writeFile(toPath: path,
-                                      for: stubGen,
-                                      extending: namespace)
+                        try writeFile(
+                            toPath: path,
+                            for: stubGen,
+                            extending: namespace,
+                            formatGeneratedSwift: formatGeneratedSwift
+                        )
                 }
 
                 // write resource object files
-                try writeFile(toPath: path,
-                              for: resourceObjectGen,
-                              extending: namespace)
+                try writeFile(
+                    toPath: path,
+                    for: resourceObjectGen,
+                    extending: namespace,
+                    formatGeneratedSwift: formatGeneratedSwift
+                )
         }
     }
 }
@@ -380,7 +409,8 @@ func writeAPIFile<T: Sequence>(
     reqDoc: DataDocumentSwiftGen?,
     respDocs: T,
     httpVerb: HttpMethod,
-    extending namespace: String
+    extending namespace: String,
+    formatGeneratedSwift: Bool = true
 ) throws where T.Element == DataDocumentSwiftGen {
 
     let apiDecl = apiDocumentsBlock(
@@ -397,7 +427,11 @@ func writeAPIFile<T: Sequence>(
         Import.AnyCodable as Decl,
         Import.XCTest as Decl,
         apiDecl
-        ].map { try $0.formattedSwiftCode() }
+        ].map {
+            formatGeneratedSwift
+                ? try $0.formattedSwiftCode()
+                : $0.swiftCode
+        }
         .joined(separator: "")
 
     try write(
@@ -410,7 +444,8 @@ func writeAPIFile<T: Sequence>(
 func writeFile<T: ResourceTypeSwiftGenerator>(
     toPath path: String,
     for resourceObject: T,
-    extending namespace: String
+    extending namespace: String,
+    formatGeneratedSwift: Bool = true
 ) throws {
 
     let swiftTypeName = resourceObject.resourceTypeName
@@ -429,7 +464,11 @@ func writeFile<T: ResourceTypeSwiftGenerator>(
                 decl
             ] as [Decl]
         )
-        .map { try $0.formattedSwiftCode() }
+        .map {
+            formatGeneratedSwift
+                ? try $0.formattedSwiftCode()
+                : $0.swiftCode
+        }
         .joined(separator: "\n")
 
     try write(

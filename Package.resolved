@@ -137,6 +137,42 @@
         }
       },
       {
+        "package": "queues",
+        "repositoryURL": "https://github.com/vapor/queues.git",
+        "state": {
+          "branch": null,
+          "revision": "f0c35103654695a8938cd3e406044d252951e89c",
+          "version": "1.2.0"
+        }
+      },
+      {
+        "package": "queues-redis-driver",
+        "repositoryURL": "https://github.com/vapor/queues-redis-driver",
+        "state": {
+          "branch": "master",
+          "revision": "2212b5daf46a35de6da1ea91af2e0cc927247ccb",
+          "version": null
+        }
+      },
+      {
+        "package": "redis-kit",
+        "repositoryURL": "https://github.com/vapor/redis-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "9ef8f9dc472d022c4e94e5388ccf3c87ad83e2cb",
+          "version": "1.0.0-beta.5"
+        }
+      },
+      {
+        "package": "RediStack",
+        "repositoryURL": "https://gitlab.com/mordil/RediStack.git",
+        "state": {
+          "branch": null,
+          "revision": "8b75ef7f0e3cb82c69f2e2b47ea8f49e7d4e2ca9",
+          "version": "1.0.0-alpha.10"
+        }
+      },
+      {
         "package": "RichJSONParser",
         "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
         "state": {
@@ -278,15 +314,6 @@
           "branch": null,
           "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
           "version": "0.50200.0"
-        }
-      },
-      {
-        "package": "vapor",
-        "repositoryURL": "https://github.com/vapor/vapor",
-        "state": {
-          "branch": null,
-          "revision": "dc2aa1e02e04a47b67cb0dabed628fe844900f30",
-          "version": "4.14.0"
         }
       },
       {

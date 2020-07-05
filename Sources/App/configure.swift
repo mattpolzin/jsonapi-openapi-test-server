@@ -2,6 +2,7 @@ import FluentPostgresDriver
 import Fluent
 import Vapor
 import APITesting
+import QueuesRedisDriver
 
 /// Called before your application initializes.
 ///
@@ -17,17 +18,14 @@ public func configure(_ app: Application, hobbled: Bool = false) throws {
 
     try configureDefaults(for: app)
 
-    // Register middleware
     addMiddleware(app)
 
     if !hobbled {
-        // Configure databases
         try addDatabases(app)
-
-        // Configure migrations
         addMigrations(app)
+
+        try addQueues(app)
     }
 
-    // Register routes
     try addRoutes(app, hobbled: hobbled)
 }
