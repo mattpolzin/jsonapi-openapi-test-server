@@ -89,6 +89,8 @@ public func produceAPITestPackage(
         return decl.swiftCode
     }
 
+    let additionalLineSeparator = formatGeneratedSwift ? "" : "\n"
+
     // generate namespaces first
     let contents = try! namespaceDecls(for: routes)
         .map { try code(for: $0.enumDecl) }
@@ -108,7 +110,7 @@ public func produceAPITestPackage(
         APIRequestTestSwiftGen.testFuncDecl,
         OpenAPIExampleParseTestSwiftGen.testFuncDecl
         ].map(code)
-        .joined(separator: "")
+        .joined(separator: additionalLineSeparator)
     try! write(
         contents: testHelperContents,
         toFileAt: testDir + "/",
@@ -432,7 +434,7 @@ func writeAPIFile<T: Sequence>(
                 ? try $0.formattedSwiftCode()
                 : $0.swiftCode
         }
-        .joined(separator: "")
+        .joined(separator: formatGeneratedSwift ? "" : "\n")
 
     try write(
         contents: outputFileContents,

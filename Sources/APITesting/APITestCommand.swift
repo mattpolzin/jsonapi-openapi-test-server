@@ -219,11 +219,8 @@ public final class APITestCommand: Command {
         .flatMapError { error in
             if let requestLogger = requestLogger {
                 requestLogger.error(
-                    "Testing Failed",
-                    metadata: ["error": .stringConvertible(String(describing: error))]
+                    "Testing Failed: \(String(describing: error))"
                 )
-                // following is tmp to workaround above metadata not being dumped to console with previous call:
-                requestLogger.error("\(String(describing: error))")
             } else {
                 testLogger.error(
                     path: nil,
@@ -327,14 +324,22 @@ public func openAPIDoc(
 
         var headers = HTTPHeaders()
         if let (username, password) = credentials {
-            headers.add(name: .authorization, value: HTTPClient.Authorization.basic(username: username, password: password).headerValue)
+            headers.add(
+                name: .authorization,
+                value: HTTPClient.Authorization.basic(
+                    username: username,
+                    password: password
+                ).headerValue
+            )
         }
 
         let request: HTTPClient.Request
         do {
-            request = try HTTPClient.Request(url: url.string,
-                                         method: .GET,
-                                         headers: headers)
+            request = try HTTPClient.Request(
+                url: url.string,
+                method: .GET,
+                headers: headers
+            )
         } catch {
             return loop.makeFailedFuture(Abort(.badRequest))
         }
@@ -380,8 +385,21 @@ public func openAPIDoc(
                 }
             }
         } else {
-            let data = threadPool.runIfActive(eventLoop: loop) {
-                try Data(contentsOf: filePath)
+            let fileIO = NonBlockingFileIO(threadPool: threadPool)
+
+            let handleAndRegion = fileIO.openFile(
+                path: filePath.path,
+                eventLoop: loop
+            )
+
+            let data: EventLoopFuture<ByteBuffer> = handleAndRegion.flatMap { (handle, region) in
+                let contents = fileIO.read(
+                    fileRegion: region,
+                    allocator: .init(),
+                    eventLoop: loop
+                )
+                contents.whenComplete { _ in try? handle.close() }
+                return contents
             }
 
             let decoder = JSONDecoder.custom(dates: .iso8601)
