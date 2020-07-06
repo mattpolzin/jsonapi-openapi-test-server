@@ -166,8 +166,17 @@ public final class APITestCommand: Command {
 
         let testProgressTracker = testProgressTracking?.0
 
+        let kickOffTime = time(nil)
+
+        func logDuration<T>(tag: String) -> (_ input: T) -> T {
+            return { input in
+                requestLogger?.info("Time elapsed when '\(tag)': \(time(nil) - kickOffTime)")
+                return input
+            }
+        }
+
         func trackProgress(_ progress: @autoclosure () -> Tracker?) -> EventLoopFuture<Void> {
-            zip(progress(), testProgressTracking?.1)
+            return zip(progress(), testProgressTracking?.1)
                 .map { $0.0.save(on: $0.1()) }
                 ?? eventLoop.makeSucceededFuture(())
         }
@@ -189,6 +198,7 @@ public final class APITestCommand: Command {
             testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
             return eventLoop.makeFailedFuture(error)
         }
+        .map(logDuration(tag: "Done Parsing Document"))
         .flatMap { openAPIDoc in
             produceAPITestPackage(
                 on: eventLoop,
@@ -201,6 +211,7 @@ public final class APITestCommand: Command {
                 logger: testLogger
             )
         }
+        .map(logDuration(tag: "Done Producing Test Package"))
         .flatMap { trackProgress(testProgressTracker?.markRunning()) }
         .flatMap {
             runAPITestPackage(
@@ -215,6 +226,7 @@ public final class APITestCommand: Command {
         .always { _ in
             try? cleanupOutFolder(outPath, logger: testLogger)
             requestLogger?.info("Cleaning up tests in \(outPath)")
+            logDuration(tag: "Done Cleaning Up")(())
         }
         .flatMapError { error in
             if let requestLogger = requestLogger {
