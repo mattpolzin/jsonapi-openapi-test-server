@@ -22,6 +22,13 @@ public extension Environment {
         return config
     }
 
+    enum DatabaseError: Swift.Error {
+        case invalidUrl(String)
+    }
+}
+
+// MARK: - Queues Vars
+public extension Environment {
     static func redisURL() throws -> String {
         guard let url = Environment.get("API_TEST_REDIS_URL") else {
             throw RedisError.invalidUrl("Not Set")
@@ -29,12 +36,16 @@ public extension Environment {
         return url
     }
 
-    enum DatabaseError: Swift.Error {
+    enum RedisError: Swift.Error {
         case invalidUrl(String)
     }
 
-    enum RedisError: Swift.Error {
-        case invalidUrl(String)
+    /// `true` if the Jobs Queue should be started
+    /// in the same process as the server. By default,
+    /// this is false and jobs are expected to be processed
+    /// by a queues service in its own process.
+    static var inProcessJobs: Bool {
+        return Environment.get("API_TEST_IN_PROCESS_QUEUES") == "true"
     }
 }
 

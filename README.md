@@ -85,6 +85,14 @@ Then you can start the server.
 docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' --env 'API_TEST_REDIS_URL=redis://host:port' -p '8080:80' mattpolzin2/api-test-server
 ```
 
+#### Jobs Queue
+Testing is run in a jobs queue. That queue can be run in the same process as the API server if you specify `API_TEST_IN_PROCESS_QUEUES=true` as an environment variable but the recommendation is to run the jobs service as its own process.
+
+You start the Jobs Queue using the same docker image as the serve but you specify the `queues` command.
+```shell
+docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' --env 'API_TEST_REDIS_URL=redis://host:port' mattpolzin2/api-test-server queues
+```
+
 **NOTE** We must explicitly expose the port to the host device. In this example, `http://localhost:8080` will point to the server which is listening on port `80` in the container.
 
 Visit the `/docs` API endpoint to see what endpoints the server provides.

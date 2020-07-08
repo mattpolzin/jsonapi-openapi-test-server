@@ -1,0 +1,79 @@
+version: "3.7"
+
+x-common: &common
+  environment:
+    API_TEST_IN_FILE: /app/openapi.json
+    API_TEST_ARCHIVES_PATH: /app/test_archive
+    API_TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+    API_TEST_REDIS_URL: redis://redis:6379
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+
+volumes:
+  test_archive:
+  db_data:
+  redis_data:
+
+services:
+  api_test:
+    <<: *common
+    image: mattpolzin2/api-test-server:latest
+    command: ['serve', '--hostname', '0.0.0.0', '--port', '80']
+    build:
+      context: .
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '8080:80'
+    volumes:
+      - test_archive:/app/test_archive
+#      - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
+#      - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
+
+  queues:
+    <<: *common
+    image: mattpolzin2/api-test-server:latest
+    command: ['queues']
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - test_archive:/app/test_archive
+#      - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
+#      - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
+
+  postgres:
+    image: postgres:12-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5434:5432'
+
+  redis:
+    image: redis:6-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - 'yes'
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+
+  migrator:
+    <<: *common
+    image: mattpolzin2/api-test-server:latest
+    command: ['migrate', '--yes']
+    depends_on:
+      - postgres
+      - api_test
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10

@@ -15,5 +15,7 @@ public func addQueues(_ app: Application) throws {
     let apiTestJob = APITestJob()
     app.queues.add(apiTestJob)
 
-    try app.queues.startInProcessJobs(on: .default)
+    if Environment.inProcessJobs {
+        try app.queues.startInProcessJobs(on: .default)
+    }
 }
