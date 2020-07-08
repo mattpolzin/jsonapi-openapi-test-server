@@ -20,30 +20,6 @@ public protocol Logger {
 typealias HttpMethod = OpenAPI.HttpMethod
 
 public func produceAPITestPackage(
-    from openAPIData: Data,
-    outputTo outPath: String,
-    zipToPath: String? = nil,
-    testSuiteConfiguration: TestSuiteConfiguration,
-    formatGeneratedSwift: Bool = true,
-    logger: Logger? = nil
-) throws {
-    let jsonDecoder = JSONDecoder()
-
-    let openAPIStructure = try jsonDecoder.decode(OpenAPI.Document.self, from: openAPIData)
-        .locallyDereferenced()
-        .resolved()
-
-    produceAPITestPackage(
-        from: openAPIStructure,
-        outputTo: outPath,
-        zipToPath: zipToPath,
-        testSuiteConfiguration: testSuiteConfiguration,
-        formatGeneratedSwift: formatGeneratedSwift,
-        logger: logger
-    )
-}
-
-public func produceAPITestPackage(
     from openAPIDocument: ResolvedDocument,
     outputTo outPath: String,
     zipToPath: String? = nil,

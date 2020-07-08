@@ -414,7 +414,7 @@ public func openAPIDoc(
                 return contents
             }
 
-            let decoder = JSONDecoder.custom(dates: .iso8601)
+            let decoder = JSONDecoder()
 
             return data.flatMap { data in
                 threadPool.runIfActive(eventLoop: loop) {
@@ -425,9 +425,7 @@ public func openAPIDoc(
             }
         }
 
-    case .basicAuth(url: let url,
-                    username: let username,
-                    password: let password):
+    case .basicAuth(url: let url, username: let username, password: let password):
 
         return get(url, credentials: (username: username, password: password))
 
