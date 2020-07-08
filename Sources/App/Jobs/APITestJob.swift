@@ -92,7 +92,6 @@ struct APITestJob: Job {
     }
 
     func error(_ context: QueueContext, _ error: Error, _ payload: Payload) -> EventLoopFuture<Void> {
-        // If you don't want to handle errors you can simply return a future. You can also omit this function entirely.
         return context.eventLoop.future()
     }
 }
