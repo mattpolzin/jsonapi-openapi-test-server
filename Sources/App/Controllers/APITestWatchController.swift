@@ -95,7 +95,7 @@ final class DatabaseAPITestWatchController: APITestWatchController {
     }
 
     private func sendNotificationsFor(test testId: API.APITestDescriptor.Id) {
-        db.logger.info("notifying \(watchers.count) watchers of test update.")
+        db.logger.debug("notifying \(watchers.count) watchers of test update.")
         let result = testController.showResults(
             id: testId.rawValue,
             shouldIncludeMessages: false,
@@ -118,7 +118,7 @@ final class DatabaseAPITestWatchController: APITestWatchController {
     }
 
     private func sendNotificationsFor(message messageId: API.APITestMessage.Id) {
-        db.logger.info("notifying \(watchers.count) watchers of message update.")
+        db.logger.debug("notifying \(watchers.count) watchers of message update.")
         let result = APITestMessageController.showResults(
             id: messageId.rawValue,
             shouldIncludeTestDescriptor: true,

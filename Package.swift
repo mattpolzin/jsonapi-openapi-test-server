@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver", from: "2.0.0-rc.2"),
         .package(url: "https://github.com/vapor/fluent", from: "4.0.0-rc.2.2"),
         .package(url: "https://github.com/vapor/fluent-kit", from: "1.0.0-rc.1.26"),
+        .package(url: "https://github.com/vapor/queues-redis-driver", .branch("master")),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes", .upToNextMinor(from: "0.7.0")),
         .package(url: "https://github.com/mattpolzin/VaporOpenAPI", .upToNextMinor(from: "0.0.13")),
@@ -39,6 +40,7 @@ let package = Package(
           .product(name: "Vapor", package: "vapor"), 
           .product(name: "Fluent", package: "fluent"),
           .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"), 
+          .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
           .product(name: "VaporTypedRoutes", package: "VaporTypedRoutes"),
           .product(name: "VaporOpenAPI", package: "VaporOpenAPI"),
 

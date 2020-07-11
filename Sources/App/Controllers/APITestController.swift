@@ -14,7 +14,6 @@ public final class APITestController: Controller {
     static let zipPathPrefix = Environment.archivesPath
     let outputPath: String
     let defaultOpenAPISource: OpenAPISource?
-    let testEventLoopGroup: MultiThreadedEventLoopGroup
 
     public init(
         outputPath: String,
@@ -22,29 +21,22 @@ public final class APITestController: Controller {
     ) {
         self.outputPath = outputPath
         self.defaultOpenAPISource = openAPISource
-        self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
 
-    deinit {
-        try! testEventLoopGroup.syncShutdownGracefully()
-    }
+    deinit {}
 
-    private func testEventLoop() -> EventLoop {
-        return testEventLoopGroup.next()
-    }
-
-    private func zipPath(for test: DB.APITestDescriptor) -> String {
+    static func zipPath(for test: DB.APITestDescriptor) -> String {
         return Self.zipPathPrefix
             + "/\(test.id!.uuidString).zip"
     }
 
-    private func testLogPath(for test: DB.APITestDescriptor) -> String {
+    static func testLogPath(for test: DB.APITestDescriptor) -> String {
         return Self.zipPathPrefix
             + "/\(test.id!.uuidString).log"
     }
 
-    private func outPath(for test: DB.APITestDescriptor) -> String {
-        return self.outputPath
+    static func outPath(for test: DB.APITestDescriptor, root: String) -> String {
+        return root
             + "/\(test.id!.uuidString)/"
     }
 }
@@ -124,7 +116,7 @@ extension APITestController {
 
         return query.first()
             .unwrap(or: Abort(.notFound))
-            .map(self.zipPath)
+            .map(Self.zipPath)
             .map { FileManager.default.fileExists(atPath: $0) ? $0 : nil }
             .unwrap(or: Abort(.notFound))
             .flatMap(req.fileio.collectFile)
@@ -141,7 +133,7 @@ extension APITestController {
 
         return query.first()
             .unwrap(or: Abort(.notFound))
-            .map(self.testLogPath)
+            .map(Self.testLogPath)
             .map { FileManager.default.fileExists(atPath: $0) ? $0 : nil }
             .unwrap(or: Abort(.notFound))
             .flatMap(req.fileio.collectFile)
@@ -158,8 +150,10 @@ extension APITestController {
         let requestedTestProperties = req.eventLoop.makeSucceededFuture(())
             .flatMapThrowing { try req.decodeBody().primaryResource.value }
             .map { $0 ~> \.testProperties }
-            .optionalFlatMap { Self.givenProperties(with: $0, on: req.db) }
+            .optionalFlatMap { Self.givenProperties(identifiedBy: $0, on: req.db) }
 
+        // here we either use the requested properties
+        // or go and find/create default properties.
         let futureTestProperties: EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> = requestedTestProperties.flatMap {
             if let properties = $0 {
                 return req.eventLoop.makeSucceededFuture(properties)
@@ -191,33 +185,14 @@ extension APITestController {
             // and independent of the API request completion.
             guard let self = self else { return }
 
-            let outPath = self.outPath(for: descriptor)
-            let testLogPath = self.testLogPath(for: descriptor)
-            let zipPath = self.zipPath(for: descriptor)
-            let eventLoop = self.testEventLoop()
-
-            let swiftGenSource = OpenAPISource(source)
-            let testProperties = APITestProperties(
-                openAPISource: swiftGenSource,
-                apiHostOverride: properties.apiHostOverride
-            )
-
-            let testLogger = Controller.Logger(
-                systemLogger: req.logger,
-                descriptor: descriptor,
-                eventLoop: eventLoop,
-                database: req.db
-            )
-
-            let _ = APITestCommand.kickTestsOff(
-                testProgressTracking: (descriptor, req.db),
-                testProperties: testProperties,
-                outPath: outPath,
-                zipPath: zipPath,
-                testLogPath: testLogPath,
-                eventLoop: eventLoop,
-                requestLogger: req.logger,
-                testLogger: testLogger
+            _ = req.queue.dispatch(
+                APITestJob.self,
+                APITestJob.Payload(
+                    descriptor: descriptor,
+                    properties: properties,
+                    source: source,
+                    outputPath: self.outputPath
+                )
             )
         }
 
@@ -235,8 +210,12 @@ extension APITestController {
 }
 
 extension APITestController {
+    /// Attempts to find properties with the given ID.
+    ///
+    /// If they cannot be found in the database, aborts
+    /// with a bad request error.
     static func givenProperties(
-        with testPropertiesId: API.APITestProperties.Id,
+        identifiedBy testPropertiesId: API.APITestProperties.Id,
         on db: Database
     ) -> EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> {
         return DB.APITestProperties
@@ -248,6 +227,14 @@ extension APITestController {
             .unwrap(or: Abort(.badRequest, reason: "Given API test properties could not be found."))
     }
 
+    /// Attempt to find or create default test properties.
+    ///
+    /// If there are no default properties associated with this
+    /// controller (which would have come from ENV variables
+    /// on the server) then this method aborts with a bad request error
+    /// under the assumption that calling this method means the user
+    /// has not specified any properties to use so we needed to try to
+    /// fall back on defaults.
     func defaultProperties(on db: Database) -> EventLoopFuture<(DB.APITestProperties, DB.OpenAPISource)> {
         guard let defaultSource = defaultOpenAPISource else {
             return db.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "No API Test properties specified and no default OpenAPI Source available."))

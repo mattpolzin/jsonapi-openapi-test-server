@@ -85,8 +85,15 @@ ENV ENVIRONMENT=$env
 # Postgres Database URL. Required.
 # ENV API_TEST_DATABASE_URL
 
+# Redis URL. Required.
+# ENV API_TEST_REDIS_URL
+
+# Jobs Queue runs in process. Optional. If false (or undefined),
+#   a jobs process must be run separately.
+# ENV API_TEST_IN_PROCESS_QUEUES
+
 ##
-## Serve (default command)
+## serve (default command)
 ##
 
 # --env
@@ -97,3 +104,11 @@ ENV ENVIRONMENT=$env
 
 ENTRYPOINT ["./Run"]
 CMD ["serve", "--env", "$ENVIRONMENT", "--hostname", "0.0.0.0", "--port", "80"]
+
+##
+## queues
+##
+
+# Use this command to run the queues service outside of the API server process.
+# This is the recommended way to run the Jobs Queue.
+# CMD ["queues"]

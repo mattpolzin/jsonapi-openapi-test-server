@@ -77,9 +77,17 @@ public final class APITestCommand: Command {
         let source: OpenAPISource = try signature.openAPIFile.map { .file(path: $0) } ?? .detect()
         let path = outPath
 
+        let formatGeneratedSwift: Bool
+        #if swift(>=5.3)
+        formatGeneratedSwift = false
+        #else
+        formatGeneratedSwift = true
+        #endif
+
         let testProperties = APITestProperties(
             openAPISource: source,
-            apiHostOverride: signature.serverOverride?.value
+            apiHostOverride: signature.serverOverride?.value,
+            formatGeneratedSwift: formatGeneratedSwift
         )
 
         context.console.print()
@@ -89,12 +97,16 @@ public final class APITestCommand: Command {
         let zipToArg = signature.shouldDumpFiles ? cwd + "/out/api_test_files.zip" : nil
         let testLogPath = cwd + "/out/api_test.log"
 
+        let threadPool = NIOThreadPool(numberOfThreads: 1)
+        threadPool.start()
+
         let future = Self.kickTestsOff(
             testProperties: testProperties,
             outPath: path,
             zipPath: zipToArg,
             testLogPath: testLogPath,
             eventLoop: eventLoop,
+            threadPool: threadPool,
             testLogger: logger
         ).recover { _ in
             if signature.shouldFailHard {
@@ -104,6 +116,8 @@ public final class APITestCommand: Command {
 
         try future
         .wait()
+
+        try threadPool.syncShutdownGracefully()
     }
 
     /// Kick off API Tests.
@@ -115,15 +129,17 @@ public final class APITestCommand: Command {
         zipPath: String?,
         testLogPath: String,
         eventLoop: EventLoop,
+        threadPool: NIOThreadPool,
         testLogger: SwiftGen.Logger
     ) -> EventLoopFuture<Void> {
         return Self.kickTestsOff(
-            testProgressTracking: nil as (NullTracker, Never)?,
+            testProgressTracking: nil as (NullTracker, () -> Never)?,
             testProperties: testProperties,
             outPath: outPath,
             zipPath: zipPath,
             testLogPath: testLogPath,
             eventLoop: eventLoop,
+            threadPool: threadPool,
             requestLogger: nil,
             testLogger: testLogger
         )
@@ -140,6 +156,7 @@ public final class APITestCommand: Command {
     ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
     ///     - testLogPath: The path and filename where plaintext test logs will be saved.
     ///     - eventLoop: The event loop on which the tests should be executed.
+    ///     - threadPool: A thread pool that can be used to perform blocking work.
     ///     - requestLogger: (Optional) If specified, a system logger to which certain process related
     ///         status updates will be logged. These updates will not be the results of tests with the
     ///         notable exception of test summaries on failure (although if this logger is `nil`,
@@ -148,12 +165,13 @@ public final class APITestCommand: Command {
     ///
     /// - returns: An `EventLoopFuture` that will have failed if any tests have failed.
     public static func kickTestsOff<Persister, Tracker: TestProgressTracker>(
-        testProgressTracking: (Tracker, Persister)?,
+        testProgressTracking: (Tracker, () -> Persister)?,
         testProperties: APITestProperties,
         outPath: String,
         zipPath: String?,
         testLogPath: String,
         eventLoop: EventLoop,
+        threadPool: NIOThreadPool,
         requestLogger: Logging.Logger?,
         testLogger: SwiftGen.Logger
     ) -> EventLoopFuture<Void> where Tracker.Persister == Persister {
@@ -161,9 +179,18 @@ public final class APITestCommand: Command {
 
         let testProgressTracker = testProgressTracking?.0
 
+        let kickOffTime = time(nil)
+
+        func logDuration<T>(tag: String) -> (_ input: T) -> T {
+            return { input in
+                requestLogger?.info("Time elapsed when '\(tag)': \(time(nil) - kickOffTime)")
+                return input
+            }
+        }
+
         func trackProgress(_ progress: @autoclosure () -> Tracker?) -> EventLoopFuture<Void> {
-            zip(progress(), testProgressTracking?.1)
-                .map { $0.0.save(on: $0.1) }
+            return zip(progress(), testProgressTracking?.1)
+                .map { $0.0.save(on: $0.1()) }
                 ?? eventLoop.makeSucceededFuture(())
         }
 
@@ -173,7 +200,7 @@ public final class APITestCommand: Command {
             logger: testLogger
         )
         .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
-        .flatMap { openAPIDoc(on: eventLoop, from: testProperties.openAPISource) }
+        .flatMap { openAPIDoc(on: eventLoop, from: testProperties.openAPISource, threadPool: threadPool) }
         .flatMapError { error in
             let errorString: String
             if let error = error as? Abort {
@@ -184,39 +211,47 @@ public final class APITestCommand: Command {
             testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
             return eventLoop.makeFailedFuture(error)
         }
+        .map(logDuration(tag: "Done Parsing Document"))
         .flatMap { openAPIDoc in
             produceAPITestPackage(
                 on: eventLoop,
                 given: openAPIDoc,
                 to: outPath,
+                threadPool: threadPool,
                 zipToPath: zipPath,
                 testSuiteConfiguration: testProperties.testSuiteConfiguration,
+                formatGeneratedSwift: testProperties.formatGeneratedSwift,
                 logger: testLogger
             )
         }
+        .map(logDuration(tag: "Done Producing Test Package"))
         .flatMap { trackProgress(testProgressTracker?.markRunning()) }
-        .flatMap { runAPITestPackage(
-            on: eventLoop,
-            at: outPath,
-            testLogPath: testLogPath,
-            logger: testLogger
+        .flatMap {
+            runAPITestPackage(
+                on: eventLoop,
+                at: outPath,
+                threadPool: threadPool,
+                testLogPath: testLogPath,
+                logger: testLogger
             )
         }
         .flatMap { trackProgress(testProgressTracker?.markPassed()) }
         .always { _ in
             try? cleanupOutFolder(outPath, logger: testLogger)
             requestLogger?.info("Cleaning up tests in \(outPath)")
+            logDuration(tag: "Done Cleaning Up")(())
         }
         .flatMapError { error in
             if let requestLogger = requestLogger {
-                requestLogger.error("Testing Failed",
-                                    metadata: ["error": .stringConvertible(String(describing: error))])
-                // following is tmp to workaround above metadata not being dumped to console with previous call:
-                requestLogger.error("\(String(describing: error))")
+                requestLogger.error(
+                    "Testing Failed: \(String(describing: error))"
+                )
             } else {
-                testLogger.error(path: nil,
-                                 context: "Testing Failed",
-                                 message: String(describing: error))
+                testLogger.error(
+                    path: nil,
+                    context: "Testing Failed",
+                    message: String(describing: error)
+                )
             }
 
             // once finished tracking progress, just recreate a new failed future to return.
@@ -305,7 +340,8 @@ public func prepOutputFolder(
 
 public func openAPIDoc(
     on loop: EventLoop,
-    from source: OpenAPISource
+    from source: OpenAPISource,
+    threadPool: NIOThreadPool
 ) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
     func get(_ url: URI, credentials: (username: String, password: String)? = nil) -> EventLoopFuture<ResolvedDocument> {
@@ -313,14 +349,22 @@ public func openAPIDoc(
 
         var headers = HTTPHeaders()
         if let (username, password) = credentials {
-            headers.add(name: .authorization, value: HTTPClient.Authorization.basic(username: username, password: password).headerValue)
+            headers.add(
+                name: .authorization,
+                value: HTTPClient.Authorization.basic(
+                    username: username,
+                    password: password
+                ).headerValue
+            )
         }
 
         let request: HTTPClient.Request
         do {
-            request = try HTTPClient.Request(url: url.string,
-                                         method: .GET,
-                                         headers: headers)
+            request = try HTTPClient.Request(
+                url: url.string,
+                method: .GET,
+                headers: headers
+            )
         } catch {
             return loop.makeFailedFuture(Abort(.badRequest))
         }
@@ -330,49 +374,71 @@ public func openAPIDoc(
                 return loop.makeFailedFuture(Abort(response.status))
             }
             return loop.makeSucceededFuture(response)
-        }.flatMapThrowing { response in
-            return try ClientResponse(status: response.status, headers: response.headers, body: response.body)
-                .content
-                .decode(OpenAPI.Document.self)
-                .locallyDereferenced()
-                .resolved()
+        }.flatMap { response in
+            let content = ClientResponse(
+                status: response.status,
+                headers: response.headers,
+                body: response.body
+            )
+            .content
+
+            return threadPool.runIfActive(eventLoop: loop) {
+                try content
+                    .decode(OpenAPI.Document.self)
+                    .locallyDereferenced()
+                    .resolved()
+            }
         }.always { _ in try! client.syncShutdown() }
     }
 
     switch source {
     case .file(path: let path):
-        do {
-            let filePath = URL(fileURLWithPath: path)
+        let filePath = URL(fileURLWithPath: path)
 
-            if filePath.pathExtension == "yml" || filePath.pathExtension == "yaml" {
-                let string = try String(contentsOf: filePath)
-
-                let decoder = YAMLDecoder()
-
-                return try loop.makeSucceededFuture(
-                    decoder.decode(OpenAPI.Document.self, from: string)
-                        .locallyDereferenced()
-                        .resolved()
-                )
-            } else {
-                let data = try Data(contentsOf: filePath)
-
-                let decoder = JSONDecoder.custom(dates: .iso8601)
-
-                return try loop.makeSucceededFuture(
-                    decoder.decode(OpenAPI.Document.self, from: data)
-                        .locallyDereferenced()
-                        .resolved()
-                )
+        if filePath.pathExtension == "yml" || filePath.pathExtension == "yaml" {
+            let string = threadPool.runIfActive(eventLoop: loop) {
+                try String(contentsOf: filePath)
             }
 
-        } catch let error {
-            return loop.makeFailedFuture(OpenAPISource.Error.fileReadError(error))
+            let decoder = YAMLDecoder()
+
+            return string.flatMap { string in
+                threadPool.runIfActive(eventLoop: loop) {
+                    try decoder.decode(OpenAPI.Document.self, from: string)
+                        .locallyDereferenced()
+                        .resolved()
+                }
+            }
+        } else {
+            let fileIO = NonBlockingFileIO(threadPool: threadPool)
+
+            let handleAndRegion = fileIO.openFile(
+                path: filePath.path,
+                eventLoop: loop
+            )
+
+            let data: EventLoopFuture<ByteBuffer> = handleAndRegion.flatMap { (handle, region) in
+                let contents = fileIO.read(
+                    fileRegion: region,
+                    allocator: .init(),
+                    eventLoop: loop
+                )
+                contents.whenComplete { _ in try? handle.close() }
+                return contents
+            }
+
+            let decoder = JSONDecoder()
+
+            return data.flatMap { data in
+                threadPool.runIfActive(eventLoop: loop) {
+                    try decoder.decode(OpenAPI.Document.self, from: data)
+                        .locallyDereferenced()
+                        .resolved()
+                }
+            }
         }
 
-    case .basicAuth(url: let url,
-                    username: let username,
-                    password: let password):
+    case .basicAuth(url: let url, username: let username, password: let password):
 
         return get(url, credentials: (username: username, password: password))
 
@@ -385,16 +451,19 @@ public func produceAPITestPackage(
     on loop: EventLoop,
     given openAPIDoc: ResolvedDocument,
     to outputPath: String,
+    threadPool: NIOThreadPool,
     zipToPath: String? = nil,
     testSuiteConfiguration: JSONAPISwiftGen.TestSuiteConfiguration,
+    formatGeneratedSwift: Bool = true,
     logger: SwiftGen.Logger
 ) -> EventLoopFuture<Void> {
-    loop.submit {
+    threadPool.runIfActive(eventLoop: loop) {
         SwiftGen.produceAPITestPackage(
             from: openAPIDoc,
             outputTo: outputPath,
             zipToPath: zipToPath,
             testSuiteConfiguration: testSuiteConfiguration,
+            formatGeneratedSwift: formatGeneratedSwift,
             logger: logger
         )
     }
@@ -403,10 +472,11 @@ public func produceAPITestPackage(
 public func runAPITestPackage(
     on loop: EventLoop,
     at outputPath: String,
+    threadPool: NIOThreadPool,
     testLogPath: String,
     logger: SwiftGen.Logger
 ) -> EventLoopFuture<Void> {
-    loop.submit {
+    threadPool.runIfActive(eventLoop: loop) {
         try SwiftGen.runAPITestPackage(
             at: outputPath,
             testLogPath: testLogPath,
