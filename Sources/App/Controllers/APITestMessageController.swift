@@ -15,7 +15,7 @@ import struct Logging.Logger
 import APIModels
 
 /// Controls basic CRUD operations on API Test Messages.
-final class APITestMessageController: Controller {
+public final class APITestMessageController: Controller {
     static func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             return req.response.badRequest
@@ -62,11 +62,22 @@ extension APITestMessageController {
         }
 
         let notFound: CannedResponse<API.SingleAPITestMessageDocument.ErrorDocument>
-            = Controller.jsonNotFoundError(details: "The requested tests were not found")
+            = Controller.jsonNotFoundError(details: "The requested message was not found")
 
         let badRequest: CannedResponse<API.SingleAPITestMessageDocument.ErrorDocument>
-            = Controller.jsonBadRequestError(details: "Test ID not specified in path")
+            = Controller.jsonBadRequestError(details: "Message ID not specified in path")
 
         static let shared = Self()
+    }
+}
+
+// MARK: - Route Configuration
+extension APITestMessageController {
+    public static func mount(on app: Application, at rootPath: RoutingKit.PathComponent...) {
+        app.on(
+            .GET,
+            rootPath.map(\.openAPIPathComponent) + [":id".description("Id of the API Test Message.")],
+            use: Self.show
+        )
     }
 }

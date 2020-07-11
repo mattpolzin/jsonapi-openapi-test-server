@@ -30,6 +30,9 @@ public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
 
     testController.mount(on: app, at: "api_tests")
 
+    // MARK: - Test Messages
+    APITestMessageController.mount(on: app, at: "api_test_messages")
+
     // MARK: - Watching (via WebSockets)
     let testWatchController: APITestWatchController
     if hobbled {
