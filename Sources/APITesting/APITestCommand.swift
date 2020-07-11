@@ -77,9 +77,17 @@ public final class APITestCommand: Command {
         let source: OpenAPISource = try signature.openAPIFile.map { .file(path: $0) } ?? .detect()
         let path = outPath
 
+        let formatGeneratedSwift: Bool
+        #if swift(>=5.3)
+        formatGeneratedSwift = false
+        #else
+        formatGeneratedSwift = true
+        #endif
+
         let testProperties = APITestProperties(
             openAPISource: source,
-            apiHostOverride: signature.serverOverride?.value
+            apiHostOverride: signature.serverOverride?.value,
+            formatGeneratedSwift: formatGeneratedSwift
         )
 
         context.console.print()
@@ -89,13 +97,16 @@ public final class APITestCommand: Command {
         let zipToArg = signature.shouldDumpFiles ? cwd + "/out/api_test_files.zip" : nil
         let testLogPath = cwd + "/out/api_test.log"
 
+        let threadPool = NIOThreadPool(numberOfThreads: 1)
+        threadPool.start()
+
         let future = Self.kickTestsOff(
             testProperties: testProperties,
             outPath: path,
             zipPath: zipToArg,
             testLogPath: testLogPath,
             eventLoop: eventLoop,
-            threadPool: .init(numberOfThreads: 1),
+            threadPool: threadPool,
             testLogger: logger
         ).recover { _ in
             if signature.shouldFailHard {
@@ -105,6 +116,8 @@ public final class APITestCommand: Command {
 
         try future
         .wait()
+
+        try threadPool.syncShutdownGracefully()
     }
 
     /// Kick off API Tests.
