@@ -11,12 +11,12 @@ You can additionally create tests that make API calls and verify that the actual
 ```json
 {
     "test_name": {
-        "test_host": "url", (optional, if omitted then default server for API will be used.
-        "skip_example": true | false, (optional, defaults to false)
-        "ignore_missing_parameter_warnings": true | false, (optional, defaults to false)
+        "test_host": "url",
+        "skip_example": false,
+        "ignore_missing_parameter_warnings": false,
         "parameters": {
             "path_param_name": "value",
-            "header_param_name": "value" (must be a string, even if the parameter type is Int or other)
+            "header_param_name": "value"
         },
         "query_parameters": [
             {
@@ -26,7 +26,13 @@ You can additionally create tests that make API calls and verify that the actual
         ]
     }
 }
-```  
+```
+
+Parameters:
+- `test_host`: optional, if omitted then default server for API will be used.
+- `skip_example`: optional, defaults to false.
+- `ignore_missing_parameter_warnings`: optional, defaults to false.
+- `parameters` values: Must be strings, even if the parameter type is Int or other.
 
 ### The Commandline Tool
 #### Against a URL
