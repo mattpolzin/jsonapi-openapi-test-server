@@ -110,8 +110,8 @@ public func produceAPITestPackage(
             endpoint: ResolvedEndpoint,
             documentFileNameString: String,
             apiRequestTest: APIRequestTestSwiftGen?,
-            requestDocument: DataDocumentSwiftGen?,
-            responseDocuments: [OpenAPI.Response.StatusCode : DataDocumentSwiftGen],
+            requestDocument: DocumentSwiftGenerator?,
+            responseDocuments: [OpenAPI.Response.StatusCode : DocumentSwiftGenerator],
             testFunctionNames: [TestFunctionName]
         )
     ]
@@ -132,7 +132,7 @@ public func produceAPITestPackage(
             logger: logger
         )
 
-        let requestDocument: DataDocumentSwiftGen?
+        let requestDocument: DocumentSwiftGenerator?
         do {
             try requestDocument = endpoint
                 .requestBody
@@ -277,10 +277,14 @@ func writeResourceObjectFiles<T: Sequence>(
     for documents: T,
     extending namespace: String,
     formatGeneratedSwift: Bool = true
-) throws where T.Element == DataDocumentSwiftGen {
+) throws where T.Element == DocumentSwiftGenerator {
     for document in documents {
 
-        let resourceObjectGenerators = document.resourceObjectGenerators
+        guard let jsonAPIDocument = document as? JSONAPIDocumentSwiftGen else {
+            continue
+        }
+
+        let resourceObjectGenerators = jsonAPIDocument.resourceObjectGenerators
 
         let definedResourceObjectNames = Set(resourceObjectGenerators
             .flatMap { $0.exportedSwiftTypeNames })
@@ -332,10 +336,10 @@ func writeResourceObjectFiles<T: Sequence>(
 /// ```
 func apiDocumentsBlock<T: Sequence>(
     request: APIRequestTestSwiftGen?,
-    requestDoc: DataDocumentSwiftGen?,
+    requestDoc: DocumentSwiftGenerator?,
     responseDocs: T,
     httpVerb: HttpMethod
-) -> Decl where T.Element == DataDocumentSwiftGen {
+) -> Decl where T.Element == DocumentSwiftGenerator {
     let requestDocAndExample = requestDoc.map { doc in
         doc.decls
             + (doc.exampleGenerator?.decls ?? [])
@@ -384,12 +388,12 @@ extension Decl {
 func writeAPIFile<T: Sequence>(
     toPath path: String,
     for request: APIRequestTestSwiftGen?,
-    reqDoc: DataDocumentSwiftGen?,
+    reqDoc: DocumentSwiftGenerator?,
     respDocs: T,
     httpVerb: HttpMethod,
     extending namespace: String,
     formatGeneratedSwift: Bool = true
-) throws where T.Element == DataDocumentSwiftGen {
+) throws where T.Element == DocumentSwiftGenerator {
 
     let apiDecl = apiDocumentsBlock(
         request: request,
@@ -544,8 +548,8 @@ func documents(
     on server: OpenAPI.Server,
     testSuiteConfiguration: TestSuiteConfiguration,
     logger: Logger?
-) -> [OpenAPI.Response.StatusCode: DataDocumentSwiftGen] {
-    var responseDocuments = [OpenAPI.Response.StatusCode: DataDocumentSwiftGen]()
+) -> [OpenAPI.Response.StatusCode: DocumentSwiftGenerator] {
+    var responseDocuments = [OpenAPI.Response.StatusCode: DocumentSwiftGenerator]()
     for (statusCode, response) in endpoint.responses {
 
         let contextString = "Parsing the HTTP \(statusCode.rawValue) response document for the \(endpoint.method.rawValue) endpoint"
@@ -571,15 +575,6 @@ func documents(
         }
 
         let responseSchema = jsonResponse.schema
-
-        guard case .object = responseSchema else {
-            logger?.warning(
-                path: endpoint.path.rawValue,
-                context: contextString,
-                message: "Found non-object response schema root (expected JSON:API 'data' object). Skipping '\(String(describing: responseSchema.jsonTypeFormat?.jsonType))'."
-            )
-            continue
-        }
 
         let responseBodyTypeName = "Document_\(statusCode.rawValue)"
         let examplePropName = "example_\(statusCode.rawValue)"
@@ -630,19 +625,36 @@ func documents(
         }
 
         do {
-            responseDocuments[statusCode] = try DataDocumentSwiftGen(
+            responseDocuments[statusCode] = try JSONAPIDocumentSwiftGen(
                 swiftTypeName: responseBodyTypeName,
                 structure: responseSchema,
                 allowPlaceholders: false,
                 example: example,
                 testExampleFuncs: testExampleFuncs
             )
-        } catch let err {
+        } catch let error {
             logger?.warning(
                 path: endpoint.path.rawValue,
                 context: contextString,
-                message: String(describing: err)
+                message: String(describing: error)
             )
+
+            do {
+                responseDocuments[statusCode] = try StructDocumentSwiftGen(
+                    swiftTypeName: responseBodyTypeName,
+                    structure: responseSchema,
+                    allowPlaceholders: false,
+                    example: example,
+                    testExampleFuncs: testExampleFuncs
+                )
+            } catch let error {
+                logger?.warning(
+                    path: endpoint.path.rawValue,
+                    context: contextString,
+                    message: String(describing: error)
+                )
+                continue
+            }
             continue
         }
     }
@@ -654,7 +666,7 @@ func document(
     for httpVerb: HttpMethod,
     at path: OpenAPI.Path,
     logger: Logger?
-) throws -> DataDocumentSwiftGen? {
+) throws -> DocumentSwiftGenerator? {
 
     guard let jsonRequest = request.content[.json] else {
         return nil
@@ -662,17 +674,9 @@ func document(
 
     let requestSchema = jsonRequest.schema
 
-    guard case .object = requestSchema else {
-        logger?.warning(
-            path: path.rawValue,
-            context: "Parsing the request document",
-            message: "Found non-object request schema root (expected JSON:API 'data' object). Skipping \(String(describing: requestSchema.jsonTypeFormat?.jsonType))"
-        )
-        return nil
-    }
-
     let requestBodyTypeName = "Document"
     let examplePropName = "example"
+    let contextString = "Parsing the request document for the \(httpVerb.rawValue) endpoint"
 
     let example: ExampleSwiftGen?
     do {
@@ -680,7 +684,7 @@ func document(
     } catch let err {
         logger?.warning(
             path: path.rawValue,
-            context: "Parsing the request document for the \(httpVerb.rawValue) endpoint",
+            context: contextString,
             message: String(describing: err)
         )
         example = nil
@@ -700,20 +704,40 @@ func document(
     } catch let err {
         logger?.warning(
             path: path.rawValue,
-            context: "Parsing the request document for the \(httpVerb.rawValue) endpoint",
+            context: contextString,
             message: String(describing: err)
         )
 
         testExampleFuncs = []
     }
 
-    return try DataDocumentSwiftGen(
-        swiftTypeName: requestBodyTypeName,
-        structure: requestSchema,
-        allowPlaceholders: false,
-        example: example,
-        testExampleFuncs: testExampleFuncs
-    )
+    let documentGen: DocumentSwiftGenerator
+    do {
+        documentGen = try JSONAPIDocumentSwiftGen(
+            swiftTypeName: requestBodyTypeName,
+            structure: requestSchema,
+            allowPlaceholders: false,
+            example: example,
+            testExampleFuncs: testExampleFuncs
+        )
+    } catch let error {
+
+        logger?.warning(
+            path: path.rawValue,
+            context: contextString,
+            message: String(describing: error)
+        )
+
+        documentGen = try StructDocumentSwiftGen(
+            swiftTypeName: requestBodyTypeName,
+            structure: requestSchema,
+            allowPlaceholders: false,
+            example: example,
+            testExampleFuncs: testExampleFuncs
+        )
+    }
+
+    return documentGen
 }
 
 func exampleTests(

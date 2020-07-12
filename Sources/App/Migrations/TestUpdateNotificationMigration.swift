@@ -31,17 +31,17 @@ public struct TestUpdateNotificationMigration: Migration {
 
         let descriptorTrigger = db.raw("""
             CREATE TRIGGER test_descriptor_event
-            AFTER INSERT OR UPDATE ON \(DB.APITestDescriptor.schema)
+            AFTER INSERT OR UPDATE ON \(raw: DB.APITestDescriptor.schema)
             FOR EACH ROW
-            EXECUTE FUNCTION test_update_notify('\(DB.APITestDescriptor.schema)')
+            EXECUTE FUNCTION test_update_notify('\(raw: DB.APITestDescriptor.schema)')
         """)
         .run()
 
         let messageTrigger = db.raw("""
             CREATE TRIGGER test_message_event
-            AFTER INSERT OR UPDATE ON \(DB.APITestMessage.schema)
+            AFTER INSERT OR UPDATE ON \(raw: DB.APITestMessage.schema)
             FOR EACH ROW
-            EXECUTE FUNCTION test_update_notify('\(DB.APITestMessage.schema)')
+            EXECUTE FUNCTION test_update_notify('\(raw: DB.APITestMessage.schema)')
         """)
         .run()
 
