@@ -194,9 +194,10 @@ public final class APITestCommand: Command {
                 ?? eventLoop.makeSucceededFuture(())
         }
 
-        return prepOutputFolder(
+        return prepOutputFolders(
             on: eventLoop,
             at: outPath,
+            testLogPath: testLogPath,
             logger: testLogger
         )
         .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
@@ -329,13 +330,14 @@ extension APITestCommand {
 }
 
 // MARK: - Helpers
-public func prepOutputFolder(
+public func prepOutputFolders(
     on loop: EventLoop,
     at outputPath: String,
+    testLogPath: String,
     logger: SwiftGen.Logger
 ) -> EventLoopFuture<Void> {
 
-    loop.submit { try prepOutFolder(outputPath, logger: logger) }
+    loop.submit { try prepOutFolders(outputPath, testLogPath: testLogPath, logger: logger) }
 }
 
 public func openAPIDoc(

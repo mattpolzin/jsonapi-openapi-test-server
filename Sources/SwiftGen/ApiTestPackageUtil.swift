@@ -9,24 +9,36 @@ import Foundation
 import OpenAPIKit
 import JSONAPISwiftGen
 
-public func prepOutFolder(_ outPath: String, logger: Logger) throws {
+public func prepOutFolders(_ outPath: String, testLogPath: String, logger: Logger) throws {
     try? FileManager.default.removeItem(atPath: outPath + "/Sources/GeneratedAPI")
     try? FileManager.default.removeItem(atPath: outPath + "/Tests/GeneratedAPITests")
     try? FileManager.default.removeItem(atPath: outPath + "/api_tests.log")
     try? FileManager.default.removeItem(atPath: outPath + "/.build")
 
+    if let testLogFolder = URL(string: testLogPath)?.deletingLastPathComponent() {
+        try? FileManager.default.createDirectory(
+            atPath: testLogFolder.path,
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
+    }
+
     if !FileManager.default.fileExists(atPath: outPath + "/Sources/GeneratedAPI") {
-        try FileManager.default.createDirectory(atPath: outPath + "/Sources/GeneratedAPI",
-                                                withIntermediateDirectories: true,
-                                                attributes: nil)
+        try FileManager.default.createDirectory(
+            atPath: outPath + "/Sources/GeneratedAPI",
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
 
         shell("touch \(outPath)/Sources/GeneratedAPI/Empty.swift")
     }
 
     if !FileManager.default.fileExists(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects") {
-        try FileManager.default.createDirectory(atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",
-                                                withIntermediateDirectories: true,
-                                                attributes: nil)
+        try FileManager.default.createDirectory(
+            atPath: outPath + "/Tests/GeneratedAPITests/resourceObjects",
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
     }
 }
 
@@ -54,7 +66,7 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
             return "Test"
         }
         if functionName.context.contextPrefix == "test_example_parse" {
-            return "Example Parsing Test"
+            return "Example Parsing"
 
         } else if functionName.context.contextPrefix == "test_example_request" {
             let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
