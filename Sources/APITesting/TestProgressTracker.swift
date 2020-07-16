@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 12/8/19.
 //
 
-import FluentKit
+import Vapor
 
 public protocol TestProgressTracker {
     associatedtype Persister
