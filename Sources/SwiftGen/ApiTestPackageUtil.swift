@@ -172,7 +172,7 @@ public enum TestPackageSwiftError: Swift.Error, CustomStringConvertible {
             return "Failed to build & run tests with output:\n\(stdout)\n"
 
         case .testsFailed(succeeded: let succeeded, failed: let failed):
-            return "\(failed)/\(succeeded + failed) Tests Failed."
+            return "\(failed)/\(succeeded + failed) Test Assertions Failed."
         }
     }
 }
