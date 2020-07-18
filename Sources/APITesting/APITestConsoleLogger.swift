@@ -13,12 +13,18 @@ final class APITestConsoleLogger: SwiftGen.Logger {
     let console: Console
     let enableWarnings: Bool
 
+    private(set) var warningCount: Int
+    private(set) var errorCount: Int
+
     init(console: Console, enableWarnings: Bool = true) {
         self.console = console
         self.enableWarnings = enableWarnings
+        self.warningCount = 0
+        self.errorCount = 0
     }
 
     public func error(path: String?, context: String, message: String) {
+        errorCount += 1
         console.error("!> \(message)")
         console.print("--")
         console.print("-- \(context)")
@@ -32,6 +38,7 @@ final class APITestConsoleLogger: SwiftGen.Logger {
     }
 
     public func warning(path: String?, context: String, message: String) {
+        warningCount += 1
         guard enableWarnings else { return }
 
         console.warning("*> \(message)")

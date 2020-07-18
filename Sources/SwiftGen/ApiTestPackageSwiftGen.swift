@@ -15,6 +15,9 @@ public protocol Logger {
     func warning(path: String?, context: String, message: String)
     func success(path: String?, context: String, message: String)
     func info(path: String?, context: String, message: String)
+
+    var errorCount: Int { get }
+    var warningCount: Int { get }
 }
 
 typealias HttpMethod = OpenAPI.HttpMethod
@@ -245,7 +248,7 @@ public func produceAPITestPackage(
     logger?.info(
         path: nil,
         context: "Processing Entire OpenAPI Document",
-        message: "Created \(totalTestCases) test cases across \(totalEndpointCount) endpoints mounted at \(totalRouteCount) routes."
+        message: "Created \(totalTestCases) test cases across \(totalEndpointCount) endpoints mounted at \(totalRouteCount) routes. [Warnings: \(logger?.warningCount ?? 0), Errors: \(logger?.errorCount ?? 0)]"
     )
 }
 

@@ -15,6 +15,9 @@ final class APITestDatabaseLogger: SwiftGen.Logger {
     let eventLoop: EventLoop
     let database: () -> Database
 
+    private(set) var warningCount: Int
+    private(set) var errorCount: Int
+
     init(
         systemLogger: Logging.Logger,
         descriptor: DB.APITestDescriptor,
@@ -25,9 +28,12 @@ final class APITestDatabaseLogger: SwiftGen.Logger {
         self.descriptor = descriptor
         self.eventLoop = eventLoop
         self.database = database
+        self.errorCount = 0
+        self.warningCount = 0
     }
 
     public func error(path: String?, context: String, message: String) {
+        errorCount += 1
         systemLogger.error("\(message)", metadata: ["context": .string(context)])
         let _ = eventLoop.submit {
             try DB.APITestMessage(
@@ -41,6 +47,7 @@ final class APITestDatabaseLogger: SwiftGen.Logger {
     }
 
     public func warning(path: String?, context: String, message: String) {
+        warningCount += 1
         systemLogger.warning("\(message)", metadata: ["context": .string(context)])
         let _ = eventLoop.submit {
             try DB.APITestMessage(
