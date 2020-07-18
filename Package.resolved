@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": null,
-          "revision": "4a2b6e35b6549a715953c4716eb859af355b0fad",
-          "version": "0.22.1"
+          "revision": "f4de144df9b5189f9e8cad9f9db6f85b63739405",
+          "version": "0.22.2"
         }
       },
       {
@@ -305,6 +305,15 @@
           "branch": null,
           "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
           "version": "0.50200.0"
+        }
+      },
+      {
+        "package": "vapor",
+        "repositoryURL": "https://github.com/vapor/vapor",
+        "state": {
+          "branch": null,
+          "revision": "4778e2ab335d4055ee308b0aa71fab32db0624a4",
+          "version": "4.25.0"
         }
       },
       {
