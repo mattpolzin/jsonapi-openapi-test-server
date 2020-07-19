@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "OpenAPIReflection",
+        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
+        "state": {
+          "branch": null,
+          "revision": "34eb557d0ab49a95d3a39e7a821fcb12ff50ba8a",
+          "version": "0.3.0"
+        }
+      },
+      {
         "package": "Poly",
         "repositoryURL": "https://github.com/mattpolzin/Poly",
         "state": {
@@ -125,6 +134,15 @@
           "branch": null,
           "revision": "ffa8b35d239e17074bb60c5b00ca62b0ec428d01",
           "version": "1.2.1"
+        }
+      },
+      {
+        "package": "pure-swift-json",
+        "repositoryURL": "https://github.com/fabianfett/pure-swift-json",
+        "state": {
+          "branch": null,
+          "revision": "5dc8ec1d857f3b56e3a718a01165ae80c7677d48",
+          "version": "0.4.0"
         }
       },
       {

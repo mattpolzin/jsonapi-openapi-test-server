@@ -8,6 +8,11 @@
 import Foundation
 import JSONAPISwiftGen
 
+public enum JSONDecodingStrategy {
+    case fast
+    case stable
+}
+
 public struct APITestProperties {
     let apiHostOverride: URL?
     let openAPISource: OpenAPISource
@@ -15,15 +20,22 @@ public struct APITestProperties {
     /// run code formatting on the Swift code
     /// generated for the test suite.
     let formatGeneratedSwift: Bool
+    /// If the test is run against a JSON document,
+    /// which strategy should be used. This option
+    /// defaults to `.stable` and is not currently used
+    /// for YAML decoding.
+    let jsonDecodingStrategy: JSONDecodingStrategy
 
     public init(
         openAPISource: OpenAPISource,
         apiHostOverride: URL?,
-        formatGeneratedSwift: Bool = true
+        formatGeneratedSwift: Bool = true,
+        jsonDecodingStrategy: JSONDecodingStrategy = .stable
     ) {
         self.apiHostOverride = apiHostOverride
         self.openAPISource = openAPISource
         self.formatGeneratedSwift = formatGeneratedSwift
+        self.jsonDecodingStrategy = jsonDecodingStrategy
     }
 }
 

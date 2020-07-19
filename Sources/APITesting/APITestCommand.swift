@@ -7,6 +7,7 @@
 
 import Foundation
 import Yams
+import PureSwiftJSON
 import Vapor
 import SwiftGen
 import OpenAPIKit
@@ -33,6 +34,12 @@ public final class APITestCommand: Command {
             help: "Do not print warnings in the output."
         )
         var shouldIgnoreWarnings: Bool
+
+        @Flag(
+            name: "fast-json",
+            help: "Use a faster JSON parser that is less battle-tested than the stable default."
+        )
+        var useFastJSONDecoder: Bool
 
         @Option(
             name: "override-server",
@@ -87,7 +94,8 @@ public final class APITestCommand: Command {
         let testProperties = APITestProperties(
             openAPISource: source,
             apiHostOverride: signature.serverOverride?.value,
-            formatGeneratedSwift: formatGeneratedSwift
+            formatGeneratedSwift: formatGeneratedSwift,
+            jsonDecodingStrategy: signature.useFastJSONDecoder ? .fast : .stable
         )
 
         context.console.print()
@@ -201,7 +209,14 @@ public final class APITestCommand: Command {
             logger: testLogger
         )
         .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
-        .flatMap { openAPIDoc(on: eventLoop, from: testProperties.openAPISource, threadPool: threadPool) }
+        .flatMap {
+            openAPIDoc(
+                on: eventLoop,
+                from: testProperties.openAPISource,
+                jsonDecodingStrategy: testProperties.jsonDecodingStrategy,
+                threadPool: threadPool
+            )
+        }
         .flatMapError { error in
             let errorString: String
             if let error = error as? Abort {
@@ -281,6 +296,7 @@ public func prepOutputFolders(
 public func openAPIDoc(
     on loop: EventLoop,
     from source: OpenAPISource,
+    jsonDecodingStrategy: JSONDecodingStrategy,
     threadPool: NIOThreadPool
 ) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
@@ -367,11 +383,16 @@ public func openAPIDoc(
                 return contents
             }
 
-            let decoder = JSONDecoder()
-
             return data.flatMap { data in
                 threadPool.runIfActive(eventLoop: loop) {
-                    try decoder.decode(OpenAPI.Document.self, from: data)
+                    let document: OpenAPI.Document
+                    switch jsonDecodingStrategy {
+                    case .stable:
+                        document = try JSONDecoder().decode(OpenAPI.Document.self, from: data)
+                    case .fast:
+                        document = try PSJSONDecoder().decode(OpenAPI.Document.self, from: data.readableBytesView)
+                    }
+                    return try document
                         .locallyDereferenced()
                         .resolved()
                 }

@@ -29,7 +29,8 @@ let package = Package(
         // .package(name: "JSONAPI-OpenAPI", path: "../JSONAPI-OpenAPI"),
         .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "1.4.0"),
         .package(url: "https://github.com/mattpolzin/JSONAPI", from: "4.0.0"),
-        .package(url: "https://github.com/jpsim/Yams", from: "3.0.0")
+        .package(url: "https://github.com/jpsim/Yams", from: "3.0.0"),
+        .package(url: "https://github.com/fabianfett/pure-swift-json", .upToNextMinor(from: "0.4.0"))
     ],
     targets: [
         /// MARK: Server App library
@@ -64,6 +65,7 @@ let package = Package(
             .product(name: "Vapor", package: "vapor"),
 
             .product(name: "Yams", package: "Yams"),
+            .product(name: "PureSwiftJSON", package: "pure-swift-json"),
 
             "SwiftGen"
         ]),
