@@ -101,15 +101,6 @@
         }
       },
       {
-        "package": "OpenAPIReflection",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
-        "state": {
-          "branch": null,
-          "revision": "34eb557d0ab49a95d3a39e7a821fcb12ff50ba8a",
-          "version": "0.3.0"
-        }
-      },
-      {
         "package": "Poly",
         "repositoryURL": "https://github.com/mattpolzin/Poly",
         "state": {
@@ -215,6 +206,15 @@
           "branch": null,
           "revision": "ea9928b7f4a801b175a00b982034d9c54ecb6167",
           "version": "3.7.0"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "223d62adc52d51669ae2ee19bdb8b7d9fd6fcd9c",
+          "version": "0.0.6"
         }
       },
       {
