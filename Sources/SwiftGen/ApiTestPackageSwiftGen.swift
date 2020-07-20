@@ -579,6 +579,8 @@ func documents(
 
         let responseSchema = jsonResponse.schema
 
+        let expectJSONAPISchema = jsonResponse.vendorExtensions["x-not-json-api"]?.value as? Bool != true
+
         let responseBodyTypeName = "Document_\(statusCode.rawValue)"
         let examplePropName = "example_\(statusCode.rawValue)"
 
@@ -628,12 +630,15 @@ func documents(
         }
 
         do {
-            responseDocuments[statusCode] = try JSONAPIDocumentSwiftGen(
+            responseDocuments[statusCode] = try documentGenerator(
+                expectJSONAPISchema: expectJSONAPISchema,
                 swiftTypeName: responseBodyTypeName,
                 structure: responseSchema,
-                allowPlaceholders: false,
                 example: example,
-                testExampleFuncs: testExampleFuncs
+                testExampleFuncs: testExampleFuncs,
+                path: endpoint.path,
+                context: contextString,
+                logger: logger
             )
         } catch let error {
             logger?.warning(
@@ -641,23 +646,6 @@ func documents(
                 context: contextString,
                 message: String(describing: error)
             )
-
-            do {
-                responseDocuments[statusCode] = try StructDocumentSwiftGen(
-                    swiftTypeName: responseBodyTypeName,
-                    structure: responseSchema,
-                    allowPlaceholders: false,
-                    example: example,
-                    testExampleFuncs: testExampleFuncs
-                )
-            } catch let error {
-                logger?.warning(
-                    path: endpoint.path.rawValue,
-                    context: contextString,
-                    message: String(describing: error)
-                )
-                continue
-            }
             continue
         }
     }
@@ -676,6 +664,8 @@ func document(
     }
 
     let requestSchema = jsonRequest.schema
+
+    let expectJSONAPISchema = jsonRequest.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
     let requestBodyTypeName = "Document"
     let examplePropName = "example"
@@ -714,33 +704,63 @@ func document(
         testExampleFuncs = []
     }
 
-    let documentGen: DocumentSwiftGenerator
-    do {
-        documentGen = try JSONAPIDocumentSwiftGen(
-            swiftTypeName: requestBodyTypeName,
-            structure: requestSchema,
-            allowPlaceholders: false,
-            example: example,
-            testExampleFuncs: testExampleFuncs
-        )
-    } catch let error {
+    return try documentGenerator(
+        expectJSONAPISchema: expectJSONAPISchema,
+        swiftTypeName: requestBodyTypeName,
+        structure: requestSchema,
+        example: example,
+        testExampleFuncs: testExampleFuncs,
+        path: path,
+        context: contextString,
+        logger: logger
+    )
+}
 
-        logger?.warning(
-            path: path.rawValue,
-            context: contextString,
-            message: String(describing: error)
-        )
-
-        documentGen = try StructDocumentSwiftGen(
-            swiftTypeName: requestBodyTypeName,
-            structure: requestSchema,
-            allowPlaceholders: false,
-            example: example,
-            testExampleFuncs: testExampleFuncs
-        )
+/// Create a document swift generator by attempting to
+/// treat the given schema as JSON:API or not depending
+/// on the value passed as `expectJSONAPISchema`.
+///
+/// This will only attempt to create a document based on
+/// the JSON:API specification of `expectJSONAPISchema`
+/// is `true`, but it will attempt to create a document based
+/// on generic JSON structures regardless of whether it has
+/// just failed to create a document based on JSON:API (i.e.
+/// as a fallback) or it was told to not expect JSON:API to
+/// begin with.
+func documentGenerator(
+    expectJSONAPISchema: Bool,
+    swiftTypeName: String,
+    structure: DereferencedJSONSchema,
+    example: ExampleSwiftGen?,
+    testExampleFuncs: [TestFunctionGenerator],
+    path: OpenAPI.Path,
+    context contextString: String,
+    logger: Logger?
+) throws -> DocumentSwiftGenerator {
+    if expectJSONAPISchema {
+        do {
+            return try JSONAPIDocumentSwiftGen(
+                swiftTypeName: swiftTypeName,
+                structure: structure,
+                allowPlaceholders: false,
+                example: example,
+                testExampleFuncs: testExampleFuncs
+            )
+        } catch let error {
+            logger?.warning(
+                path: path.rawValue,
+                context: contextString,
+                message: String(describing: error)
+            )
+        }
     }
-
-    return documentGen
+    return try StructDocumentSwiftGen(
+        swiftTypeName: swiftTypeName,
+        structure: structure,
+        allowPlaceholders: false,
+        example: example,
+        testExampleFuncs: testExampleFuncs
+    )
 }
 
 func exampleTests(

@@ -7,6 +7,24 @@ The test server requires a Postgres database and Redis instace.
 
 The test server and commandline tool will execute tests against an OpenAPI document. Out of box, you get errors for unprocessable OpenAPI documentation, warnings for certain unhandled types of APIs, and a test that every OpenAPI Example parses under the corresponding request/response body schema. 
 
+By default the server will assume that all request and response bodies are JSON:API compliant. The server will warn you and fall back to a non-JSON:API (but still JSON) request/response parsing mode if it fails to generate a test based on a JSON:API compliant schema. You can also opt out of attempting to interpret any particular OpenAPI Media Item as JSON:API with the `x-not-json-api: true` specification extension. This gets added to the OpenAPI document inside the Media Item but outside the schema.
+
+For example,
+```json
+...
+{
+    "content": {
+        "application/json": {
+            "x-not-json-api": true,
+            "schema": {
+                "type": "object"
+            }
+        }
+    }
+}
+...
+```
+
 You can additionally create tests that make API calls and verify that the actual responses from your server are parseable under the corresponding response schema. You do this with the `x-tests` Specification Extension on the OpenAPI Media Type Object within a Response Object (e.g. `responses/'200'/content/'application/json'/x-tests`). `x-tests` has the following structure:
 ```json
 {
