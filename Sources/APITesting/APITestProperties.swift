@@ -8,7 +8,7 @@
 import Foundation
 import JSONAPISwiftGen
 
-public enum JSONDecodingStrategy {
+public enum DecodingStrategy: String, CaseIterable {
     case fast
     case stable
 }
@@ -24,18 +24,18 @@ public struct APITestProperties {
     /// which strategy should be used. This option
     /// defaults to `.stable` and is not currently used
     /// for YAML decoding.
-    let jsonDecodingStrategy: JSONDecodingStrategy
+    let decodingStrategy: DecodingStrategy
 
     public init(
         openAPISource: OpenAPISource,
         apiHostOverride: URL?,
         formatGeneratedSwift: Bool = true,
-        jsonDecodingStrategy: JSONDecodingStrategy = .stable
+        decodingStrategy: DecodingStrategy = .stable
     ) {
         self.apiHostOverride = apiHostOverride
         self.openAPISource = openAPISource
         self.formatGeneratedSwift = formatGeneratedSwift
-        self.jsonDecodingStrategy = jsonDecodingStrategy
+        self.decodingStrategy = decodingStrategy
     }
 }
 

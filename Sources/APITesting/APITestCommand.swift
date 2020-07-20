@@ -6,105 +6,145 @@
 //
 
 import Foundation
+import ArgumentParser
+import Vapor
 import Yams
 import PureSwiftJSON
-import Vapor
 import SwiftGen
 import OpenAPIKit
 import JSONAPISwiftGen
 
-public final class APITestCommand: Command {
-    public struct Signature: CommandSignature {
+extension DecodingStrategy: ExpressibleByArgument {}
 
-        @Flag(
-            name: "dump-files",
-            help: "Dump produced test files in a zipped file at the current working directory."
-        )
-        var shouldDumpFiles: Bool
+internal struct URLOption: LosslessStringConvertible, ExpressibleByArgument {
+    let value: URL
 
-        @Flag(
-            name: "fail-hard",
-            short: "f",
-            help: "Produce a non-zero exit code if any tests fail."
-        )
-        var shouldFailHard: Bool
-
-        @Flag(
-            name: "ignore-warnings",
-            help: "Do not print warnings in the output."
-        )
-        var shouldIgnoreWarnings: Bool
-
-        @Flag(
-            name: "fast-json",
-            help: "Use a faster JSON parser that is less battle-tested than the stable default."
-        )
-        var useFastJSONDecoder: Bool
-
-        @Option(
-            name: "override-server",
-            help: "Override the server definition(s) in the OpenAPI document for the purposes of this test run."
-        )
-        var serverOverride: URLOption?
-
-        @Option(
-            name: "openapi-file",
-            help: "Specify a filename from the local filesystem from which to read OpenAPI documentation.",
-            completion: .files(withExtensions: ["json", "yml", "yaml"])
-        )
-        var openAPIFile: String?
-
-        public init() {}
+    init?(_ description: String) {
+        guard let url = URL(string: description) else {
+            return nil
+        }
+        value = url
     }
 
-    public let signature = Signature()
-
-    public let help = "Run API Tests."
-
-    let testEventLoopGroup: MultiThreadedEventLoopGroup
-    let outPath: String
-
-    public init() throws {
-        self.testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        self.outPath = Environment.outPath
+    var description: String {
+        return value.absoluteString
     }
+}
 
-    deinit {
-        try! testEventLoopGroup.syncShutdownGracefully()
-    }
+public struct APITestCommand: ParsableCommand {
+    public static let configuration: CommandConfiguration = .init(
+        commandName: "APITest",
+        abstract: "Build and run tests based on an OpenAPI Document."
+    )
 
-    private func testEventLoop() -> EventLoop {
-        return testEventLoopGroup.next()
-    }
+    @ArgumentParser.Option(
+        name: .customLong("dump-files"),
+        help: .init(
+            "Dump produced test files in a zipped file at the specified location.",
+            discussion: """
+                Tip: A good location to dump files is "./out". For the Dockerized tool this will be `/app/out` and when running the tool natively on your machine this will be the `out` folder relative to the current working directory.
 
-    public func run(using context: CommandContext, signature: APITestCommand.Signature) throws {
-        let logger = Logger(console: context.console, enableWarnings: !signature.shouldIgnoreWarnings)
+                Not using this argument will result in test files being deleted after execution of the tests.
+                """,
+            valueName: "directory path"
+        )
+    )
+    var dumpFilesPath: String?
 
-        let eventLoop = testEventLoop()
-        let source: OpenAPISource = try signature.openAPIFile.map { .file(path: $0) } ?? .detect()
+    @ArgumentParser.Flag(
+        name: [.long, .short],
+        help: .init(
+            "Produce a non-zero exit code if any tests fail."
+        )
+    )
+    var failHard: Bool
+
+    @ArgumentParser.Flag(
+        help: .init("Do not print warnings in the output.")
+    )
+    var ignoreWarnings: Bool
+
+    @ArgumentParser.Option(
+        name: .customLong("openapi-file"),
+        help: .init(
+            "Specify a filename from the local filesystem from which to read OpenAPI documentation.",
+            discussion: """
+                Alternatively, set the `API_TEST_IN_FILE` environment variable.
+
+                Either the environment variable or this argument must be used to indicate the OpenAPI file from which the tests should be generated.
+                """,
+            valueName: "file path"
+        )
+    )
+    var openAPIFile: String?
+
+    @ArgumentParser.Option(
+        name: .long,
+        default: nil,
+        help: .init(
+            "Override the server definition(s) in the OpenAPI document for the purposes of this test run.",
+            discussion: """
+                This argument allows you to make API requests against a different server than the input OpenAPI documentation specifies for this test run.
+
+                Not using this argument will result in the API server options from the OpenAPI documentation being used.
+                """,
+            valueName: "url"
+        )
+    )
+    var overrideServer: URLOption?
+
+    @ArgumentParser.Option(
+        name: [.customLong("parser"), .customShort("p")],
+        default: .stable,
+        help: .init(
+            "Choose between the \"stable\" parser and a \"fast\" parser that is less battle-tested.",
+            discussion: """
+                This argument is currently only applicable to JSON parsing. When decoding a YAML file, the argument is ignored as there is only currently one YAML parser to choose from.
+
+                Not using this argument will result in using the default stable parser.
+                """,
+            valueName: "parser"
+        )
+    )
+    var decodingStrategy: DecodingStrategy
+
+    public init() {}
+
+    public func run() throws {
+        let testEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+
+        let outPath: String = Environment.outPath
+
+        let console = Terminal()
+
+        let logger = Logger(console: console, enableWarnings: !ignoreWarnings)
+
+        let source: OpenAPISource = try openAPIFile.map { .file(path: $0) } ?? .detect()
         let path = outPath
+
+        let cwd = FileManager.default.currentDirectoryPath
+
+        let zipToArg = dumpFilesPath.map { "\($0)/api_test_files.zip" }
+        let testLogPath = dumpFilesPath.map { "\($0)/api_test.log" } ?? cwd + "/out/api_test.log"
 
         let formatGeneratedSwift: Bool
         #if swift(>=5.3)
         formatGeneratedSwift = false
         #else
-        formatGeneratedSwift = true
+        // format the Swift files only if the result is being dumped for later consumption
+        formatGeneratedSwift = dumpFilesPath != nil
         #endif
 
         let testProperties = APITestProperties(
             openAPISource: source,
-            apiHostOverride: signature.serverOverride?.value,
+            apiHostOverride: overrideServer?.value,
             formatGeneratedSwift: formatGeneratedSwift,
-            jsonDecodingStrategy: signature.useFastJSONDecoder ? .fast : .stable
+            decodingStrategy: decodingStrategy
         )
 
-        context.console.print()
+        console.print()
 
-        let cwd = FileManager.default.currentDirectoryPath
-
-        let zipToArg = signature.shouldDumpFiles ? cwd + "/out/api_test_files.zip" : nil
-        let testLogPath = cwd + "/out/api_test.log"
-
+        let testEventLoop = testEventLoopGroup.next()
         let threadPool = NIOThreadPool(numberOfThreads: 1)
         threadPool.start()
 
@@ -113,20 +153,24 @@ public final class APITestCommand: Command {
             outPath: path,
             zipPath: zipToArg,
             testLogPath: testLogPath,
-            eventLoop: eventLoop,
+            eventLoop: testEventLoop,
             threadPool: threadPool,
             testLogger: logger
         ).recover { _ in
-            if signature.shouldFailHard {
-                exit(1)
+            if self.failHard {
+                Self.exit(withError: ExitCode(1))
             }
         }
 
         try future
-        .wait()
+            .wait()
 
         try threadPool.syncShutdownGracefully()
+        try testEventLoopGroup.syncShutdownGracefully()
     }
+}
+
+extension APITestCommand {
 
     /// Kick off API Tests.
     ///
@@ -213,7 +257,7 @@ public final class APITestCommand: Command {
             openAPIDoc(
                 on: eventLoop,
                 from: testProperties.openAPISource,
-                jsonDecodingStrategy: testProperties.jsonDecodingStrategy,
+                decodingStrategy: testProperties.decodingStrategy,
                 threadPool: threadPool
             )
         }
@@ -296,7 +340,7 @@ public func prepOutputFolders(
 public func openAPIDoc(
     on loop: EventLoop,
     from source: OpenAPISource,
-    jsonDecodingStrategy: JSONDecodingStrategy,
+    decodingStrategy: DecodingStrategy,
     threadPool: NIOThreadPool
 ) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
@@ -386,7 +430,7 @@ public func openAPIDoc(
             return data.flatMap { data in
                 threadPool.runIfActive(eventLoop: loop) {
                     let document: OpenAPI.Document
-                    switch jsonDecodingStrategy {
+                    switch decodingStrategy {
                     case .stable:
                         document = try JSONDecoder().decode(OpenAPI.Document.self, from: data)
                     case .fast:
@@ -443,20 +487,5 @@ public func runAPITestPackage(
             testLogPath: testLogPath,
             logger: logger
         )
-    }
-}
-
-internal struct URLOption: LosslessStringConvertible {
-    let value: URL
-
-    init?(_ description: String) {
-        guard let url = URL(string: description) else {
-            return nil
-        }
-        value = url
-    }
-
-    var description: String {
-        return value.absoluteString
     }
 }
