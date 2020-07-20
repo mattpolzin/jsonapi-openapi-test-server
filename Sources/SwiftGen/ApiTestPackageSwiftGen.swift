@@ -247,7 +247,7 @@ public func produceAPITestPackage(
     let totalTestCases = results.map { $0.testFunctionNames.count }.reduce(0, +)
     logger?.info(
         path: nil,
-        context: "Processing Entire OpenAPI Document",
+        context: "Processing OpenAPI Document",
         message: "Created \(totalTestCases) test cases across \(totalEndpointCount) endpoints mounted at \(totalRouteCount) routes. [Warnings: \(logger?.warningCount ?? 0), Errors: \(logger?.errorCount ?? 0)]"
     )
 }

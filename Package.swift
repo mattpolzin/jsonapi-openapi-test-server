@@ -30,13 +30,17 @@ let package = Package(
         .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "1.4.0"),
         .package(url: "https://github.com/mattpolzin/JSONAPI", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams", from: "3.0.0"),
-        .package(url: "https://github.com/fabianfett/pure-swift-json", .upToNextMinor(from: "0.4.0"))
+        .package(url: "https://github.com/fabianfett/pure-swift-json", .upToNextMinor(from: "0.4.0")),
+
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.6"))
     ],
     targets: [
-        /// MARK: Server App library
+        // MARK: API Models
         .target(name: "APIModels", dependencies: [
             "JSONAPI"
         ]),
+
+        // MARK: Server App Library
         .target(name: "App", dependencies: [
           .product(name: "Vapor", package: "vapor"), 
           .product(name: "Fluent", package: "fluent"),
@@ -60,9 +64,10 @@ let package = Package(
             .product(name: "JSONAPITesting", package: "JSONAPI")
         ]),
 
-        /// MARK: Terminal App library
+        // MARK: Terminal App library
         .target(name: "APITesting", dependencies: [
             .product(name: "Vapor", package: "vapor"),
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
 
             .product(name: "Yams", package: "Yams"),
             .product(name: "PureSwiftJSON", package: "pure-swift-json"),
@@ -70,14 +75,14 @@ let package = Package(
             "SwiftGen"
         ]),
 
-        /// MARK: Server API Documentation library
+        // MARK: Server API Documentation library
         .target(name: "AppAPIDocumentation", dependencies: [
             "App",
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             .product(name: "VaporOpenAPI", package: "VaporOpenAPI")
         ]),
 
-        /// MARK: Executables
+        // MARK: Executables
         .target(name: "Run", dependencies: ["App"]),
         .target(name: "APITest", dependencies: [
             "APITesting",
@@ -87,7 +92,7 @@ let package = Package(
             "AppAPIDocumentation"
         ]),
 
-        /// MARK: Swift Generation interface
+        // MARK: Swift Generation interface
         .target(name: "SwiftGen", dependencies: [
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             .product(name: "OpenAPIKit", package: "OpenAPIKit"),

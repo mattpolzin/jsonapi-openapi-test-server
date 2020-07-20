@@ -35,6 +35,51 @@ Parameters:
 - `parameters` values: Must be strings, even if the parameter type is Int or other.
 
 ### The Commandline Tool
+
+The command line tool's usage can be printed with `--help` and it is as follows:
+```
+VERVIEW: Build and run tests based on an OpenAPI Document.
+
+USAGE: APITest [--dump-files <directory path>] [--fail-hard] [--ignore-warnings] [--openapi-file <file path>] [--override-server <url>] [--parser <parser>]
+
+OPTIONS:
+  --dump-files <directory path>
+                          Dump produced test files in a zipped file at the
+                          specified location. 
+        Tip: A good location to dump files is "./out". For the Dockerized tool
+        this will be `/app/out` and when running the tool natively on your
+        machine this will be the `out` folder relative to the current working
+        directory.
+
+        Not using this argument will result in test files being deleted after
+        execution of the tests.
+  -f, --fail-hard         Produce a non-zero exit code if any tests fail. 
+  --ignore-warnings       Do not print warnings in the output. 
+  --openapi-file <file path>
+                          Specify a filename from the local filesystem from
+                          which to read OpenAPI documentation. 
+        Alternatively, set the `API_TEST_IN_FILE` environment variable.
+
+        Either the environment variable or this argument must be used to
+        indicate the OpenAPI file from which the tests should be generated.
+  --override-server <url> Override the server definition(s) in the OpenAPI
+                          document for the purposes of this test run. 
+        This argument allows you to make API requests against a different
+        server than the input OpenAPI documentation specifies for this test
+        run.
+
+        Not using this argument will result in the API server options from the
+        OpenAPI documentation being used.
+  -p, --parser <parser>   Choose between the "stable" parser and a "fast"
+                          parser that is less battle-tested. (default: stable)
+        This argument is currently only applicable to JSON parsing. When
+        decoding a YAML file, the argument is ignored as there is only
+        currently one YAML parser to choose from.
+
+        Not using this argument will result in using the default stable parser.
+  -h, --help              Show help information.
+```
+
 #### Against a URL
 You can point the test tool at a URL serving up OpenAPI documentation. The URL can either require HTTP Basic Authentication or no authentication.
 
@@ -52,7 +97,7 @@ docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_URL=https://website.co
 You can point the test tool at a local file if you mount that file into the docker container and specify the mount destination with the `API_TEST_IN_FILE` environment variable or the `--openapi-file` option for the `test` command.
 ```shell
 # command option
-docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json
+docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server --openapi-file /api/openapi.json
 
 # ENV var
 docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json' -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server
@@ -66,17 +111,17 @@ docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json
 #### API Host Override
 You can specify an override test server URL if you want to make API test requests against a different URL than is specified bu the OpenAPI documentation. You use the `test` command's `--override-server` option for this.
 ```shell
-docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server test --openapi-file /api/openapi.json --override-server https://test.server.com
+docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server --openapi-file /api/openapi.json --override-server https://test.server.com
 ```
 
 #### Dumping test files
-The test tool works by generating Swift code to parse examples and test responses. These test files include JSON:API models that could be used as a basis for client implementations. You can dump the test files with the `--dump-files` argument to the `./APITest test` command. You must also mount the output directory so you can access the generated file from outside of the container.
+The test tool works by generating Swift code to parse examples and test responses. These test files include JSON:API models that could be used as a basis for client implementations. You can dump the test files with the `--dump-files` argument to the `./APITest test` command. You must also mount the output directory (or don't remove the container and then `docker cp` later) so you can access the generated file from outside of the container.
 
 ```shell
-docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' -v "$(pwd)/out:/app/out" mattpolzin2/api-test-server ./APITest test --dump-files
+docker run --rm --env 'API_TEST_IN_URL=https://website.com/api/documentation' -v "$(pwd)/out:/app/out" mattpolzin2/api-test-server ./APITest --dump-files /app/out
 ```
 
-You will find the dumped files at `./out/api_test_files.zip`.
+You will find the dumped files at `/app/out/api_test_files.zip`. **TIP:** You can also find the raw text logs from a test run at `/app/out/api_test.log`.
 
 ### The Test Server
 You can run an API Test server that accepts requests to run tests at HTTP endpoints. This requires the same input file or URL environment variables explained in the above section but you also must provide a Postgres database for the server to use as its persistence layer. You specify this database using a Postgres URL in the `API_TEST_DATABASE_URL` environment variable. A Redis instance is required to queue up the test runs. You specify the Redis URL in the `API_TEST_REDIS_URL` environment variable.
