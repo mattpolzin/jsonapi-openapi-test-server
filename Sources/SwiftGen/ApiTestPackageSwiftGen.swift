@@ -123,6 +123,7 @@ public func produceAPITestPackage(
         let documentFileNameString = documentTypeName(path: endpoint.path, verb: endpoint.method)
 
         let apiRequestTest = try? APIRequestTestSwiftGen(
+            method: endpoint.method,
             server: server,
             pathComponents: endpoint.path,
             parameters: endpoint.parameters
@@ -601,6 +602,7 @@ func documents(
             testExampleFuncs = try exampleTests(
                 testSuiteConfiguration: testSuiteConfiguration,
                 server: server,
+                method: endpoint.method,
                 pathComponents: endpoint.path,
                 parameters: endpoint.parameters,
                 jsonResponse: jsonResponse,
@@ -766,6 +768,7 @@ func documentGenerator(
 func exampleTests(
     testSuiteConfiguration: TestSuiteConfiguration,
     server: OpenAPI.Server,
+    method: OpenAPI.HttpMethod,
     pathComponents: OpenAPI.Path,
     parameters: [DereferencedParameter],
     jsonResponse: DereferencedContent,
@@ -792,6 +795,7 @@ func exampleTests(
         .compactMap { properties in
             do {
                 return try OpenAPIExampleRequestTestSwiftGen(
+                    method: method,
                     server: server,
                     pathComponents: pathComponents,
                     parameters: parameters,

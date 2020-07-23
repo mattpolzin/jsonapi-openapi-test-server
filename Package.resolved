@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit",
         "state": {
           "branch": null,
-          "revision": "3e4e5383669f7103032bf232d36ad94ba96f0655",
-          "version": "1.4.1"
+          "revision": "5ae2c3f1aa54a126ac3d185b2c866c7e6cc762fe",
+          "version": "1.5.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI",
         "state": {
           "branch": null,
-          "revision": "6e0ea8b6f250b755681d2453ba46e44efc0c9390",
-          "version": "0.22.3"
+          "revision": "715ac5721c03b0f44084c493b652c5c0f03e5428",
+          "version": "0.23.1"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/vapor/queues.git",
         "state": {
           "branch": null,
-          "revision": "0d3a788b98dd72dd521acae2374c769c6c467b9a",
-          "version": "1.3.0"
+          "revision": "5f97a2bc93390fab037a50cedab91375f1d0171a",
+          "version": "1.3.1"
         }
       },
       {
@@ -314,6 +314,15 @@
           "branch": null,
           "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
           "version": "0.50200.0"
+        }
+      },
+      {
+        "package": "vapor",
+        "repositoryURL": "https://github.com/vapor/vapor",
+        "state": {
+          "branch": null,
+          "revision": "88293674e2ea017691c56af20d0938dfff7ece04",
+          "version": "4.27.0"
         }
       },
       {
