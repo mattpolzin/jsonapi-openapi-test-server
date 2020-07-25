@@ -27,8 +27,8 @@ services:
       - '8080:80'
     volumes:
       - test_archive:/app/test_archive
-#      - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
-#      - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
+      # - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
+      # - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
 
   queues:
     <<: *common
@@ -39,8 +39,8 @@ services:
       - redis
     volumes:
       - test_archive:/app/test_archive
-#      - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
-#      - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
+      # - /Users/matt/Downloads/openapi_test.json:/app/openapi.json:ro
+      # - /Users/matt/Downloads/openapi_test.yml:/app/openapi.yml:ro
 
   postgres:
     image: postgres:12-alpine

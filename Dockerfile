@@ -1,13 +1,16 @@
 
-FROM swift:5.2 as builder
+FROM swift:5.2-focal as builder
 
-RUN apt-get -qq update && apt-get install -y \
-  libssl-dev zlib1g-dev \
-  && rm -r /var/lib/apt/lists/*
+# Install OS updates and, if needed, sqlite3
+RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
+    && apt-get -q update \
+    && apt-get -q dist-upgrade -y \
+    && apt-get install -y libssl-dev zlib1g-dev libz-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
 
-WORKDIR /app
+WORKDIR /build
 
 # Copy manifest
 COPY ./Package.* ./
@@ -20,20 +23,28 @@ COPY . .
 
 #########
 # RELEASE
-# RUN swift build --enable-test-discovery -c release -Xswiftc -g \
-#  && mv `swift build -c release --show-bin-path` /build/bin
+# RUN swift build --enable-test-discovery -c release
 #
 #########
 # DEBUG
-RUN swift build --enable-test-discovery -c release -Xswiftc -g -Xswiftc -DDEBUG \
-  && mv `swift build -c release --show-bin-path` /build/bin
+RUN swift build --enable-test-discovery -c release -Xswiftc -DDEBUG
 #
 #########
 
-#
-# Generate API Documentation
-#
-RUN /build/bin/GenAPIDocumentation > ./Public/openapi.yml
+# Copy to staging area
+WORKDIR /staging
+
+# Copy Public folder to staging area
+RUN cp -r /build/Public ./Public
+
+# Copy main executables to staging area 
+# and generate API documentation
+# and write-protect Public folder
+RUN bin_path="$(swift build --package-path /build -c release --show-bin-path)" \
+  && cp "${bin_path}/Run" ./ \
+  && cp "${bin_path}/APITest" ./ \
+  && ${bin_path}/GenAPIDocumentation > ./Public/openapi.yml \
+  && chmod -R a-w ./Public
 
 # ------------------------------------------------------------------------------
 
@@ -41,26 +52,26 @@ RUN /build/bin/GenAPIDocumentation > ./Public/openapi.yml
 ## Production image
 #
 
-FROM swift:5.2
-ARG env
+FROM swift:5.2-focal
+
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  libatomic1 libicu60 libxml2 libcurl4 libz-dev libbsd0 tzdata zlib1g \
-  && rm -r /var/lib/apt/lists/*
+# Make sure all system packages are up to date.
+RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
+    && apt-get -q update && apt-get -q dist-upgrade -y \
+    && apt-get install -y libz-dev libz3-4 tzdata zlib1g \
+    && rm -r /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /build/bin/Run .
-COPY --from=builder /build/bin/APITest .
-COPY --from=builder /app/Public ./Public
-COPY --from=builder /build/lib/* /usr/lib/
 
+# Copy built executable and any staged resources from builder
+COPY --from=builder /staging /app
+
+# Create the default output directory
 RUN mkdir -p ./out
 
 ##
 ## ENV vars
 ##
-
-ENV ENVIRONMENT=$env
 
 # A local file from which to read the OpenAPI documentation.
 #   IMPORTANT: Only specify one of [API_TEST_IN_FILE, API_TEST_IN_URL]
@@ -103,7 +114,7 @@ ENV ENVIRONMENT=$env
 # The log-level. One of case "trace", "debug", "info", "notice", "warning", "error", "critical"
 
 ENTRYPOINT ["./Run"]
-CMD ["serve", "--env", "$ENVIRONMENT", "--hostname", "0.0.0.0", "--port", "80"]
+CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "80"]
 
 ##
 ## queues
