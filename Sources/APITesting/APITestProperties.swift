@@ -8,11 +8,6 @@
 import Foundation
 import JSONAPISwiftGen
 
-public enum DecodingStrategy: String, CaseIterable {
-    case fast
-    case stable
-}
-
 public struct APITestProperties {
     let apiHostOverride: URL?
     let openAPISource: OpenAPISource
@@ -24,18 +19,25 @@ public struct APITestProperties {
     /// which strategy should be used. This option
     /// defaults to `.stable` and is not currently used
     /// for YAML decoding.
-    let decodingStrategy: DecodingStrategy
+    let parser: Parser
 
     public init(
         openAPISource: OpenAPISource,
         apiHostOverride: URL?,
         formatGeneratedSwift: Bool = true,
-        decodingStrategy: DecodingStrategy = .stable
+        parser: Parser
     ) {
         self.apiHostOverride = apiHostOverride
         self.openAPISource = openAPISource
         self.formatGeneratedSwift = formatGeneratedSwift
-        self.decodingStrategy = decodingStrategy
+        self.parser = parser
+    }
+}
+
+extension APITestProperties {
+    public enum Parser: String, CaseIterable {
+        case fast
+        case stable
     }
 }
 

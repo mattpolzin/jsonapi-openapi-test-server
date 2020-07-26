@@ -7,7 +7,8 @@ private let migrationList: [Migration] = [
     DB.APITestProperties.Migrations.Create(),
     DB.APITestDescriptor.Migrations.Create(),
     DB.APITestMessage.Migrations.Create(),
-    TestUpdateNotificationMigration()
+    TestUpdateNotificationMigration(),
+    DB.APITestProperties.Migrations.AddParserField()
 ]
 
 public func addMigrations(_ app: Application) {

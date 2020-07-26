@@ -14,7 +14,7 @@ import SwiftGen
 import OpenAPIKit
 import JSONAPISwiftGen
 
-extension DecodingStrategy: ExpressibleByArgument {}
+extension APITestProperties.Parser: ExpressibleByArgument {}
 
 internal struct URLOption: LosslessStringConvertible, ExpressibleByArgument {
     let value: URL
@@ -94,7 +94,7 @@ public struct APITestCommand: ParsableCommand {
     var overrideServer: URLOption?
 
     @ArgumentParser.Option(
-        name: [.customLong("parser"), .customShort("p")],
+        name: [.long, .short],
         default: .stable,
         help: .init(
             "Choose between the \"stable\" parser and a \"fast\" parser that is less battle-tested.",
@@ -106,7 +106,7 @@ public struct APITestCommand: ParsableCommand {
             valueName: "parser"
         )
     )
-    var decodingStrategy: DecodingStrategy
+    var parser: APITestProperties.Parser
 
     public init() {}
 
@@ -139,7 +139,7 @@ public struct APITestCommand: ParsableCommand {
             openAPISource: source,
             apiHostOverride: overrideServer?.value,
             formatGeneratedSwift: formatGeneratedSwift,
-            decodingStrategy: decodingStrategy
+            parser: parser
         )
 
         console.print()
@@ -257,7 +257,7 @@ extension APITestCommand {
             openAPIDoc(
                 on: eventLoop,
                 from: testProperties.openAPISource,
-                decodingStrategy: testProperties.decodingStrategy,
+                parser: testProperties.parser,
                 threadPool: threadPool
             )
         }
@@ -340,7 +340,7 @@ public func prepOutputFolders(
 public func openAPIDoc(
     on loop: EventLoop,
     from source: OpenAPISource,
-    decodingStrategy: DecodingStrategy,
+    parser: APITestProperties.Parser,
     threadPool: NIOThreadPool
 ) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
@@ -430,7 +430,7 @@ public func openAPIDoc(
             return data.flatMap { data in
                 threadPool.runIfActive(eventLoop: loop) {
                     let document: OpenAPI.Document
-                    switch decodingStrategy {
+                    switch parser {
                     case .stable:
                         document = try JSONDecoder().decode(OpenAPI.Document.self, from: data)
                     case .fast:

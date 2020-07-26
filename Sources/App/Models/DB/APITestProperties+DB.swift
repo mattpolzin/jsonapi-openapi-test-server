@@ -26,14 +26,22 @@ extension DB {
         @Field(key: "api_host_override")
         public var apiHostOverride: URL?
 
+        @Enum(key: "parser")
+        public var parser: API.Parser
+
         @Parent(key: "openapi_source_id")
         public var openAPISource: OpenAPISource
 
         /// Create new test properties.
-        public init(openAPISourceId: UUID, apiHostOverride: URL?) {
+        public init(
+            openAPISourceId: UUID,
+            apiHostOverride: URL?,
+            parser: API.Parser
+        ) {
             self.id = UUID()
             self.createdAt = Date()
             self.$apiHostOverride.wrappedValue = apiHostOverride
+            self.$parser.wrappedValue = parser
             self.$openAPISource.id = openAPISourceId
         }
 
@@ -50,6 +58,8 @@ extension DB {
     }
 }
 
+extension API.Parser: AnyJSONCaseIterable {}
+
 extension DB.APITestProperties: JSONAPIConvertible {
     typealias JSONAPIModel = API.APITestProperties
     typealias JSONAPIIncludeType = API.SingleAPITestPropertiesDocument.IncludeType
@@ -60,7 +70,8 @@ extension DB.APITestProperties: JSONAPIConvertible {
 
         let attributes = API.APITestProperties.Attributes(
             createdAt: createdAt,
-            apiHostOverride: apiHostOverride
+            apiHostOverride: apiHostOverride,
+            parser: parser
         )
 
         let relationships = API.APITestProperties.Relationships(

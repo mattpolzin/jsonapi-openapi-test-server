@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit",
         "state": {
           "branch": null,
-          "revision": "b0f5ab383987787bd28ccbc3c28871a9a581504b",
-          "version": "1.4.2"
+          "revision": "31daf628295db4038b314855d71e0a15ef23b5ab",
+          "version": "1.4.3"
         }
       },
       {
@@ -149,9 +149,9 @@
         "package": "queues-redis-driver",
         "repositoryURL": "https://github.com/vapor/queues-redis-driver",
         "state": {
-          "branch": "master",
-          "revision": "2f86b2db1b1d3c5105695bcdf8bbead62a2d89a8",
-          "version": null
+          "branch": null,
+          "revision": "2212b5daf46a35de6da1ea91af2e0cc927247ccb",
+          "version": "1.0.0-rc.3"
         }
       },
       {

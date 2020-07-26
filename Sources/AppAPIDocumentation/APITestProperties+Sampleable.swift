@@ -12,7 +12,7 @@ import APIModels
 
 extension API.APITestPropertiesDescription.Attributes: Sampleable {
     public static var sample: API.APITestPropertiesDescription.Attributes {
-        .init(createdAt: Date(), apiHostOverride: URL(string: "https://mysite.com")!)
+        .init(createdAt: Date(), apiHostOverride: URL(string: "https://mysite.com")!, parser: .stable)
     }
 }
 

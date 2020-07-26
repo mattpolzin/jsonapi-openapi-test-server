@@ -252,7 +252,7 @@ extension APITestController {
                     .query(on: db)
                     .filter(\.$openAPISource.$id == sourceId)
                     .filter(\.$apiHostOverride == nil)
-                    .first(orCreate: DB.APITestProperties(openAPISourceId: sourceId, apiHostOverride: nil))
+                    .first(orCreate: DB.APITestProperties(openAPISourceId: sourceId, apiHostOverride: nil, parser: .stable))
                     .map { ($0, source) }
         }
     }

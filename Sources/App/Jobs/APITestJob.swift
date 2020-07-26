@@ -44,10 +44,20 @@ struct APITestJob: Job {
         formatGeneratedSwift = true
         #endif
 
+        let parser: APITestProperties.Parser = {
+            switch payload.properties.parser {
+            case .fast:
+                return .fast
+            case .stable:
+                return .stable
+            }
+        }()
+
         let testProperties = APITestProperties(
             openAPISource: swiftGenSource,
             apiHostOverride: payload.properties.apiHostOverride,
-            formatGeneratedSwift: formatGeneratedSwift
+            formatGeneratedSwift: formatGeneratedSwift,
+            parser: parser
         )
 
         let testLogger = Controller.Logger(
