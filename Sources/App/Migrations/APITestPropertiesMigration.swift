@@ -6,6 +6,8 @@
 //
 
 import Fluent
+import PostgresKit
+import APIModels
 
 public extension DB.APITestProperties {
     enum Migrations {
@@ -53,13 +55,26 @@ public extension DB.APITestProperties {
                     .create()
 
                 return parserTypeFuture.flatMap { parserDataType in
-                    database.schema(DB.APITestProperties.schema)
-                        .field(
-                            "parser",
-                            parserDataType,
-                            .required
-                        )
-                        .update()
+                    // no fluent support as of now for adding
+                    // a required field with a default value
+                    // or retrofilling existing rows and then
+                    // setting to required after the fact
+                    database.schema(DB.APITestProperties.schema) // create as optional
+                    .field(
+                        "parser",
+                        parserDataType
+                    )
+                    .update()
+                    .flatMap { // backfill as stable
+                        database.query(DB.APITestProperties.self)
+                            .set(\.$parser, to: API.Parser.stable)
+                            .update()
+                    }
+                    .flatMap { // update to non-optional
+                        (database as! PostgresDatabase)
+                            .query("ALTER TABLE \(DB.APITestProperties.schema) ALTER COLUMN parser SET NOT NULL")
+                            .transform(to: ())
+                    }
                 }
             }
 
