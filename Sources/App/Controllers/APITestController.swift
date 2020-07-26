@@ -223,8 +223,8 @@ extension APITestController {
             .filter(\.$id == testPropertiesId.rawValue)
             .with(\.$openAPISource)
             .first()
-            .optionalMap { ($0, $0.$openAPISource.value!) }
             .unwrap(or: Abort(.badRequest, reason: "Given API test properties could not be found."))
+            .map { ($0, $0.$openAPISource.value!) }
     }
 
     /// Attempt to find or create default test properties.
@@ -252,6 +252,7 @@ extension APITestController {
                     .query(on: db)
                     .filter(\.$openAPISource.$id == sourceId)
                     .filter(\.$apiHostOverride == nil)
+                    .filter(\.$parser == .stable)
                     .first(orCreate: DB.APITestProperties(openAPISourceId: sourceId, apiHostOverride: nil, parser: .stable))
                     .map { ($0, source) }
         }
@@ -385,7 +386,7 @@ extension APITestController {
             rootPath.map(\.openAPIPathComponent),
             use: self.create
         )
-            .tags("Testing")
+            .tags("Test Creation")
             .summary("Run tests")
             .description("""
 Running tests is an asynchronous operation. This route will return immediately if it was able to queue up a new test run.
@@ -399,7 +400,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
             rootPath.map(\.openAPIPathComponent),
             use: self.index
         )
-            .tags("Testing")
+            .tags("Test Status", "Test Results")
             .summary("Retrieve all test results")
 
         app.on(
@@ -407,7 +408,7 @@ You can monitor the status of your test run with the `GET` `/api_test/{id}` endp
             rootPath.map(\.openAPIPathComponent) + [":id".description(idDescription)],
             use: self.show
         )
-            .tags("Testing")
+            .tags("Test Status", "Test Results")
             .summary("Retrieve a single test result")
 
         // MARK: File Retrieval

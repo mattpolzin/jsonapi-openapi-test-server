@@ -32,6 +32,7 @@ extension OpenAPISourceController {
             .flatMap(req.response.success.encode)
     }
 
+    /// Show an `OpenAPISource`.
     func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             return req.response.badRequest

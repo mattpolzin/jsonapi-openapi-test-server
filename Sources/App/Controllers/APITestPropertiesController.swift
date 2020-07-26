@@ -92,6 +92,7 @@ extension APITestPropertiesController {
             DB.APITestProperties.query(on: req.db)
                 .filter(\.$openAPISource.$id == properties.$openAPISource.id)
                 .filter(\.$apiHostOverride == properties.apiHostOverride)
+                .filter(\.$parser == properties.parser)
                 .first(orCreate: properties)
         }
 

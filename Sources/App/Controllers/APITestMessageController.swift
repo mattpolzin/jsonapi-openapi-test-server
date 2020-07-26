@@ -79,5 +79,7 @@ extension APITestMessageController {
             rootPath.map(\.openAPIPathComponent) + [":id".description("Id of the API Test Message.")],
             use: Self.show
         )
+        .tags("Test Results")
+        .summary("Retrieve a single test message")
     }
 }

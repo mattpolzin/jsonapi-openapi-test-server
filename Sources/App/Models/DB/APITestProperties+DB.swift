@@ -49,6 +49,7 @@ extension DB {
             self.id = UUID()
             self.createdAt = Date()
             self.$apiHostOverride.wrappedValue = apiModel.apiHostOverride
+            self.$parser.wrappedValue = apiModel.parser
             self.$openAPISource.id = openAPISourceId
         }
 
