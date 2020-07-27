@@ -47,6 +47,11 @@ public extension Environment {
     static var inProcessJobs: Bool {
         return Environment.get("API_TEST_IN_PROCESS_QUEUES") == "true"
     }
+
+    /// The number of concurrent test jobs to allow at once.
+    static var concurrentTests: Int {
+        return min(Int(floor(Double(System.coreCount) / 2.0)), Environment.get("API_TEST_CONCURRENT_TESTS").flatMap(Int.init) ?? Int.max)
+    }
 }
 
 // MARK: - Archive Vars

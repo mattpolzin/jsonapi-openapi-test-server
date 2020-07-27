@@ -9,12 +9,26 @@ import Foundation
 import JSONAPISwiftGen
 
 public struct APITestProperties {
+    /// If specified, the given URL will be used
+    /// as the API host instead of the server
+    /// specified in the OpenAPI documentation
+    /// used to generate the API Tests.
     let apiHostOverride: URL?
+
+    /// Where to find the OpenAPI documentation
+    /// that will be used to generate API Tests.
     let openAPISource: OpenAPISource
+
     /// `true` by default, `false` to not
     /// run code formatting on the Swift code
     /// generated for the test suite.
+    ///
+    /// Not formatting code removes any
+    /// compatibility problems related to
+    /// swift-format and it also speeds up
+    /// test build time.
     let formatGeneratedSwift: Bool
+
     /// If the test is run against a JSON document,
     /// which strategy should be used. This option
     /// defaults to `.stable` and is not currently used

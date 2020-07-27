@@ -203,7 +203,7 @@ extension APITestCommand {
     ///     - testProgressTracking: (Optional) If specified, tuple with both
     ///         a progress tracker and a persistence layer delegate. This is not required
     ///         to run tests.
-    ///     - testSuiteConfiguration: The configuration for the whole test suite, including the OpenAPI documentation source.
+    ///     - testProperties: The configuration for the whole test suite, including the OpenAPI documentation source.
     ///     - outPath: The local path at which test files should be stored.
     ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
     ///     - testLogPath: The path and filename where plaintext test logs will be saved.

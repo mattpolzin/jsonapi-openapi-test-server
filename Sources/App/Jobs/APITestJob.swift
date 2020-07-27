@@ -12,6 +12,54 @@ import APITesting
 import Fluent
 import SwiftGen
 
+extension Application {
+    public struct APITestJobProvider {
+        final class Storage {
+            let threadPool: NIOThreadPool
+
+            init() {
+                self.threadPool = NIOThreadPool(numberOfThreads: Environment.concurrentTests)
+                self.threadPool.start()
+            }
+        }
+
+        struct Key: StorageKey {
+            typealias Value = Storage
+        }
+
+        struct Lifecycle: LifecycleHandler {
+            func willBoot(_ application: Application) throws {
+            }
+
+            func shutdown(_ application: Application) {
+                try! application.apiTestJobs.storage.threadPool.syncShutdownGracefully()
+            }
+        }
+
+        let application: Application
+
+        var storage: Storage {
+            if self.application.storage[Key.self] == nil {
+                self.initialize()
+            }
+            return self.application.storage[Key.self]!
+        }
+
+        var threadPool: NIOThreadPool {
+            return storage.threadPool
+        }
+
+        func initialize() {
+            self.application.storage[Key.self] = .init()
+            self.application.lifecycle.use(Lifecycle())
+        }
+    }
+
+    public var apiTestJobs: APITestJobProvider {
+        .init(application: self)
+    }
+}
+
 struct APITestJob: Job {
 
     struct Payload: Codable {
@@ -82,7 +130,7 @@ struct APITestJob: Job {
                 zipPath: zipPath,
                 testLogPath: testLogPath,
                 eventLoop: context.eventLoop,
-                threadPool: context.application.threadPool,
+                threadPool: context.application.apiTestJobs.threadPool,
                 requestLogger: context.logger,
                 testLogger: testLogger
             )
