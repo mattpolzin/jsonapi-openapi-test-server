@@ -3,6 +3,7 @@ import VaporTypedRoutes
 import VaporOpenAPI
 import FluentPostgresDriver
 import APITesting
+import Metrics
 
 /// Register your application's routes here.
 public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
@@ -45,4 +46,11 @@ public func addRoutes(_ app: Application, hobbled: Bool = false) throws {
 
     // MARK: - Documentation
     DocumentationController.mount(on: app, at: "docs")
+
+    // MARK: - Metrics
+    app.get("metrics") { req -> EventLoopFuture<String> in
+        let promise = req.eventLoop.makePromise(of: String.self)
+        try MetricsSystem.prometheus().collect(into: promise)
+        return promise.futureResult
+    }
 }

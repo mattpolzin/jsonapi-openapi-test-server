@@ -16,6 +16,8 @@ import QueuesRedisDriver
 ///         database.
 public func configure(_ app: Application, hobbled: Bool = false) throws {
 
+    bootstrapMetrics()
+
     try configureDefaults(for: app)
 
     addMiddleware(app)

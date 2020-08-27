@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "OpenAPIReflection",
+        "repositoryURL": "https://github.com/mattpolzin/OpenAPIReflection",
+        "state": {
+          "branch": null,
+          "revision": "34eb557d0ab49a95d3a39e7a821fcb12ff50ba8a",
+          "version": "0.3.0"
+        }
+      },
+      {
         "package": "Poly",
         "repositoryURL": "https://github.com/mattpolzin/Poly",
         "state": {
@@ -314,6 +323,15 @@
           "branch": null,
           "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
           "version": "0.50200.0"
+        }
+      },
+      {
+        "package": "SwiftPrometheus",
+        "repositoryURL": "https://github.com/MrLotU/SwiftPrometheus.git",
+        "state": {
+          "branch": null,
+          "revision": "fa3d278e1475c1a4274da0a3abafa35daa3dab6b",
+          "version": "1.0.0-alpha.7"
         }
       },
       {
