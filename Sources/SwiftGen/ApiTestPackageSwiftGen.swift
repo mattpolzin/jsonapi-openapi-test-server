@@ -583,6 +583,18 @@ func documents(
             continue
         }
 
+        let simplifiedResponseSchema: DereferencedJSONSchema
+        do {
+            simplifiedResponseSchema = try responseSchema.simplified()
+        } catch let error {
+            logger?.warning(
+                path: endpoint.path.rawValue,
+                context: contextString,
+                message: String(describing: error)
+            )
+            continue
+        }
+
         let expectJSONAPISchema = jsonResponse.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
         let responseBodyTypeName = "Document_\(statusCode.rawValue)"
@@ -638,7 +650,7 @@ func documents(
             responseDocuments[statusCode] = try documentGenerator(
                 expectJSONAPISchema: expectJSONAPISchema,
                 swiftTypeName: responseBodyTypeName,
-                structure: responseSchema,
+                structure: simplifiedResponseSchema,
                 example: example,
                 testExampleFuncs: testExampleFuncs,
                 path: endpoint.path,
@@ -673,11 +685,25 @@ func document(
         return nil
     }
 
+    let contextString = "Parsing the request document for the \(httpVerb.rawValue) endpoint"
+
+    let simplifiedRequestSchema: DereferencedJSONSchema
+    do {
+        simplifiedRequestSchema = try requestSchema.simplified()
+    } catch let error {
+        logger?.warning(
+            path: path.rawValue,
+            context: contextString,
+            message: String(describing: error)
+        )
+        return nil
+    }
+
     let expectJSONAPISchema = jsonRequest.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
     let requestBodyTypeName = "Document"
     let examplePropName = "example"
-    let contextString = "Parsing the request document for the \(httpVerb.rawValue) endpoint"
+
 
     let example: ExampleSwiftGen?
     do {
@@ -715,7 +741,7 @@ func document(
     return try documentGenerator(
         expectJSONAPISchema: expectJSONAPISchema,
         swiftTypeName: requestBodyTypeName,
-        structure: requestSchema,
+        structure: simplifiedRequestSchema,
         example: example,
         testExampleFuncs: testExampleFuncs,
         path: path,
