@@ -14,25 +14,24 @@ let package = Package(
         .library(name: "TestServerModels", targets: ["APIModels"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor", .upToNextMajor(from: "4.5.0")),
-        .package(url: "https://github.com/vapor/fluent-postgres-driver", from: "2.0.0-rc.2"),
-        .package(url: "https://github.com/vapor/fluent", from: "4.0.0-rc.2.2"),
-        .package(url: "https://github.com/vapor/fluent-kit", from: "1.0.0-rc.1.26"),
-        .package(url: "https://github.com/vapor/queues-redis-driver", from: "1.0.0-rc.3"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.5.0"),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.1.0"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
+        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
+        .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0-rc.3"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes", .upToNextMinor(from: "0.7.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI", .upToNextMinor(from: "0.0.13")),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.7.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .branch("openapikit-v2")),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation/", .upToNextMinor(from: "0.9.10")),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI", .upToNextMinor(from: "0.23.0")),
-        // .package(name: "JSONAPI-OpenAPI", path: "../JSONAPI-OpenAPI"),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "1.4.0"),
-        .package(url: "https://github.com/mattpolzin/JSONAPI", from: "4.0.0"),
-        .package(url: "https://github.com/jpsim/Yams", from: "3.0.0"),
-        .package(url: "https://github.com/fabianfett/pure-swift-json", .upToNextMinor(from: "0.4.0")),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("openapikit-v2")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.0.0-alpha.4"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "4.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "3.0.0"),
+        .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
 
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.6"))
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.0.6"))
     ],
     targets: [
         // MARK: API Models

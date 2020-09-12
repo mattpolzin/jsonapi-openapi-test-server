@@ -578,7 +578,10 @@ func documents(
             continue
         }
 
-        let responseSchema = jsonResponse.schema
+        guard let responseSchema = jsonResponse.schema else {
+            // skip if there is no schema to work with
+            continue
+        }
 
         let expectJSONAPISchema = jsonResponse.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
@@ -665,7 +668,10 @@ func document(
         return nil
     }
 
-    let requestSchema = jsonRequest.schema
+    guard let requestSchema = jsonRequest.schema else {
+        // skip if there is no schema to work with
+        return nil
+    }
 
     let expectJSONAPISchema = jsonRequest.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
