@@ -273,6 +273,14 @@ extension APITestCommand {
         }
         .map(logDuration(tag: "Done Parsing Document"))
         .flatMap { openAPIDoc in
+            produceValidationErrors(
+                document: openAPIDoc,
+                on: eventLoop,
+                logger: testLogger
+            )
+        }
+        .map(logDuration(tag: "Done Validating Document"))
+        .flatMap { openAPIDoc in
             produceAPITestPackage(
                 on: eventLoop,
                 given: openAPIDoc,
@@ -450,6 +458,38 @@ public func openAPIDoc(
     case .unauthenticated(url: let url):
         return get(url)
     }
+}
+
+/// Produces validation errors as side effects
+/// via the given logger.
+public func produceValidationErrors(
+    document: ResolvedDocument,
+    on loop: EventLoop,
+    logger: SwiftGen.Logger
+) -> EventLoopFuture<ResolvedDocument> {
+    let validator = Validator()
+        .validating(.documentContainsPaths)
+        .validating(.pathsContainOperations)
+        .validating(.schemaComponentsAreDefined)
+
+    do {
+        try document
+            .underlyingDocument
+            .underlyingDocument
+            .validate(using: validator)
+    } catch let errors as ValidationErrorCollection {
+        for error in errors.values {
+            logger.error(
+                path: error.codingPathString,
+                context: "Validating OpenAPI Documentation",
+                message: error.reason
+            )
+        }
+    } catch let error {
+        return loop.makeFailedFuture(error)
+    }
+
+    return loop.makeSucceededFuture(document)
 }
 
 public func produceAPITestPackage(
