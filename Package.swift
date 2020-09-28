@@ -21,12 +21,12 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0-rc.3"),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.7.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .branch("openapikit-v2")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .exact("0.0.14")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("openapikit-v2")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.0.0-rc.1"),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.25.0")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.0.0"),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"),
         .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
