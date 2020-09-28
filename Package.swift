@@ -26,12 +26,12 @@ let package = Package(
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
 
         .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("openapikit-v2")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.0.0-beta.2"),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "4.0.0"),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.0.0-rc.1"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"),
         .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
 
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.0.6"))
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1"))
     ],
     targets: [
         // MARK: API Models

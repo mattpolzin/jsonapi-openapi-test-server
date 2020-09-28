@@ -33,7 +33,7 @@ extension API {
         }
 
         public struct Relationships: JSONAPI.Relationships {
-            public let apiTestDescriptor: ToOneRelationship<APITestDescriptor, NoMetadata, NoLinks>
+            public let apiTestDescriptor: ToOneRelationship<APITestDescriptor, NoIdMetadata, NoMetadata, NoLinks>
 
             public init(apiTestDescriptor: APITestDescriptor.Pointer) {
                 self.apiTestDescriptor = apiTestDescriptor
