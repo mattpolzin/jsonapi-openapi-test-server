@@ -57,12 +57,12 @@ public struct APITestCommand: ParsableCommand {
             "Produce a non-zero exit code if any tests fail."
         )
     )
-    var failHard: Bool
+    var failHard: Bool = false
 
     @ArgumentParser.Flag(
         help: .init("Do not print warnings in the output.")
     )
-    var ignoreWarnings: Bool
+    var ignoreWarnings: Bool = false
 
     @ArgumentParser.Option(
         name: .customLong("openapi-file"),
@@ -80,7 +80,6 @@ public struct APITestCommand: ParsableCommand {
 
     @ArgumentParser.Option(
         name: .long,
-        default: nil,
         help: .init(
             "Override the server definition(s) in the OpenAPI document for the purposes of this test run.",
             discussion: """
@@ -95,7 +94,6 @@ public struct APITestCommand: ParsableCommand {
 
     @ArgumentParser.Option(
         name: [.long, .short],
-        default: .stable,
         help: .init(
             "Choose between the \"stable\" parser and a \"fast\" parser that is less battle-tested.",
             discussion: """
@@ -106,7 +104,7 @@ public struct APITestCommand: ParsableCommand {
             valueName: "parser"
         )
     )
-    var parser: APITestProperties.Parser
+    var parser: APITestProperties.Parser = .stable
 
     public init() {}
 
