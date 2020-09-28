@@ -36,7 +36,7 @@ extension API {
         }
 
         public struct Relationships: JSONAPI.Relationships {
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>
+            public let openAPISource: ToOneRelationship<OpenAPISource, NoIdMetadata, NoMetadata, NoLinks>
 
             public init(openAPISource: OpenAPISource) {
                 self.openAPISource = .init(resourceObject: openAPISource)
@@ -66,9 +66,9 @@ extension API {
         }
 
         public struct Relationships: JSONAPI.Relationships {
-            public let openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>?
+            public let openAPISource: ToOneRelationship<OpenAPISource, NoIdMetadata, NoMetadata, NoLinks>?
 
-            public init(openAPISource: ToOneRelationship<OpenAPISource, NoMetadata, NoLinks>? = nil) {
+            public init(openAPISource: ToOneRelationship<OpenAPISource, NoIdMetadata, NoMetadata, NoLinks>? = nil) {
                 self.openAPISource = openAPISource
             }
         }

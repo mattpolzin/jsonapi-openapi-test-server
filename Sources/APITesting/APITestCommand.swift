@@ -57,12 +57,12 @@ public struct APITestCommand: ParsableCommand {
             "Produce a non-zero exit code if any tests fail."
         )
     )
-    var failHard: Bool
+    var failHard: Bool = false
 
     @ArgumentParser.Flag(
         help: .init("Do not print warnings in the output.")
     )
-    var ignoreWarnings: Bool
+    var ignoreWarnings: Bool = false
 
     @ArgumentParser.Option(
         name: .customLong("openapi-file"),
@@ -80,7 +80,6 @@ public struct APITestCommand: ParsableCommand {
 
     @ArgumentParser.Option(
         name: .long,
-        default: nil,
         help: .init(
             "Override the server definition(s) in the OpenAPI document for the purposes of this test run.",
             discussion: """
@@ -95,7 +94,6 @@ public struct APITestCommand: ParsableCommand {
 
     @ArgumentParser.Option(
         name: [.long, .short],
-        default: .stable,
         help: .init(
             "Choose between the \"stable\" parser and a \"fast\" parser that is less battle-tested.",
             discussion: """
@@ -106,7 +104,7 @@ public struct APITestCommand: ParsableCommand {
             valueName: "parser"
         )
     )
-    var parser: APITestProperties.Parser
+    var parser: APITestProperties.Parser = .stable
 
     public init() {}
 
@@ -272,6 +270,14 @@ extension APITestCommand {
             return eventLoop.makeFailedFuture(error)
         }
         .map(logDuration(tag: "Done Parsing Document"))
+        .flatMap { openAPIDoc in
+            produceValidationErrors(
+                document: openAPIDoc,
+                on: eventLoop,
+                logger: testLogger
+            )
+        }
+        .map(logDuration(tag: "Done Validating Document"))
         .flatMap { openAPIDoc in
             produceAPITestPackage(
                 on: eventLoop,
@@ -450,6 +456,38 @@ public func openAPIDoc(
     case .unauthenticated(url: let url):
         return get(url)
     }
+}
+
+/// Produces validation errors as side effects
+/// via the given logger.
+public func produceValidationErrors(
+    document: ResolvedDocument,
+    on loop: EventLoop,
+    logger: SwiftGen.Logger
+) -> EventLoopFuture<ResolvedDocument> {
+    let validator = Validator()
+        .validating(.documentContainsPaths)
+        .validating(.pathsContainOperations)
+        .validating(.schemaComponentsAreDefined)
+
+    do {
+        try document
+            .underlyingDocument
+            .underlyingDocument
+            .validate(using: validator)
+    } catch let errors as ValidationErrorCollection {
+        for error in errors.values {
+            logger.error(
+                path: error.codingPathString,
+                context: "Validating OpenAPI Documentation",
+                message: error.reason
+            )
+        }
+    } catch let error {
+        return loop.makeFailedFuture(error)
+    }
+
+    return loop.makeSucceededFuture(document)
 }
 
 public func produceAPITestPackage(

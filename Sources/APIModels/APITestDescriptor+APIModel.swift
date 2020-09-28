@@ -28,8 +28,8 @@ extension API {
         }
 
         public struct Relationships: JSONAPI.Relationships {
-            public let messages: ToManyRelationship<APITestMessage, NoMetadata, NoLinks>
-            public let testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>
+            public let messages: ToManyRelationship<APITestMessage, NoIdMetadata, NoMetadata, NoLinks>
+            public let testProperties: ToOneRelationship<APITestProperties, NoIdMetadata, NoMetadata, NoLinks>
 
             public init(testProperties: APITestProperties, messages: [APITestMessage]) {
                 self.testProperties = .init(resourceObject: testProperties)
@@ -54,9 +54,9 @@ extension API {
         public typealias Attributes = NoAttributes
 
         public struct Relationships: JSONAPI.Relationships {
-            public let testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>?
+            public let testProperties: ToOneRelationship<APITestProperties, NoIdMetadata, NoMetadata, NoLinks>?
 
-            public init(testProperties: ToOneRelationship<APITestProperties, NoMetadata, NoLinks>? = nil) {
+            public init(testProperties: ToOneRelationship<APITestProperties, NoIdMetadata, NoMetadata, NoLinks>? = nil) {
                 self.testProperties = testProperties
             }
         }
