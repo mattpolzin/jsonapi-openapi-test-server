@@ -280,7 +280,6 @@ extension APITestCommand {
                 testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
                 return eventLoop.makeFailedFuture(error)
             }
-            .map(logDuration(tag: "Done Parsing Document"))
         }
 
         /// Validate the OpenAPI Document _if_ validation is enabled in
@@ -299,7 +298,6 @@ extension APITestCommand {
                 on: eventLoop,
                 logger: testLogger
             )
-            .map(logDuration(tag: "Done Validating Document"))
         }
 
         /// Generate the test package but do not run it yet.
@@ -314,7 +312,6 @@ extension APITestCommand {
                 formatGeneratedSwift: testProperties.formatGeneratedSwift,
                 logger: testLogger
             )
-            .map(logDuration(tag: "Done Producing Test Package"))
         }
 
         /// Run the tests.
@@ -336,12 +333,20 @@ extension APITestCommand {
         }
 
         return prepAndParseOpenAPI()
+        .map(logDuration(tag: "Done Parsing Document"))
+
         .flatMap(validateOpenAPI)
+        .map(logDuration(tag: "Done Validating Document"))
+
         .flatMap(generateTests)
+        .map(logDuration(tag: "Done Producing Test Package"))
+
         .flatMap { trackProgress(testProgressTracker?.markRunning()) }
         .flatMap(runTests)
         .flatMap { trackProgress(testProgressTracker?.markPassed()) }
+
         .always(cleanup)
+
         .flatMap {
             // tests were successful but if we experienced any
             // failures during validation this is when we want
