@@ -64,6 +64,13 @@ public struct APITestCommand: ParsableCommand {
     )
     var ignoreWarnings: Bool = false
 
+    @ArgumentParser.Flag(
+        help: .init(
+            "Perform validation and linting on the OpenAPI documentation in addition to generating tests from it."
+        )
+    )
+    var validateOpenAPI: Bool = false
+
     @ArgumentParser.Option(
         name: .customLong("openapi-file"),
         help: .init(
@@ -137,6 +144,7 @@ public struct APITestCommand: ParsableCommand {
             openAPISource: source,
             apiHostOverride: overrideServer?.value,
             formatGeneratedSwift: formatGeneratedSwift,
+            validateOpenAPI: validateOpenAPI,
             parser: parser
         )
 
@@ -201,7 +209,7 @@ extension APITestCommand {
     ///     - testProgressTracking: (Optional) If specified, tuple with both
     ///         a progress tracker and a persistence layer delegate. This is not required
     ///         to run tests.
-    ///     - testSuiteConfiguration: The configuration for the whole test suite, including the OpenAPI documentation source.
+    ///     - testProperties: The configuration for the whole test suite, including the OpenAPI documentation source.
     ///     - outPath: The local path at which test files should be stored.
     ///     - zipPath: (Optional) If specified, test files will be zipped and saved to a file at this path.
     ///     - testLogPath: The path and filename where plaintext test logs will be saved.
@@ -244,41 +252,58 @@ extension APITestCommand {
                 ?? eventLoop.makeSucceededFuture(())
         }
 
-        return prepOutputFolders(
-            on: eventLoop,
-            at: outPath,
-            testLogPath: testLogPath,
-            logger: testLogger
-        )
-        .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
-        .flatMap {
-            openAPIDoc(
+        /// Prep the output folder and parse the OpenAPI Document into a
+        /// ResolvedDocument
+        func prepAndParseOpenAPI() -> EventLoopFuture<ResolvedDocument> {
+            return prepOutputFolders(
                 on: eventLoop,
-                from: testProperties.openAPISource,
-                parser: testProperties.parser,
-                threadPool: threadPool
+                at: outPath,
+                testLogPath: testLogPath,
+                logger: testLogger
             )
-        }
-        .flatMapError { error in
-            let errorString: String
-            if let error = error as? Abort {
-                errorString = "HTTP Error: \(error.status.code) - \(error.status.reasonPhrase)"
-            } else {
-                errorString = OpenAPI.Error(from: error).localizedDescription
+            .flatMap { trackProgress(testProgressTracker?.markBuilding()) }
+            .flatMap {
+                openAPIDoc(
+                    on: eventLoop,
+                    from: testProperties.openAPISource,
+                    parser: testProperties.parser,
+                    threadPool: threadPool
+                )
             }
-            testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
-            return eventLoop.makeFailedFuture(error)
+            .flatMapError { error in
+                let errorString: String
+                if let error = error as? Abort {
+                    errorString = "HTTP Error: \(error.status.code) - \(error.status.reasonPhrase)"
+                } else {
+                    errorString = OpenAPI.Error(from: error).localizedDescription
+                }
+                testLogger.error(path: nil, context: "Prepping/Retrieving OpenAPI Source", message: errorString)
+                return eventLoop.makeFailedFuture(error)
+            }
+            .map(logDuration(tag: "Done Parsing Document"))
         }
-        .map(logDuration(tag: "Done Parsing Document"))
-        .flatMap { openAPIDoc in
-            produceValidationErrors(
+
+        /// Validate the OpenAPI Document _if_ validation is enabled in
+        /// the `APITestProperties`.
+        ///
+        /// Validation will not produce an `Error` event loop future even if it
+        /// fails. This is to allow the tests to run regardless of whether documentation
+        /// validation passes. To determine if validation has passed, you can instead
+        /// inspect the logger's error count at the end of test execution and if the error
+        /// count is non-zero but tests succeeded then you know that validation failed.
+        func validateOpenAPI(_ openAPIDoc: ResolvedDocument) -> EventLoopFuture<ResolvedDocument> {
+            guard testProperties.validateOpenAPI else { return eventLoop.makeSucceededFuture(openAPIDoc) }
+
+            return produceValidationErrors(
                 document: openAPIDoc,
                 on: eventLoop,
                 logger: testLogger
             )
+            .map(logDuration(tag: "Done Validating Document"))
         }
-        .map(logDuration(tag: "Done Validating Document"))
-        .flatMap { openAPIDoc in
+
+        /// Generate the test package but do not run it yet.
+        func generateTests(_ openAPIDoc: ResolvedDocument) -> EventLoopFuture<Void> {
             produceAPITestPackage(
                 on: eventLoop,
                 given: openAPIDoc,
@@ -289,10 +314,11 @@ extension APITestCommand {
                 formatGeneratedSwift: testProperties.formatGeneratedSwift,
                 logger: testLogger
             )
+            .map(logDuration(tag: "Done Producing Test Package"))
         }
-        .map(logDuration(tag: "Done Producing Test Package"))
-        .flatMap { trackProgress(testProgressTracker?.markRunning()) }
-        .flatMap {
+
+        /// Run the tests.
+        func runTests() -> EventLoopFuture<Void> {
             runAPITestPackage(
                 on: eventLoop,
                 at: outPath,
@@ -301,11 +327,40 @@ extension APITestCommand {
                 logger: testLogger
             )
         }
-        .flatMap { trackProgress(testProgressTracker?.markPassed()) }
-        .always { _ in
+
+        /// Cleanup the output folder.
+        func cleanup(_ result: Result<Void, Error>) -> Void {
             try? cleanupOutFolder(outPath, logger: testLogger)
             requestLogger?.info("Cleaning up tests in \(outPath)")
             logDuration(tag: "Done Cleaning Up")(())
+        }
+
+        return prepAndParseOpenAPI()
+        .flatMap(validateOpenAPI)
+        .flatMap(generateTests)
+        .flatMap { trackProgress(testProgressTracker?.markRunning()) }
+        .flatMap(runTests)
+        .flatMap { trackProgress(testProgressTracker?.markPassed()) }
+        .always(cleanup)
+        .flatMap {
+            // tests were successful but if we experienced any
+            // failures during validation this is when we want
+            // to turn those into an error.
+            if testLogger.errorCount > 0 {
+                return eventLoop.makeFailedFuture(
+                    ValidationError(
+                        description: "OpenAPI Documentation Validation Failed"
+                    )
+                )
+            }
+            if requestLogger == nil {
+                testLogger.success(
+                    path: nil,
+                    context: "Testing Succeeded",
+                    message: "\(testLogger.successCount) test cases passed"
+                )
+            }
+            return eventLoop.makeSucceededFuture(())
         }
         .flatMapError { error in
             if let requestLogger = requestLogger {
@@ -526,4 +581,8 @@ public func runAPITestPackage(
             logger: logger
         )
     }
+}
+
+struct ValidationError: Swift.Error, CustomStringConvertible {
+    let description: String
 }

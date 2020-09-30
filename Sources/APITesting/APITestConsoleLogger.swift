@@ -15,12 +15,14 @@ final class APITestConsoleLogger: SwiftGen.Logger {
 
     private(set) var warningCount: Int
     private(set) var errorCount: Int
+    private(set) var successCount: Int
 
     init(console: Console, enableWarnings: Bool = true) {
         self.console = console
         self.enableWarnings = enableWarnings
         self.warningCount = 0
         self.errorCount = 0
+        self.successCount = 0
     }
 
     public func error(path: String?, context: String, message: String) {
@@ -54,6 +56,7 @@ final class APITestConsoleLogger: SwiftGen.Logger {
     }
 
     public func success(path: String?, context: String, message: String) {
+        successCount += 1
         console.success("-> \(message)")
         console.print("--")
         console.print("-- \(context)")
