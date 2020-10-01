@@ -65,11 +65,12 @@ public struct APITestCommand: ParsableCommand {
     var ignoreWarnings: Bool = false
 
     @ArgumentParser.Flag(
+        name: [.customLong("validate-all")],
         help: .init(
             "Perform validation and linting on the OpenAPI documentation in addition to generating tests from it."
         )
     )
-    var validateOpenAPI: Bool = false
+    var validateAllOpenAPI: Bool = false
 
     @ArgumentParser.Option(
         name: .customLong("openapi-file"),
@@ -144,7 +145,7 @@ public struct APITestCommand: ParsableCommand {
             openAPISource: source,
             apiHostOverride: overrideServer?.value,
             formatGeneratedSwift: formatGeneratedSwift,
-            validateOpenAPI: validateOpenAPI,
+            validateOpenAPI: validateAllOpenAPI,
             parser: parser
         )
 
