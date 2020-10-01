@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
           "branch": null,
-          "revision": "dea99e8bb5d8241c5c9f815d0fb0ad487b9491b0",
-          "version": "2.0.0"
+          "revision": "55e8672834d4bf6f65f9cdf8ca385956bd4924c9",
+          "version": "2.0.1"
         }
       },
       {
@@ -339,8 +339,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "236c616ca1d781e9dc9b6a8f3f1e1427a326c161",
-          "version": "4.29.3"
+          "revision": "cf1651f7ff76515593f4d8ca6e6e15d2247fe255",
+          "version": "4.29.4"
         }
       },
       {
