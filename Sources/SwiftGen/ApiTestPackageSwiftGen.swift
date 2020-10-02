@@ -123,12 +123,29 @@ public func produceAPITestPackage(
 
         let documentFileNameString = documentTypeName(path: endpoint.path, verb: endpoint.method)
 
-        let apiRequestTest = try? APIRequestTestSwiftGen(
-            method: endpoint.method,
-            server: server,
-            pathComponents: endpoint.path,
-            parameters: endpoint.parameters
-        )
+
+        let apiRequestTest: APIRequestTestSwiftGen?
+        do {
+            apiRequestTest = try APIRequestTestSwiftGen(
+                method: endpoint.method,
+                server: server,
+                pathComponents: endpoint.path,
+                parameters: endpoint.parameters
+            )
+        } catch let error as APIRequestTestSwiftGen.Error {
+            if case .pathParametersNotDefined(names: let names) = error {
+                let namesString = names.joined(separator: ", ")
+                logger?.warning(
+                    path: endpoint.path.rawValue,
+                    context: "Processing the \(endpoint.method.rawValue) endpoint",
+                    message: "Some path parameters (\(namesString)) were not defined for this endpoint"
+                )
+            }
+            apiRequestTest = nil
+        } catch {
+            // we will just ignore other errors for now
+            apiRequestTest = nil
+        }
 
         let responseDocuments = documents(
             for: endpoint,
@@ -149,11 +166,11 @@ public func produceAPITestPackage(
                         logger: logger
                     )
             }
-        } catch let err {
+        } catch let error {
             logger?.warning(
                 path: endpoint.path.rawValue,
                 context: "Parsing request document for \(endpoint.method.rawValue)",
-                message: String(describing: err)
+                message: String(describing: error)
             )
             requestDocument = nil
         }
