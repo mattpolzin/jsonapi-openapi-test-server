@@ -18,6 +18,7 @@ public protocol Logger {
 
     var errorCount: Int { get }
     var warningCount: Int { get }
+    var successCount: Int { get }
 }
 
 typealias HttpMethod = OpenAPI.HttpMethod
