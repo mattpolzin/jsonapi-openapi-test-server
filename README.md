@@ -114,7 +114,7 @@ docker run --rm --entrypoint ./APITest --env 'API_TEST_IN_FILE=/api/openapi.json
 ```
 
 #### API Host Override
-You can specify an override test server URL if you want to make API test requests against a different URL than is specified bu the OpenAPI documentation. You use the `test` command's `--override-server` option for this.
+You can specify an override test server URL if you want to make API test requests against a different URL than is specified by the OpenAPI documentation. You use the `test` command's `--override-server` option for this.
 ```shell
 docker run --rm --entrypoint ./APITest -v '/full/path/to/openapi.json:/api/openapi.json' mattpolzin2/api-test-server --openapi-file /api/openapi.json --override-server https://test.server.com
 ```
@@ -144,12 +144,12 @@ docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env '
 #### Jobs Queue
 Testing is run in a jobs queue. That queue can be run in the same process as the API server if you specify `API_TEST_IN_PROCESS_QUEUES=true` as an environment variable but the recommendation is to run the jobs service as its own process.
 
-You start the Jobs Queue using the same docker image as the serve but you specify the `queues` command.
+You start the Jobs Queue using the same docker image as the server but you specify the `queues` command.
 ```shell
 docker run --env 'API_TEST_IN_URL=https://website.com/api/documentation' --env 'API_TEST_DATABASE_URL=postgres://user:password@host:port/databasename' --env 'API_TEST_REDIS_URL=redis://host:port' mattpolzin2/api-test-server queues
 ```
 
-**NOTE** We must explicitly expose the port to the host device. In this example, `http://localhost:8080` will point to the server which is listening on port `80` in the container.
+**NOTE** You must explicitly expose the port to the host device. In this example, `http://localhost:8080` will point to the server which is listening on port `80` in the container.
 
 Visit the `/docs` API endpoint to see what endpoints the server provides.
 
