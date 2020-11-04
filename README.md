@@ -56,43 +56,30 @@ Parameters:
 
 The command line tool's usage can be printed with `--help` and it is as follows:
 ```
-VERVIEW: Build and run tests based on an OpenAPI Document.
+OVERVIEW: Build and run tests based on an OpenAPI Document.
 
-USAGE: APITest [--dump-files <directory path>] [--fail-hard] [--ignore-warnings] [--openapi-file <file path>] [--override-server <url>] [--parser <parser>]
+USAGE: APITest [--dump-files <directory path>] [--fail-hard] [--ignore-warnings] [--validate-all] [--openapi-file <file path>] [--override-server <url>] [--parser <parser>]
 
 OPTIONS:
   --dump-files <directory path>
-                          Dump produced test files in a zipped file at the
-                          specified location. 
-        Tip: A good location to dump files is "./out". For the Dockerized tool
-        this will be `/app/out` and when running the tool natively on your
-        machine this will be the `out` folder relative to the current working
-        directory.
+                          Dump produced test files in a zipped file at the specified location. 
+        Tip: A good location to dump files is "./out". For the Dockerized tool this will be `/app/out` and when running the tool natively on your machine this will be the `out` folder relative to the current working directory.
 
-        Not using this argument will result in test files being deleted after
-        execution of the tests.
+        Not using this argument will result in test files being deleted after execution of the tests.
   -f, --fail-hard         Produce a non-zero exit code if any tests fail. 
   --ignore-warnings       Do not print warnings in the output. 
+  --validate-all          Perform validation and linting on the OpenAPI documentation in addition to generating tests from it. 
   --openapi-file <file path>
-                          Specify a filename from the local filesystem from
-                          which to read OpenAPI documentation. 
+                          Specify a filename from the local filesystem from which to read OpenAPI documentation. 
         Alternatively, set the `API_TEST_IN_FILE` environment variable.
 
-        Either the environment variable or this argument must be used to
-        indicate the OpenAPI file from which the tests should be generated.
-  --override-server <url> Override the server definition(s) in the OpenAPI
-                          document for the purposes of this test run. 
-        This argument allows you to make API requests against a different
-        server than the input OpenAPI documentation specifies for this test
-        run.
+        Either the environment variable or this argument must be used to indicate the OpenAPI file from which the tests should be generated.
+  --override-server <url> Override the server definition(s) in the OpenAPI document for the purposes of this test run. 
+        This argument allows you to make API requests against a different server than the input OpenAPI documentation specifies for this test run.
 
-        Not using this argument will result in the API server options from the
-        OpenAPI documentation being used.
-  -p, --parser <parser>   Choose between the "stable" parser and a "fast"
-                          parser that is less battle-tested. (default: stable)
-        This argument is currently only applicable to JSON parsing. When
-        decoding a YAML file, the argument is ignored as there is only
-        currently one YAML parser to choose from.
+        Not using this argument will result in the API server options from the OpenAPI documentation being used.
+  -p, --parser <parser>   Choose between the "stable" parser and a "fast" parser that is less battle-tested. (default: stable)
+        This argument is currently only applicable to JSON parsing. When decoding a YAML file, the argument is ignored as there is only currently one YAML parser to choose from.
 
         Not using this argument will result in using the default stable parser.
   -h, --help              Show help information.
