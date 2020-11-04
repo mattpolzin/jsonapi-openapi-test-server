@@ -530,6 +530,7 @@ public func produceValidationErrors(
         .validating(.documentContainsPaths)
         .validating(.pathsContainOperations)
         .validating(.schemaComponentsAreDefined)
+        .validating(.pathParametersAreDefined)
 
     do {
         try document
