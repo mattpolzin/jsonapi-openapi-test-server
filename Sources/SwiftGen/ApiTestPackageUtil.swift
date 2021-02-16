@@ -46,6 +46,36 @@ public func cleanupOutFolder(_ outPath: String, logger: Logger) throws {
     try FileManager.default.removeItem(atPath: outPath)
 }
 
+func dropBracket(_ inString: String) -> String {
+    if inString.last == "]" {
+        return String(inString.dropLast())
+    }
+    return inString
+}
+
+func testFunctionName<S>(for line: S) -> TestFunctionName? where S: StringProtocol {
+    let testFunctionNameRawValue = TestFunctionName.testPrefix + line
+        .components(separatedBy: "__")
+        .dropFirst()
+        .joined(separator: "__")
+
+    return TestFunctionName(rawValue: testFunctionNameRawValue)
+}
+
+func context(for testFunctionName: TestFunctionName?) -> String {
+    guard let functionName = testFunctionName else {
+        return "Test"
+    }
+    if functionName.context.contextPrefix == "test_example_parse" {
+        return "Example Parsing"
+
+    } else if functionName.context.contextPrefix == "test_example_request" {
+        let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
+        return "Request Test\(slugString)"
+    }
+    return "Test"
+}
+
 public func runAPITestPackage(at path: String, testLogPath: String, logger: Logger) throws {
     let (exitCode, stdout) = shell("cd '\(path)' && swift test 2>&1")
 
@@ -60,36 +90,6 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
     }
 
     let testOutput = stdout.split(separator: "\n")
-
-    func context(for testFunctionName: TestFunctionName?) -> String {
-        guard let functionName = testFunctionName else {
-            return "Test"
-        }
-        if functionName.context.contextPrefix == "test_example_parse" {
-            return "Example Parsing"
-
-        } else if functionName.context.contextPrefix == "test_example_request" {
-            let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
-            return "Request Test\(slugString)"
-        }
-        return "Test"
-    }
-
-    func dropBracket(_ inString: String) -> String {
-        if inString.last == "]" {
-            return String(inString.dropLast())
-        }
-        return inString
-    }
-
-    func testFunctionName<S>(for line: S) -> TestFunctionName? where S: StringProtocol {
-        let testFunctionNameRawValue = TestFunctionName.testPrefix + line
-            .components(separatedBy: "__")
-            .dropFirst()
-            .joined(separator: "__")
-
-        return TestFunctionName(rawValue: testFunctionNameRawValue)
-    }
 
     let failedTestLines = testOutput.filter { $0.contains(": error:") }
     let succeededTestLines = testOutput.filter { $0.contains(" passed (") }
@@ -122,12 +122,16 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
     }
 
     guard failedTestLines.count == 0 else {
-        for line in failedTestLines {
+        for (idx, line) in testOutput.enumerated() {
+            if !line.contains(": error:") {
+                continue
+            }
 
-            let pathAndError = Optional(line
-                .components(separatedBy: " : ")
-                .map(dropBracket))
-                .flatMap { zip($0.first, $0.last) }
+            let pathAndError = Optional(
+                line.components(separatedBy: " : ")
+                    .map(dropBracket)
+            )
+            .flatMap { zip($0.first, $0.last) }
 
             let functionName = pathAndError.flatMap { testFunctionName(for: $0.0) }
 
@@ -140,14 +144,18 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
                 ].compactMap { $0 }.joined(separator: ", ")
             }
 
-            let isolatedError = pathAndError?.1 ?? String(line)
+            let isolatedErrorLine1 = pathAndError?.1 ?? String(line)
 
-            logger.error(
-                path: pathParseAttempt ?? path,
-                context: isolatedError,
-                message: "\(context(for: functionName)) Failed"
+            gatherErrorLines(
+                at: path,
+                parsedPath: pathParseAttempt,
+                logger: logger,
+                functionName: functionName,
+                currentError: isolatedErrorLine1,
+                remainingLines: testOutput.dropFirst(idx + 1)
             )
         }
+
         throw TestPackageSwiftError.testsFailed(
             succeeded: succeededTestLines.count,
             failed: failedTestLines.count
@@ -157,6 +165,28 @@ public func runAPITestPackage(at path: String, testLogPath: String, logger: Logg
     guard exitCode == shellSuccessCode else {
         throw TestPackageSwiftError.executionFailed(stdout: stdout)
     }
+}
+
+func gatherErrorLines<S : StringProtocol, Col: Collection>(at path: String, parsedPath: String?, logger: Logger, functionName: TestFunctionName?, currentError: String, remainingLines: Col, maxCollection: Int = 8) where Col.Element == S {
+    guard let line = remainingLines.first, !line.contains("Test Case "), !line.contains("Compiling GeneratedAPITests"), maxCollection > 0 else {
+
+        logger.error(
+            path: path,
+            context: currentError,
+            message: "\(context(for: functionName)) Failed"
+        )
+        return
+    }
+
+    gatherErrorLines(
+        at: path,
+        parsedPath: parsedPath,
+        logger: logger,
+        functionName: functionName,
+        currentError: currentError + "\n" + line,
+        remainingLines: remainingLines.dropFirst(),
+        maxCollection: maxCollection - 1
+    )
 }
 
 let shellSuccessCode: Int32 = 0
