@@ -171,7 +171,7 @@ func gatherErrorLines<S : StringProtocol, Col: Collection>(at path: String, pars
     guard let line = remainingLines.first, !line.contains("Test Case "), !line.contains("Compiling GeneratedAPITests"), maxCollection > 0 else {
 
         logger.error(
-            path: path,
+            path: parsedPath ?? path,
             context: currentError,
             message: "\(context(for: functionName)) Failed"
         )
