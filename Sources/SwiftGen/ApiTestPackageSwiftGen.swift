@@ -85,6 +85,7 @@ public func produceAPITestPackage(
         Import.JSONAPI as Decl,
         Import.JSONAPITesting as Decl,
         Import.AnyCodable as Decl,
+        Import.Poly as Decl,
         Import.XCTest as Decl,
         Import.FoundationNetworking,
         APIRequestTestSwiftGen.testFuncDecl,
@@ -429,6 +430,7 @@ func writeAPIFile<T: Sequence>(
         Import.Foundation as Decl,
         Import.JSONAPI as Decl,
         Import.AnyCodable as Decl,
+        Import.Poly as Decl,
         Import.XCTest as Decl,
         apiDecl
         ].map {
@@ -465,6 +467,7 @@ func writeFile<T: ResourceTypeSwiftGenerator>(
             [
                 Import.JSONAPI,
                 Import.AnyCodable,
+                Import.Poly,
                 decl
             ] as [Decl]
         )
@@ -895,16 +898,17 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "4.0.0"))
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "4.0.0")),
+        .package(url: "https://github.com/mattpolzin/Poly.git", .upToNextMajor(from: "2.5.0"))
     ],
     targets: [
         .target(
             name: "GeneratedAPI",
-            dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable"]
+            dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable", "Poly"]
         ),
         .testTarget(
             name: "GeneratedAPITests",
-            dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable"]
+            dependencies: ["JSONAPI", "JSONAPITesting", "AnyCodable", "Poly"]
         )
     ]
 )

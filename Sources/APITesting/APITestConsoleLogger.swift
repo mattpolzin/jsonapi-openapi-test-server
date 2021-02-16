@@ -29,7 +29,7 @@ final class APITestConsoleLogger: SwiftGen.Logger {
         errorCount += 1
         console.error("!> \(message)")
         console.print("--")
-        console.print("-- \(context)")
+        console.print("-- \(context.replacingOccurrences(of: "\n", with: "\n-- "))")
         if let path = path {
             console.print("-- at [", newLine: false)
             console.error(path, newLine:  false)
