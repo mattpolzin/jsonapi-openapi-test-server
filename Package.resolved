@@ -77,9 +77,9 @@
         "package": "JSONAPI-OpenAPI",
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
-          "branch": "more-poly-support",
-          "revision": "954b978e54c926fbbd935e12139b219d870ee89e",
-          "version": null
+          "branch": null,
+          "revision": "80896d9b281695fbd0dde679f568e1ac8cb5efc7",
+          "version": "0.27.0"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Poly.git",
         "state": {
           "branch": null,
-          "revision": "ea759f4c6ba6573c35d8a6e5e22de0749336de10",
-          "version": "2.5.1"
+          "revision": "7dd2d0d3e6c0625f36f1b8306a90db12719240c8",
+          "version": "2.5.2"
         }
       },
       {
