@@ -619,20 +619,45 @@ func documents(
         let expectJSONAPISchema = jsonResponse.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
         let responseBodyTypeName = "Document_\(statusCode.rawValue)"
-        let examplePropName = "example_\(statusCode.rawValue)"
-
-        let example: ExampleSwiftGen?
-        do {
-            example = try jsonResponse.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
-        } catch let err {
-            logger?.warning(
-                path: endpoint.path.rawValue,
-                context: contextString,
-                message: String(describing: err)
-            )
-            example = nil
+        func exampleProp(named name: String) -> String {
+            let validName = name.replacingOccurrences(of: " ", with: "_")
+            return "example_\(statusCode.rawValue)_\(validName)"
         }
 
+        let exampleGens: [ExampleSwiftGen]
+
+        if let example = jsonResponse.example {
+            do {
+                exampleGens = [ try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: "default")) ]
+            } catch let err {
+                logger?.warning(
+                    path: endpoint.path.rawValue,
+                    context: contextString,
+                    message: String(describing: err)
+                )
+                exampleGens = []
+            }
+        } else if let examples = jsonResponse.examples {
+            exampleGens = examples
+                .compactMapValues { $0.value.b }
+                .compactMap { (name, example) in
+                    do {
+                        return try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: name))
+                    } catch let err {
+                        logger?.warning(
+                            path: endpoint.path.rawValue,
+                            context: contextString,
+                            message: String(describing: err)
+                        )
+                        return nil
+                    }
+                }
+        } else {
+            exampleGens = []
+        }
+
+        // TODO: support x-tests for named examples. Right now it just assumes there
+        //       is only 1 example.
         let testExampleFuncs: [TestFunctionGenerator]
         do {
             testExampleFuncs = try exampleTests(
@@ -642,7 +667,7 @@ func documents(
                 pathComponents: endpoint.path,
                 parameters: endpoint.parameters,
                 jsonResponse: jsonResponse,
-                exampleDataPropName: example.map { _ in examplePropName },
+                exampleDataPropName: exampleGens.first.map { $0.propertyName },
                 bodyType: .init(.init(name: responseBodyTypeName)),
                 expectedHttpStatus: statusCode
             )
@@ -672,7 +697,7 @@ func documents(
                 expectJSONAPISchema: expectJSONAPISchema,
                 swiftTypeName: responseBodyTypeName,
                 structure: simplifiedResponseSchema,
-                example: example,
+                examples: exampleGens,
                 testExampleFuncs: testExampleFuncs,
                 path: endpoint.path,
                 context: contextString,
@@ -723,27 +748,49 @@ func document(
     let expectJSONAPISchema = jsonRequest.vendorExtensions["x-not-json-api"]?.value as? Bool != true
 
     let requestBodyTypeName = "Document"
-    let examplePropName = "example"
+    func exampleProp(named name: String) -> String {
+        let validName = name.replacingOccurrences(of: " ", with: "_")
+        return "example_request_\(validName)"
+    }
 
+    let exampleGens: [ExampleSwiftGen]
 
-    let example: ExampleSwiftGen?
-    do {
-        example = try jsonRequest.example.map { try ExampleSwiftGen.init(openAPIExample: $0, propertyName: examplePropName) }
-    } catch let err {
-        logger?.warning(
-            path: path.rawValue,
-            context: contextString,
-            message: String(describing: err)
-        )
-        example = nil
+    if let example = jsonRequest.example {
+        do {
+            exampleGens = [ try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: "default")) ]
+        } catch let err {
+            logger?.warning(
+                path: path.rawValue,
+                context: contextString,
+                message: String(describing: err)
+            )
+            exampleGens = []
+        }
+    } else if let examples = jsonRequest.examples {
+        exampleGens = examples
+            .compactMapValues { $0.value.b }
+            .compactMap { (name, example) in
+                do {
+                    return try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: name))
+                } catch let err {
+                    logger?.warning(
+                        path: path.rawValue,
+                        context: contextString,
+                        message: String(describing: err)
+                    )
+                    return nil
+                }
+            }
+    } else {
+        exampleGens = []
     }
 
     let testExampleFuncs: [TestFunctionGenerator]
     do {
-        testExampleFuncs = try example.map { _ in
+        testExampleFuncs = try exampleGens.first.map { gen in
             try [
                 exampleParsingTest(
-                    exampleDataPropName: examplePropName,
+                    exampleDataPropName: gen.propertyName,
                     bodyType: .init(.init(name: requestBodyTypeName)),
                     expectedHttpStatus: nil
                 )
@@ -763,7 +810,7 @@ func document(
         expectJSONAPISchema: expectJSONAPISchema,
         swiftTypeName: requestBodyTypeName,
         structure: simplifiedRequestSchema,
-        example: example,
+        examples: exampleGens,
         testExampleFuncs: testExampleFuncs,
         path: path,
         context: contextString,
