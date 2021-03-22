@@ -667,7 +667,7 @@ func documents(
                 pathComponents: endpoint.path,
                 parameters: endpoint.parameters,
                 jsonResponse: jsonResponse,
-                exampleDataPropName: exampleGens.first.map { $0.propertyName },
+                exampleDataPropNames: exampleGens.map { $0.propertyName },
                 bodyType: .init(.init(name: responseBodyTypeName)),
                 expectedHttpStatus: statusCode
             )
@@ -872,24 +872,24 @@ func exampleTests(
     pathComponents: OpenAPI.Path,
     parameters: [DereferencedParameter],
     jsonResponse: DereferencedContent,
-    exampleDataPropName: String?,
+    exampleDataPropNames: [String],
     bodyType: SwiftTypeRep,
     expectedHttpStatus: OpenAPI.Response.StatusCode
 ) throws -> [TestFunctionGenerator] {
     // if we have an x-tests extension, use it. otherwise, fall
     // back to a test that just parses any given example.
     guard let testsExtension = jsonResponse.vendorExtensions["x-tests"]?.value as? [String: Any] else {
-        return try exampleDataPropName.map {
-            try [
+        return try exampleDataPropNames.map {
+            try
                 exampleParsingTest(
                     exampleDataPropName: $0,
                     bodyType: bodyType,
                     expectedHttpStatus: expectedHttpStatus
                 )
-            ]
-        } ?? []
+        }
     }
 
+    // TODO: handle tests against named examples.
     return try OpenAPIExampleRequestTestSwiftGen.TestProperties
         .properties(for: testsExtension, server: server)
         .compactMap { properties in
@@ -901,7 +901,7 @@ func exampleTests(
                     parameters: parameters,
                     testSuiteConfiguration: testSuiteConfiguration,
                     testProperties: properties,
-                    exampleResponseDataPropName: exampleDataPropName,
+                    exampleResponseDataPropName: exampleDataPropNames.first,
                     responseBodyType: bodyType,
                     expectedHttpStatus: expectedHttpStatus
                 )
