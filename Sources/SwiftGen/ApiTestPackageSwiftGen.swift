@@ -365,7 +365,7 @@ func apiDocumentsBlock<T: Sequence>(
 ) -> Decl where T.Element == DocumentSwiftGenerator {
     let requestDocAndExample = requestDoc.map { doc in
         doc.decls
-            + (doc.exampleGenerator?.decls ?? [])
+            + doc.exampleGenerators.flatMap { $0.decls }
             + doc.testExampleFuncs.flatMap { $0.decls }
     }
 
@@ -378,7 +378,7 @@ func apiDocumentsBlock<T: Sequence>(
 
     let responseDocsAndExamples = responseDocs.flatMap { doc in
         doc.decls
-            + (doc.exampleGenerator?.decls ?? [])
+            + doc.exampleGenerators.flatMap { $0.decls }
             + doc.testExampleFuncs.flatMap { $0.decls }
     }
 
@@ -786,7 +786,7 @@ func documentGenerator(
     expectJSONAPISchema: Bool,
     swiftTypeName: String,
     structure: DereferencedJSONSchema,
-    example: ExampleSwiftGen?,
+    examples: [ExampleSwiftGen],
     testExampleFuncs: [TestFunctionGenerator],
     path: OpenAPI.Path,
     context contextString: String,
@@ -798,7 +798,7 @@ func documentGenerator(
                 swiftTypeName: swiftTypeName,
                 structure: structure,
                 allowPlaceholders: false,
-                example: example,
+                examples: examples,
                 testExampleFuncs: testExampleFuncs
             )
         } catch let error {
@@ -813,7 +813,7 @@ func documentGenerator(
         swiftTypeName: swiftTypeName,
         structure: structure,
         allowPlaceholders: false,
-        example: example,
+        examples: examples,
         testExampleFuncs: testExampleFuncs
     )
 }
