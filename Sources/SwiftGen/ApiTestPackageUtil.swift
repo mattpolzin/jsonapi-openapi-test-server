@@ -67,7 +67,7 @@ func context(for testFunctionName: TestFunctionName?) -> String {
         return "Test"
     }
     if functionName.context.contextPrefix == "test_example_parse" {
-        return "Example Parsing"
+        return "Example Parsing (\(functionName.context.slug ?? "default"))"
 
     } else if functionName.context.contextPrefix == "test_example_request" {
         let slugString = functionName.context.slug.map { " (\($0))" } ?? ""
