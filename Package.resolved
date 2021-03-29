@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
         "state": {
           "branch": null,
-          "revision": "b940506cf3411fd0d7ad9a766e412acaf82cc8ee",
-          "version": "0.28.0"
+          "revision": "accaae5e77e3e8669ae65b15996b5960ef0f1e47",
+          "version": "0.29.0"
         }
       },
       {
@@ -348,8 +348,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "b6e1bc692de72db5f7c7adc232441cc39c5dee2e",
-          "version": "4.41.6"
+          "revision": "984852e6ef87c653c83df90b365b8adba736f109",
+          "version": "4.41.9"
         }
       },
       {
@@ -384,8 +384,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "9003d51672e516cc59297b7e96bff1dfdedcb4ea",
-          "version": "4.0.4"
+          "revision": "4ec0a3c5d6a2446667a2b22c8c7d0fc82dd1d3de",
+          "version": "4.0.5"
         }
       },
       {
