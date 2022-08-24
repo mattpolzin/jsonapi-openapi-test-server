@@ -27,7 +27,7 @@ let package = Package(
 
         .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.29.0")),
         .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.1.0"),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.0.0"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.1.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"),
         .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
 
