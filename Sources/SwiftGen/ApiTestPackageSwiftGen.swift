@@ -281,7 +281,7 @@ func swiftTypeName(from string: String) -> String {
 
 func namespace(for path: OpenAPI.Path) -> String {
     return path.components
-        .map(swiftTypeName)
+        .map(TestFunctionName.swiftName)
         .joined(separator: ".")
 }
 
@@ -539,7 +539,7 @@ func namespaceDecls(for routes: [ResolvedRoute]) -> [DeclNode] {
         var remainingPath = path.components.makeIterator()
 
         func fillFrom(currentNode: inout DeclNode) {
-            guard let next = remainingPath.next().map(swiftTypeName) else {
+            guard let next = remainingPath.next().map(TestFunctionName.swiftName) else {
                 return
             }
             var newNode = DeclNode(name: next, children: [])
@@ -550,7 +550,7 @@ func namespaceDecls(for routes: [ResolvedRoute]) -> [DeclNode] {
 
         func step(currentNodes: inout [DeclNode]) {
 
-            guard let next = remainingPath.next().map(swiftTypeName) else {
+            guard let next = remainingPath.next().map(TestFunctionName.swiftName) else {
                 return
             }
 
