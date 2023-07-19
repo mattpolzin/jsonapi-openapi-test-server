@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "FineJSON",
-        "repositoryURL": "https://github.com/omochi/FineJSON.git",
-        "state": {
-          "branch": null,
-          "revision": "05101709243cb66d80c92e645210a3b80cf4e17f",
-          "version": "1.14.0"
-        }
-      },
-      {
         "package": "fluent",
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
@@ -105,8 +96,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
           "branch": null,
-          "revision": "4986552e76c331a99770428bd2be77ad76068c08",
-          "version": "2.4.0"
+          "revision": "7e3969ea427374013fa930199ebf8f8f17d9baea",
+          "version": "2.5.3"
         }
       },
       {
@@ -188,15 +179,6 @@
           "branch": null,
           "revision": "b2367ac33eb8632011c1ec7afff12307838a4dab",
           "version": "1.1.0"
-        }
-      },
-      {
-        "package": "RichJSONParser",
-        "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
-        "state": {
-          "branch": null,
-          "revision": "263e2ecfe88d0500fa99e4cbc8c948529d335534",
-          "version": "3.0.0"
         }
       },
       {
