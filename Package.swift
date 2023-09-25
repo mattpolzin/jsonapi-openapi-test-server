@@ -1,11 +1,11 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.5
 
 import PackageDescription
 
 let package = Package(
     name: "jsonapi-openapi-test-server",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v12),
         .iOS(.v10)
     ],
     products: [
@@ -25,13 +25,13 @@ let package = Package(
 
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.30.0")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "2.5.0"),
+        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("openapikit-3")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .branch("release/3_0")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.1.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
         .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
 
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1"))
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0")
     ],
     targets: [
         // MARK: API Models
@@ -82,19 +82,19 @@ let package = Package(
         ]),
 
         // MARK: Executables
-        .target(name: "Run", dependencies: ["App"]),
-        .target(name: "APITest", dependencies: [
+        .executableTarget(name: "Run", dependencies: ["App"]),
+        .executableTarget(name: "APITest", dependencies: [
             "APITesting",
             .product(name: "Vapor", package: "vapor")
         ]),
-        .target(name: "GenAPIDocumentation", dependencies: [
+        .executableTarget(name: "GenAPIDocumentation", dependencies: [
             "AppAPIDocumentation"
         ]),
 
         // MARK: Swift Generation interface
         .target(name: "SwiftGen", dependencies: [
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
-            .product(name: "OpenAPIKit", package: "OpenAPIKit"),
+            .product(name: "OpenAPIKit30", package: "OpenAPIKit"),
             .product(name: "JSONAPISwiftGen", package: "JSONAPI-OpenAPI"),
             .product(name: "ZIPFoundation", package: "ZIPFoundation")
         ])
