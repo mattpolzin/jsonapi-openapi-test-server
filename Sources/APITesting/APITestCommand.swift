@@ -11,7 +11,7 @@ import Vapor
 import Yams
 import PureSwiftJSON
 import SwiftGen
-import OpenAPIKit
+import OpenAPIKit30
 import JSONAPISwiftGen
 
 extension APITestProperties.Parser: ExpressibleByArgument {}
