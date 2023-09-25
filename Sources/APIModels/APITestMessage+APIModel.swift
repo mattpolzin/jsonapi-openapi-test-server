@@ -7,6 +7,7 @@
 
 import Foundation
 import JSONAPI
+import Poly
 
 extension API {
     public enum APITestMessageDescription: JSONAPI.ResourceObjectDescription {

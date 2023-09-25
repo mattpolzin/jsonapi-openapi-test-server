@@ -20,8 +20,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0-rc.3"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.7.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .exact("0.0.14")),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.9.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .branch("openapikit-3")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
 

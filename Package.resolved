@@ -392,9 +392,9 @@
         "package": "VaporOpenAPI",
         "repositoryURL": "https://github.com/mattpolzin/VaporOpenAPI.git",
         "state": {
-          "branch": null,
-          "revision": "b9ce1c3f983216e6ba4b3f22ee23678d984d5348",
-          "version": "0.0.14"
+          "branch": "openapikit-3",
+          "revision": "b3c6fb698ba456d6b76f7b74dcee0c3b1ddc050b",
+          "version": null
         }
       },
       {
@@ -402,8 +402,8 @@
         "repositoryURL": "https://github.com/mattpolzin/VaporTypedRoutes.git",
         "state": {
           "branch": null,
-          "revision": "73cd29ed2c44900e9f54a09c1c336d97adc72b32",
-          "version": "0.7.1"
+          "revision": "e8015627a2def1b641ceba9d605972a40eeff309",
+          "version": "0.9.0"
         }
       },
       {
