@@ -64,8 +64,7 @@ final class APITestMessageControllerTests: XCTestCase {
 
         let properties = DB.APITestProperties(
             openAPISourceId: UUID(),
-            apiHostOverride: nil,
-            parser: .stable
+            apiHostOverride: nil
         )
 
         let descriptor = try DB.APITestDescriptor(
@@ -127,8 +126,7 @@ final class APITestMessageControllerTests: XCTestCase {
 
         let properties = DB.APITestProperties(
             openAPISourceId: UUID(),
-            apiHostOverride: nil,
-            parser: .stable
+            apiHostOverride: nil
         )
 
         let descriptor = try DB.APITestDescriptor(

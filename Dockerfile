@@ -1,5 +1,5 @@
 
-FROM swift:5.8-focal as builder
+FROM swift:5.9 as builder
 
 # Install OS updates and, if needed, sqlite3
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -52,7 +52,7 @@ RUN bin_path="$(swift build --package-path /build -c release --show-bin-path)" \
 ## Production image
 #
 
-FROM swift:5.8-focal
+FROM swift:5.9
 
 # DEBIAN_FRONTEND=noninteractive for automatic UTC configuration in tzdata
 # Make sure all system packages are up to date.
