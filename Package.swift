@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.8
 
 import PackageDescription
 
@@ -6,7 +6,7 @@ let package = Package(
     name: "jsonapi-openapi-test-server",
     platforms: [
         .macOS(.v12),
-        .iOS(.v10)
+        .iOS(.v11)
     ],
     products: [
         .library(name: "jsonapi-openapi-test-server", targets: ["App"]),
@@ -18,18 +18,17 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.1.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
-        .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0-rc.3"),
+        .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.9.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .branch("openapikit-3")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.5.0")),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.10")),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
 
-        .package(name: "JSONAPI-OpenAPI", url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .branch("openapikit-3")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", .branch("release/3_0")),
+        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.31.0")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "3.0.0"),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.1.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
-        .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMinor(from: "0.4.0")),
 
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0")
     ],
@@ -69,7 +68,6 @@ let package = Package(
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
 
             .product(name: "Yams", package: "Yams"),
-            .product(name: "PureSwiftJSON", package: "pure-swift-json"),
 
             "SwiftGen"
         ]),
