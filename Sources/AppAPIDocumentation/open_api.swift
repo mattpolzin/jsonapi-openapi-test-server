@@ -7,7 +7,7 @@ import JSONAPIOpenAPI
 
 public struct OpenAPIDocs {
 
-    public let document: OpenAPI.Document
+    public let document: OpenAPIKit.OpenAPI.Document
 
     public init(contentConfig: ContentConfiguration, routes: Routes) throws {
 
@@ -22,21 +22,21 @@ public struct OpenAPIDocs {
             jsonEncoder.outputFormatting = .sortedKeys
         #endif
 
-        let info = OpenAPI.Document.Info(
+        let info = OpenAPIKit.OpenAPI.Document.Info(
             title: "OpenAPI Test Server API",
             description: Self.description,
             version: "1.0"
         )
 
         let servers = [
-            OpenAPI.Server(url: URL(string: "http://localhost")!)
+            OpenAPIKit.OpenAPI.Server(url: URL(string: "http://localhost")!)
         ]
 
-        let components = OpenAPI.Components()
+        let components = OpenAPIKit.OpenAPI.Components()
 
         let paths = try routes.openAPIPathItems(using: jsonEncoder)
 
-        document = OpenAPI.Document(
+        document = OpenAPIKit.OpenAPI.Document(
             info: info,
             servers: servers,
             paths: paths,

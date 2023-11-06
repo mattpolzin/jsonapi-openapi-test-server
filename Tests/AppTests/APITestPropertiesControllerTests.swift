@@ -50,7 +50,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         propertiesController.mount(on: app, at: "api_test_properties")
 
         let requestedNewProperties = API.NewAPITestProperties(
-            attributes: .init(apiHostOverride: nil, parser: .stable),
+            attributes: .init(apiHostOverride: nil),
             relationships: .init(openAPISource: nil),
             meta: .none,
             links: .none
@@ -92,7 +92,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         // expect the database to be queried to create a new API Test Properties resource
         // and serve up the craeted resource
         testDatabase.append([
-            TestOutput(DB.APITestProperties(openAPISourceId: UUID(), apiHostOverride: nil, parser: .stable))
+            TestOutput(DB.APITestProperties(openAPISourceId: UUID(), apiHostOverride: nil))
         ])
 
         let defaultSource = OpenAPISource.file(path: "/hello/world.json")
@@ -105,7 +105,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
 
         // create the POST request body
         let requestedNewProperties = API.NewAPITestProperties(
-            attributes: .init(apiHostOverride: nil, parser: .stable),
+            attributes: .init(apiHostOverride: nil),
             relationships: .init(openAPISource: nil),
             meta: .none,
             links: .none
@@ -169,8 +169,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         testDatabase.append([
@@ -189,14 +189,14 @@ final class APITestPropertiesControllerTests: XCTestCase {
         let expectedValues = [
             API.APITestProperties(
                 id: .init(rawValue: testProperties[0].id!),
-                attributes: .init(createdAt: testProperties[0].createdAt, apiHostOverride: testProperties[0].apiHostOverride, parser: .stable),
+                attributes: .init(createdAt: testProperties[0].createdAt, apiHostOverride: testProperties[0].apiHostOverride),
                 relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[0]))),
                 meta: .none,
                 links: .none
             ),
             API.APITestProperties(
                 id: .init(rawValue: testProperties[1].id!),
-                attributes: .init(createdAt: testProperties[1].createdAt, apiHostOverride: testProperties[1].apiHostOverride, parser: .fast),
+                attributes: .init(createdAt: testProperties[1].createdAt, apiHostOverride: testProperties[1].apiHostOverride),
                 relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[1]))),
                 meta: .none,
                 links: .none
@@ -233,8 +233,8 @@ final class APITestPropertiesControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testSources = [
@@ -261,14 +261,14 @@ final class APITestPropertiesControllerTests: XCTestCase {
         let expectedPrimaries = [
             API.APITestProperties(
                 id: .init(rawValue: testProperties[0].id!),
-                attributes: .init(createdAt: testProperties[0].createdAt, apiHostOverride: testProperties[0].apiHostOverride, parser: .stable),
+                attributes: .init(createdAt: testProperties[0].createdAt, apiHostOverride: testProperties[0].apiHostOverride),
                 relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[0]))),
                 meta: .none,
                 links: .none
             ),
             API.APITestProperties(
                 id: .init(rawValue: testProperties[1].id!),
-                attributes: .init(createdAt: testProperties[1].createdAt, apiHostOverride: testProperties[1].apiHostOverride, parser: .fast),
+                attributes: .init(createdAt: testProperties[1].createdAt, apiHostOverride: testProperties[1].apiHostOverride),
                 relationships: .init(openAPISource: .init(id: .init(rawValue: openAPISourceUUIDs[1]))),
                 meta: .none,
                 links: .none
@@ -370,7 +370,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         app.databases.use(testDatabase.configuration, as: .psql)
 
         let sourceUUID = UUID()
-        let testProperty = DB.APITestProperties(openAPISourceId: sourceUUID, apiHostOverride: nil, parser: .stable)
+        let testProperty = DB.APITestProperties(openAPISourceId: sourceUUID, apiHostOverride: nil)
 
         // expect a database query to find the properties resource
         // and respond with a resource
@@ -386,7 +386,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
 
         let expectedValue = API.APITestProperties(
             id: .init(rawValue: testProperty.id!),
-            attributes: .init(createdAt: testProperty.createdAt, apiHostOverride: testProperty.apiHostOverride, parser: .stable),
+            attributes: .init(createdAt: testProperty.createdAt, apiHostOverride: testProperty.apiHostOverride),
             relationships: .init(openAPISource: .init(id: .init(rawValue: sourceUUID))),
             meta: .none,
             links: .none
@@ -415,7 +415,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
         app.databases.use(testDatabase.configuration, as: .psql)
 
         let sourceUUID = UUID()
-        let testProperty = DB.APITestProperties(openAPISourceId: sourceUUID, apiHostOverride: nil, parser: .stable)
+        let testProperty = DB.APITestProperties(openAPISourceId: sourceUUID, apiHostOverride: nil)
         let testSource = DB.OpenAPISource(id: sourceUUID, uri: "http://website.com/source.yml", sourceType: .url)
 
         // expect a database query to find the properties resource
@@ -436,7 +436,7 @@ final class APITestPropertiesControllerTests: XCTestCase {
 
         let expectedPrimary = API.APITestProperties(
             id: .init(rawValue: testProperty.id!),
-            attributes: .init(createdAt: testProperty.createdAt, apiHostOverride: testProperty.apiHostOverride, parser: .stable),
+            attributes: .init(createdAt: testProperty.createdAt, apiHostOverride: testProperty.apiHostOverride),
             relationships: .init(openAPISource: .init(id: .init(rawValue: sourceUUID))),
             meta: .none,
             links: .none

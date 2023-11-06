@@ -50,6 +50,8 @@ public final class JSONAPIErrorMiddleware: Vapor.Middleware {
                 return Self.notFoundError(details: abortError.reason)
             case .badRequest:
                 return Self.badRequestError(details: abortError.reason)
+            case .unprocessableEntity:
+                return Self.unprocessableEntityError(details: abortError.reason)
             default:
                 return Self.serverError(details: abortError.reason)
             }

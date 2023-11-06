@@ -18,31 +18,17 @@ public struct APITestProperties {
     /// Perform validation & linting on the OpenAPI
     /// documentation in addition to generating tests from it.
     let validateOpenAPI: Bool
-    /// If the test is run against a JSON document,
-    /// which strategy should be used. This option
-    /// defaults to `.stable` and is not currently used
-    /// for YAML decoding.
-    let parser: Parser
 
     public init(
         openAPISource: OpenAPISource,
         apiHostOverride: URL?,
         formatGeneratedSwift: Bool = true,
-        validateOpenAPI: Bool = false,
-        parser: Parser
+        validateOpenAPI: Bool = false
     ) {
         self.apiHostOverride = apiHostOverride
         self.openAPISource = openAPISource
         self.formatGeneratedSwift = formatGeneratedSwift
         self.validateOpenAPI = validateOpenAPI
-        self.parser = parser
-    }
-}
-
-extension APITestProperties {
-    public enum Parser: String, CaseIterable {
-        case fast
-        case stable
     }
 }
 

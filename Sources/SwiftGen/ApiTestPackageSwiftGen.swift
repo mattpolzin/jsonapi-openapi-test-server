@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import OpenAPIKit
+import OpenAPIKit30
 import JSONAPISwiftGen
 import ZIPFoundation
 
@@ -629,7 +629,7 @@ func documents(
 
         if let examples = jsonResponse.examples {
             exampleGens = examples
-                .compactMapValues { $0.value.b }
+                .compactMapValues { $0.value?.b }
                 .compactMap { (name, example) in
                     do {
                         return (name, try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: name)))
@@ -758,7 +758,7 @@ func document(
 
     if let examples = jsonRequest.examples {
         exampleGens = examples
-            .compactMapValues { $0.value.b }
+            .compactMapValues { $0.value?.b }
             .compactMap { (name, example) in
                 do {
                     return try ExampleSwiftGen.init(openAPIExample: example, propertyName: exampleProp(named: name))

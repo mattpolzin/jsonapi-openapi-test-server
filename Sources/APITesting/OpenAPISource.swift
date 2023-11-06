@@ -6,7 +6,7 @@
 //
 
 import Vapor
-import OpenAPIKit
+import OpenAPIKit30
 
 public enum OpenAPISource {
     case file(path: String)
