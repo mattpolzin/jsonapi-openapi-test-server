@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import OpenAPIKit
+import OpenAPIKit30
 import JSONAPISwiftGen
 
 public func prepOutFolders(_ outPath: String, testLogPath: String, logger: Logger) throws {
