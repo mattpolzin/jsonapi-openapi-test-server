@@ -174,8 +174,8 @@ final class APITestControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testDescriptors = [
@@ -246,8 +246,8 @@ final class APITestControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testDescriptors = [
@@ -327,8 +327,8 @@ final class APITestControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testDescriptors = [
@@ -430,8 +430,8 @@ final class APITestControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testDescriptors = [
@@ -494,8 +494,7 @@ final class APITestControllerTests: XCTestCase {
                     id: .init(rawValue: testProperties[0].id!),
                     attributes: .init(
                         createdAt: testProperties[0].createdAt,
-                        apiHostOverride: testProperties[0].apiHostOverride,
-                        parser: .stable
+                        apiHostOverride: testProperties[0].apiHostOverride
                     ),
                     relationships: .init(openAPISourceId: .init(rawValue: testProperties[0].$openAPISource.id)),
                     meta: .none,
@@ -522,8 +521,7 @@ final class APITestControllerTests: XCTestCase {
                     id: .init(rawValue: testProperties[1].id!),
                     attributes: .init(
                         createdAt: testProperties[1].createdAt,
-                        apiHostOverride: testProperties[1].apiHostOverride,
-                        parser: .fast
+                        apiHostOverride: testProperties[1].apiHostOverride
                     ),
                     relationships: .init(openAPISourceId: .init(rawValue: testProperties[1].$openAPISource.id)),
                     meta: .none,
@@ -577,8 +575,8 @@ final class APITestControllerTests: XCTestCase {
         ]
 
         let testProperties = [
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil, parser: .stable),
-            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!, parser: .fast)
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[0], apiHostOverride: nil),
+            DB.APITestProperties(openAPISourceId: openAPISourceUUIDs[1], apiHostOverride: URL(string: "http://website.com")!)
         ]
 
         let testDescriptors = [
@@ -646,8 +644,7 @@ final class APITestControllerTests: XCTestCase {
                     id: .init(rawValue: testProperties[0].id!),
                     attributes: .init(
                         createdAt: testProperties[0].createdAt,
-                        apiHostOverride: testProperties[0].apiHostOverride,
-                        parser: .stable
+                        apiHostOverride: testProperties[0].apiHostOverride
                     ),
                     relationships: .init(openAPISourceId: .init(rawValue: testProperties[0].$openAPISource.id)),
                     meta: .none,
@@ -687,8 +684,7 @@ final class APITestControllerTests: XCTestCase {
                     id: .init(rawValue: testProperties[1].id!),
                     attributes: .init(
                         createdAt: testProperties[1].createdAt,
-                        apiHostOverride: testProperties[1].apiHostOverride,
-                        parser: .fast
+                        apiHostOverride: testProperties[1].apiHostOverride
                     ),
                     relationships: .init(openAPISourceId: .init(rawValue: testProperties[1].$openAPISource.id)),
                     meta: .none,
@@ -784,7 +780,7 @@ final class APITestControllerTests: XCTestCase {
 
         let testDescriptor = try DB.APITestDescriptor(
             id: UUID(),
-            testProperties: .init(openAPISourceId: UUID(), apiHostOverride: nil, parser: .stable)
+            testProperties: .init(openAPISourceId: UUID(), apiHostOverride: nil)
         )
 
         // expect a database query to find the properties resource

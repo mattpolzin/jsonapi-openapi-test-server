@@ -16,22 +16,18 @@ extension API {
         public struct Attributes: JSONAPI.SparsableAttributes {
             public let createdAt: Attribute<Date>
             public let apiHostOverride: Attribute<URL?>
-            public let parser: Attribute<Parser>
 
             public init(
                 createdAt: Date,
-                apiHostOverride: URL?,
-                parser: Parser
+                apiHostOverride: URL?
             ) {
                 self.createdAt = .init(value: createdAt)
                 self.apiHostOverride = .init(value: apiHostOverride)
-                self.parser = .init(value: parser)
             }
 
             public enum CodingKeys: SparsableCodingKey {
                 case createdAt
                 case apiHostOverride
-                case parser
             }
         }
 
@@ -57,11 +53,9 @@ extension API {
 
         public struct Attributes: JSONAPI.Attributes {
             public let apiHostOverride: Attribute<URL?>
-            public let parser: Attribute<Parser>
 
-            public init(apiHostOverride: URL?, parser: Parser) {
+            public init(apiHostOverride: URL?) {
                 self.apiHostOverride = .init(value: apiHostOverride)
-                self.parser = .init(value: parser)
             }
         }
 
@@ -82,11 +76,4 @@ extension API {
     public typealias SingleAPITestPropertiesDocument = SingleDocument<APITestProperties, Include1<OpenAPISource>>
 
     public typealias CreateAPITestPropertiesDocument = SingleDocument<NewAPITestProperties, NoIncludes>.SuccessDocument
-}
-
-extension API {
-    public enum Parser: String, Codable, CaseIterable {
-        case fast = "fast"
-        case stable = "stable"
-    }
 }

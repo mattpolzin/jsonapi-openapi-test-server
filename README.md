@@ -58,7 +58,7 @@ The command line tool's usage can be printed with `--help` and it is as follows:
 ```
 OVERVIEW: Build and run tests based on an OpenAPI Document.
 
-USAGE: APITest [--dump-files <directory path>] [--fail-hard] [--ignore-warnings] [--validate-all] [--openapi-file <file path>] [--override-server <url>] [--parser <parser>]
+USAGE: APITest [--dump-files <directory path>] [--fail-hard] [--ignore-warnings] [--validate-all] [--openapi-file <file path>] [--override-server <url>]
 
 OPTIONS:
   --dump-files <directory path>
@@ -78,10 +78,6 @@ OPTIONS:
         This argument allows you to make API requests against a different server than the input OpenAPI documentation specifies for this test run.
 
         Not using this argument will result in the API server options from the OpenAPI documentation being used.
-  -p, --parser <parser>   Choose between the "stable" parser and a "fast" parser that is less battle-tested. (default: stable)
-        This argument is currently only applicable to JSON parsing. When decoding a YAML file, the argument is ignored as there is only currently one YAML parser to choose from.
-
-        Not using this argument will result in using the default stable parser.
   -h, --help              Show help information.
 ```
 

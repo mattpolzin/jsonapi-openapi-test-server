@@ -9,12 +9,9 @@ import Foundation
 import ArgumentParser
 import Vapor
 import Yams
-import PureSwiftJSON
 import SwiftGen
 import OpenAPIKit30
 import JSONAPISwiftGen
-
-extension APITestProperties.Parser: ExpressibleByArgument {}
 
 internal struct URLOption: LosslessStringConvertible, ExpressibleByArgument {
     let value: URL
@@ -100,20 +97,6 @@ public struct APITestCommand: ParsableCommand {
     )
     var overrideServer: URLOption?
 
-    @ArgumentParser.Option(
-        name: [.long, .short],
-        help: .init(
-            "Choose between the \"stable\" parser and a \"fast\" parser that is less battle-tested.",
-            discussion: """
-                This argument is currently only applicable to JSON parsing. When decoding a YAML file, the argument is ignored as there is only currently one YAML parser to choose from.
-
-                Not using this argument will result in using the default stable parser.
-                """,
-            valueName: "parser"
-        )
-    )
-    var parser: APITestProperties.Parser = .stable
-
     public init() {}
 
     public func run() throws {
@@ -145,8 +128,7 @@ public struct APITestCommand: ParsableCommand {
             openAPISource: source,
             apiHostOverride: overrideServer?.value,
             formatGeneratedSwift: formatGeneratedSwift,
-            validateOpenAPI: validateAllOpenAPI,
-            parser: parser
+            validateOpenAPI: validateAllOpenAPI
         )
 
         console.print()
@@ -267,7 +249,6 @@ extension APITestCommand {
                 openAPIDoc(
                     on: eventLoop,
                     from: testProperties.openAPISource,
-                    parser: testProperties.parser,
                     threadPool: threadPool
                 )
             }
@@ -407,7 +388,6 @@ public func prepOutputFolders(
 public func openAPIDoc(
     on loop: EventLoop,
     from source: OpenAPISource,
-    parser: APITestProperties.Parser,
     threadPool: NIOThreadPool
 ) -> EventLoopFuture<ResolvedDocument> {
     /// Get the OpenAPI documentation from a URL
@@ -496,13 +476,7 @@ public func openAPIDoc(
 
             return data.flatMap { data in
                 threadPool.runIfActive(eventLoop: loop) {
-                    let document: OpenAPI.Document
-                    switch parser {
-                    case .stable:
-                        document = try JSONDecoder().decode(OpenAPI.Document.self, from: data)
-                    case .fast:
-                        document = try PSJSONDecoder().decode(OpenAPI.Document.self, from: data.readableBytesView)
-                    }
+                    let document = try JSONDecoder().decode(OpenAPI.Document.self, from: data)
                     return try document
                         .locallyDereferenced()
                         .resolved()
