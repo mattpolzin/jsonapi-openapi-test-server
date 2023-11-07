@@ -14,13 +14,13 @@ let package = Package(
         .library(name: "TestServerModels", targets: ["APIModels"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.5.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.86.0"),
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.1.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.9.0")),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.10.0")),
         .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.5.0")),
 
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
