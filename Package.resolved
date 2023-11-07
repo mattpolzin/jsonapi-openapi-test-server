@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/OpenAPIKit.git",
       "state" : {
-        "revision" : "ae98338a8e660ae547b058ebb69c010e70b64e31",
-        "version" : "3.0.0"
+        "revision" : "f93e9bd8ec7b9d58f6a86e303fd5f71c7088f9ae",
+        "version" : "3.0.1"
       }
     },
     {
@@ -392,8 +392,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/VaporOpenAPI.git",
       "state" : {
-        "revision" : "970fdd0ee30c5e5c1a8a4edfb165035877a2784b",
-        "version" : "0.5.0"
+        "revision" : "2c23383d0171081504758af4eaf9f626b5097d1e",
+        "version" : "0.6.0"
       }
     },
     {
