@@ -952,7 +952,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", .upToNextMajor(from: "5.2.0")),
-        .package(url: "https://github.com/mattpolzin/Poly.git", .upToNextMajor(from: "2.6.0"))
+        .package(url: "https://github.com/mattpolzin/Poly.git", .upToNextMajor(from: "2.7.0"))
     ],
     targets: [
         .target(
