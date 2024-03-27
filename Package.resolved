@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/JSONAPI.git",
       "state" : {
-        "revision" : "661dfc3ffec1ba3a201fd067877da2f3c553f236",
-        "version" : "5.1.0"
+        "revision" : "aaa014a75ac778a019e6abd05325ddcf812b539c",
+        "version" : "5.2.0"
       }
     },
     {
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/Poly.git",
       "state" : {
-        "revision" : "c108e9e0a2904134719b082f6c18d64406afc6db",
-        "version" : "2.6.0"
+        "revision" : "fb90ab22a09fe32e8cb152f7dea344df82a59d53",
+        "version" : "2.7.0"
       }
     },
     {
