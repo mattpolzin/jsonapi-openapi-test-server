@@ -24,56 +24,55 @@ public final class OpenAPISourceController: Controller {
 // MARK: - Routes
 extension OpenAPISourceController {
     /// Returns a list of all `OpenAPISource`s.
-    func index(_ req: TypedRequest<IndexContext>) throws -> EventLoopFuture<Response> {
+    func index(_ req: TypedRequest<IndexContext>) async throws -> Response {
 
-        return API.batchOpenAPISourceResponse(
+        async let batchResponse = API.batchOpenAPISourceResponse(
             query: DB.OpenAPISource.query(on: req.db)
         )
-            .flatMap(req.response.success.encode)
+
+        return try await req.response.success.encode(batchResponse)
     }
 
     /// Show an `OpenAPISource`.
-    func show(_ req: TypedRequest<ShowContext>) throws -> EventLoopFuture<Response> {
+    func show(_ req: TypedRequest<ShowContext>) async throws -> Response {
         guard let id = req.parameters.get("id", as: UUID.self) else {
-            return req.response.badRequest
+            // TODO: figure out right way to make my canned responses
+            //       async instead of EventLoopFutures
+            return try await req.response.badRequest.get()
         }
 
         let query = DB.OpenAPISource.query(on: req.db)
             .filter(\.$id == id)
 
-        return API.singleOpenAPISourceResponse(
+        async let singleResponse = API.singleOpenAPISourceResponse(
             query: query
         )
-            .flatMap(req.response.success.encode)
+
+        return try await req.response.success.encode(singleResponse)
     }
 
     /// Create an `OpenAPISource`.
-    func create(_ req: TypedRequest<CreateContext>) throws -> EventLoopFuture<Response> {
+    func create(_ req: TypedRequest<CreateContext>) async throws -> Response {
 
-        let source = req.eventLoop.makeSucceededFuture(())
-            .flatMapThrowing { try req.decodeBody().primaryResource.value }
+        async let source = req.decodeBody().primaryResource.value
 
-        let requestedSourceModel = source
-            .map(DB.OpenAPISource.init(apiModel:))
+        let requestedSourceModel = try await DB.OpenAPISource.init(apiModel: source)
 
-        let sourceModel = requestedSourceModel.flatMap { model in
-            DB.OpenAPISource.query(on: req.db)
-                .filter(\.$sourceType == model.sourceType)
-                .filter(\.$uri == model.uri)
-                .first(orCreate: model)
-        }
+        async let sourceModelQuery = DB.OpenAPISource.query(on: req.db)
+                .filter(\.$sourceType == requestedSourceModel.sourceType)
+                .filter(\.$uri == requestedSourceModel.uri)
+                .first(orCreate: requestedSourceModel)
+                .get()
 
-        return sourceModel
-            .flatMapThrowing { responseModel in
-                API.SingleOpenAPISourceDocument.SuccessDocument(
-                    apiDescription: .none,
-                    body: .init(resourceObject: try responseModel.jsonApiResources().primary),
-                    includes: .none,
-                    meta: .none,
-                    links: .none
-                )
-            }
-            .flatMap(req.response.success.encode)
+        let document = await API.SingleOpenAPISourceDocument.SuccessDocument(
+            apiDescription: .none,
+            body: .init(resourceObject: try sourceModelQuery.jsonApiResources().primary),
+            includes: .none,
+            meta: .none,
+            links: .none
+        )
+
+        return try await req.response.success.encode(document)
     }
 }
 
