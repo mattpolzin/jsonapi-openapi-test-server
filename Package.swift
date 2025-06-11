@@ -23,7 +23,7 @@ let package = Package(
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.10.0")),
         .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.6.0")),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
+//        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
 
         .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.31.0")),
         .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "3.0.0"),
@@ -94,7 +94,7 @@ let package = Package(
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             .product(name: "OpenAPIKit30", package: "OpenAPIKit"),
             .product(name: "JSONAPISwiftGen", package: "JSONAPI-OpenAPI"),
-            .product(name: "ZIPFoundation", package: "ZIPFoundation")
+//            .product(name: "ZIPFoundation", package: "ZIPFoundation")
         ])
     ]
 )

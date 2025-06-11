@@ -8,7 +8,7 @@
 import Foundation
 import OpenAPIKit30
 import JSONAPISwiftGen
-import ZIPFoundation
+//import ZIPFoundation
 
 public protocol Logger {
     func error(path: String?, context: String, message: String)
@@ -517,7 +517,8 @@ func archive(from sourcePath: String, to archiveFilePath: String) throws {
         try fileManager.removeItem(atPath: archiveFilePath)
     }
 
-    try fileManager.zipItem(at: source, to: destination)
+    throw TestPackageSwiftError.executionFailed(stdout: "NEED TO REPLACE ZIPFOUNDATION LIBRARY")
+//    try fileManager.zipItem(at: source, to: destination)
 }
 
 struct DeclNode: Equatable {
