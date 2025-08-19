@@ -1,5 +1,5 @@
 
-FROM swift:5.9 as builder
+FROM swift:5.9 AS builder
 
 # Install OS updates and, if needed, sqlite3
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
