@@ -1,12 +1,12 @@
-// swift-tools-version:5.8
+// swift-tools-version:6.0
 
 import PackageDescription
 
 let package = Package(
     name: "jsonapi-openapi-test-server",
     platforms: [
-        .macOS(.v12),
-        .iOS(.v11)
+        .macOS(.v10_15),
+        .iOS(.v13)
     ],
     products: [
         .library(name: "jsonapi-openapi-test-server", targets: ["App"]),
@@ -21,14 +21,14 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
 
         .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.10.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.6.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.8.0")),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
+//        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
 
-        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.32.1")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "3.0.0"),
-        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "5.3.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.33.0")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "4.0.0"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "6.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0"),
 
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0")
     ],
@@ -94,7 +94,8 @@ let package = Package(
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             .product(name: "OpenAPIKit30", package: "OpenAPIKit"),
             .product(name: "JSONAPISwiftGen", package: "JSONAPI-OpenAPI"),
-            .product(name: "ZIPFoundation", package: "ZIPFoundation")
+//            .product(name: "ZIPFoundation", package: "ZIPFoundation")
         ])
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )

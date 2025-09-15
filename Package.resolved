@@ -1,12 +1,13 @@
 {
+  "originHash" : "4ec6df7cd4a044abc16ff2f1b3730cdc76f3fc7991e4c20bff233f2d0ce2f07e",
   "pins" : [
     {
       "identity" : "async-http-client",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server/async-http-client.git",
       "state" : {
-        "revision" : "60235983163d040f343a489f7e2e77c1918a8bd9",
-        "version" : "1.26.1"
+        "revision" : "7dc119c7edf3c23f52638faadb89182861dee853",
+        "version" : "1.28.0"
       }
     },
     {
@@ -14,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/async-kit.git",
       "state" : {
-        "revision" : "e048c8ee94967e8d8a1c2ec0e1156d6f7fa34d31",
-        "version" : "1.20.0"
+        "revision" : "6f3615ccf2ac3c2ae0c8087d527546e9544a43dd",
+        "version" : "1.21.0"
       }
     },
     {
@@ -50,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/fluent-postgres-driver.git",
       "state" : {
-        "revision" : "095bc5a17ab3363167f4becb270b6f8eb790481c",
-        "version" : "2.10.1"
+        "revision" : "cd47a7042a529735e401bdfaa070823d151f7f94",
+        "version" : "2.11.0"
       }
     },
     {
@@ -59,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/JSONAPI.git",
       "state" : {
-        "revision" : "58ebdc9b104383288cde3028ce0efd552e08c47a",
-        "version" : "5.3.1"
+        "revision" : "d3457ae21a76b21e9a8f5bf3953ba9166cfa12f0",
+        "version" : "6.0.0"
       }
     },
     {
@@ -68,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/JSONAPI-OpenAPI.git",
       "state" : {
-        "revision" : "8ac5e4fab3f8153b1e0623ba2a6bafffbe3bcf2c",
-        "version" : "0.32.1"
+        "revision" : "29440d88c27b57360dff15cbcd24c243395bfa77",
+        "version" : "0.33.1"
       }
     },
     {
@@ -77,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/JSONAPIViz.git",
       "state" : {
-        "revision" : "407422e121c2d73f6dd262071df62481cb4016e9",
-        "version" : "0.0.6"
+        "revision" : "129a7d622a8512bd35909b413a4ab7a70ddaac3f",
+        "version" : "0.0.7"
       }
     },
     {
@@ -95,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/OpenAPIKit.git",
       "state" : {
-        "revision" : "e0ecdf050c4bebc0104ed2505ec6fa1f6afb7555",
-        "version" : "3.7.0"
+        "revision" : "fe8cd4bd569b0834943cdc230b1204b0a9c6e14e",
+        "version" : "4.1.0"
       }
     },
     {
@@ -104,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/OpenAPIReflection.git",
       "state" : {
-        "revision" : "4abc8cfcc66fc34de25a69454f8fa7b9f484dfce",
-        "version" : "2.0.1"
+        "revision" : "d5981296867215f62363d6c88cf05c8d71cf8d48",
+        "version" : "3.0.0"
       }
     },
     {
@@ -113,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/Poly.git",
       "state" : {
-        "revision" : "99e2e8b575620369be52fe348c0dd72028e3674c",
-        "version" : "2.8.0"
+        "revision" : "37c942daa23ab373ce05ef87f42103342e59cf3a",
+        "version" : "3.0.0"
       }
     },
     {
@@ -122,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/postgres-kit.git",
       "state" : {
-        "revision" : "f4d4b9e8db9a907644d67d6a7ecb5f0314eec1ad",
-        "version" : "2.14.0"
+        "revision" : "d2fd3172c2e318bd292a4c1297e4c65a418cf6f3",
+        "version" : "2.14.1"
       }
     },
     {
@@ -158,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/redis.git",
       "state" : {
-        "revision" : "f4ac19812066c3ff735f9aac3e254ee673aa6418",
-        "version" : "4.13.0"
+        "revision" : "bc960cc856ef9fd5da760d6a3afedb93fc92aa00",
+        "version" : "4.14.0"
       }
     },
     {
@@ -194,8 +195,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/sql-kit.git",
       "state" : {
-        "revision" : "0169d063f6eb9f384a85c5ccc881fe2b32de53f1",
-        "version" : "3.33.1"
+        "revision" : "1a9ab0523fb742d9629558cede64290165c4285b",
+        "version" : "3.33.2"
       }
     },
     {
@@ -248,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-certificates.git",
       "state" : {
-        "revision" : "c059d9c9d08d6654b9a92dda93d9049a278964c6",
-        "version" : "1.12.0"
+        "revision" : "20c451f1ad8e344e61ddbb34ef196653d4b73ea6",
+        "version" : "1.13.0"
       }
     },
     {
@@ -275,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-crypto.git",
       "state" : {
-        "revision" : "334e682869394ee239a57dbe9262bff3cd9495bd",
-        "version" : "3.14.0"
+        "revision" : "d1c6b70f7c5f19fb0b8750cb8dcdf2ea6e2d8c34",
+        "version" : "3.15.0"
       }
     },
     {
@@ -284,8 +285,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-distributed-tracing.git",
       "state" : {
-        "revision" : "b78796709d243d5438b36e74ce3c5ec2d2ece4d8",
-        "version" : "1.2.1"
+        "revision" : "6600888f4cb5bbf1bcac51000f60b2cbd224c91b",
+        "version" : "1.3.0"
       }
     },
     {
@@ -374,8 +375,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "385f5bd783ffbfff46b246a7db7be8e4f04c53bd",
-        "version" : "2.33.0"
+        "revision" : "737e550e607d82bf15bdfddf158ec61652ce836f",
+        "version" : "2.34.0"
       }
     },
     {
@@ -401,8 +402,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics.git",
       "state" : {
-        "revision" : "e0ec0f5f3af6f3e4d5e7a19d2af26b481acb6ba8",
-        "version" : "1.0.3"
+        "revision" : "bbadd4b853a33fd78c4ae977d17bb2af15eb3f2a",
+        "version" : "1.1.0"
       }
     },
     {
@@ -446,8 +447,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/vapor.git",
       "state" : {
-        "revision" : "3636f443474769147828a5863e81a31f6f30e92c",
-        "version" : "4.115.1"
+        "revision" : "773ea6a63595ae4f6bc46a366d78769d4cb8b08c",
+        "version" : "4.117.0"
       }
     },
     {
@@ -455,8 +456,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/VaporOpenAPI.git",
       "state" : {
-        "revision" : "2c23383d0171081504758af4eaf9f626b5097d1e",
-        "version" : "0.6.0"
+        "revision" : "7535ecbab7f13ccd581621acee70b36e09101ad2",
+        "version" : "0.8.0"
       }
     },
     {
@@ -482,19 +483,10 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jpsim/Yams.git",
       "state" : {
-        "revision" : "3d6871d5b4a5cd519adf233fbb576e0a2af71c17",
-        "version" : "5.4.0"
-      }
-    },
-    {
-      "identity" : "zipfoundation",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/weichsel/ZIPFoundation.git",
-      "state" : {
-        "revision" : "02b6abe5f6eef7e3cbd5f247c5cc24e246efcfe0",
-        "version" : "0.9.19"
+        "revision" : "d41ba4e7164c0838c6d48351f7575f7f762151fe",
+        "version" : "6.1.0"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
