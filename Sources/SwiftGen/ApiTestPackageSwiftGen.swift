@@ -1,9 +1,6 @@
 //
 //  ApiTestPackageSwiftGen.swift
 //
-//
-//  Created by Mathew Polzin on 7/27/19.
-//
 
 import Foundation
 import OpenAPIKit30
@@ -122,13 +119,12 @@ public func produceAPITestPackage(
     ]
     results = routes.flatMap(\.endpoints).map { endpoint in
 
-        let documentFileNameString = documentTypeName(path: endpoint.path, verb: endpoint.method)
-
+        let documentFileNameString = documentTypeName(path: endpoint.path, verb: .builtin(endpoint.method))
 
         let apiRequestTest: APIRequestTestSwiftGen?
         do {
             apiRequestTest = try APIRequestTestSwiftGen(
-                method: endpoint.method,
+                method: .builtin(endpoint.method),
                 server: server,
                 pathComponents: endpoint.path,
                 parameters: endpoint.parameters
@@ -162,7 +158,7 @@ public func produceAPITestPackage(
                 .flatMap {
                     try document(
                         from: $0,
-                        for: endpoint.method,
+                        for: .builtin(endpoint.method),
                         at: endpoint.path,
                         logger: logger
                     )
@@ -183,7 +179,7 @@ public func produceAPITestPackage(
         }.map { context in
             TestFunctionName(
                 path: endpoint.path,
-                endpoint: endpoint.method,
+                endpoint: .builtin(endpoint.method),
                 direction: .response,
                 context: context
             )
@@ -196,7 +192,7 @@ public func produceAPITestPackage(
                     .map { context in
                         TestFunctionName(
                             path: endpoint.path,
-                            endpoint: endpoint.method,
+                            endpoint: .builtin(endpoint.method),
                             direction: .request,
                             context: context
                         )
@@ -240,7 +236,7 @@ public func produceAPITestPackage(
             for: result.apiRequestTest,
             reqDoc: result.requestDocument,
             respDocs: result.responseDocuments.values,
-            httpVerb: result.endpoint.method,
+            httpVerb: .builtin(result.endpoint.method),
             extending: namespace(for: result.endpoint.path),
             formatGeneratedSwift: formatGeneratedSwift
         )
@@ -665,7 +661,7 @@ func documents(
             testExampleFuncs = try exampleTests(
                 testSuiteConfiguration: testSuiteConfiguration,
                 server: server,
-                method: endpoint.method,
+                method: .builtin(endpoint.method),
                 pathComponents: endpoint.path,
                 parameters: endpoint.parameters,
                 jsonResponse: jsonResponse,

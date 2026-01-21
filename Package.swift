@@ -20,13 +20,14 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.10.0")),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.8.0")),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", branch: "feature/sendables"),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", branch: "feature/openapikit-5"),
 
+        // TODO: try https://github.com/adam-fowler/swift-zip-archive
 //        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
 
-        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.33.0")),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "4.0.0"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", branch: "feature/openapikit-5"),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "5.0.0-rc.2"),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "6.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0"),
 
