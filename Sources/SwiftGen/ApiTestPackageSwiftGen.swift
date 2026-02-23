@@ -5,7 +5,7 @@
 import Foundation
 import OpenAPIKit30
 import JSONAPISwiftGen
-//import ZIPFoundation
+import ZipArchive
 
 public protocol Logger {
     func error(path: String?, context: String, message: String)
@@ -492,10 +492,9 @@ func write(contents: String, toFileAt path: String, named name: String) throws {
 func archive(from sourcePath: String, to archiveFilePath: String) throws {
     let fileManager = FileManager.default
 
-    let source = URL(fileURLWithPath: sourcePath)
-    let destination = URL(fileURLWithPath: archiveFilePath)
+    let destinationURL = URL(fileURLWithPath: archiveFilePath)
 
-    let archiveFolderPath = destination
+    let archiveFolderPath = destinationURL
         .deletingLastPathComponent()
         .path
 
@@ -513,8 +512,9 @@ func archive(from sourcePath: String, to archiveFilePath: String) throws {
         try fileManager.removeItem(atPath: archiveFilePath)
     }
 
-    throw TestPackageSwiftError.executionFailed(stdout: "NEED TO REPLACE ZIPFOUNDATION LIBRARY")
-//    try fileManager.zipItem(at: source, to: destination)
+    try ZipArchiveWriter.withFile(archiveFilePath, options: .create) { writer in
+        try writer.writeFolderContents(.init(sourcePath), options: [.recursive, .includeContainingFolder, .includeHiddenFiles])
+    }
 }
 
 struct DeclNode: Equatable {
