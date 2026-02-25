@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "jsonapi-openapi-test-server",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v13),
         .iOS(.v13)
     ],
     products: [
@@ -20,14 +20,13 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.7.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
 
-        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", branch: "feature/sendables"),
-        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", branch: "feature/openapikit-5"),
+        .package(url: "https://github.com/mattpolzin/VaporTypedRoutes.git", .upToNextMinor(from: "0.11.0")),
+        .package(url: "https://github.com/mattpolzin/VaporOpenAPI.git", .upToNextMinor(from: "0.9.0")),
 
-        // TODO: try https://github.com/adam-fowler/swift-zip-archive
-//        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMinor(from: "0.9.17")),
+        .package(url: "https://github.com/adam-fowler/swift-zip-archive.git", .upToNextMinor(from: "0.6.4")),
 
-        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", branch: "feature/openapikit-5"),
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "5.0.0-rc.2"),
+        .package(url: "https://github.com/mattpolzin/JSONAPI-OpenAPI.git", .upToNextMinor(from: "0.34.0")),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "5.0.0"),
         .package(url: "https://github.com/mattpolzin/JSONAPI.git", from: "6.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0"),
 
@@ -95,7 +94,7 @@ let package = Package(
             .product(name: "JSONAPIOpenAPI", package: "JSONAPI-OpenAPI"),
             .product(name: "OpenAPIKit30", package: "OpenAPIKit"),
             .product(name: "JSONAPISwiftGen", package: "JSONAPI-OpenAPI"),
-//            .product(name: "ZIPFoundation", package: "ZIPFoundation")
+            .product(name: "ZipArchive", package: "swift-zip-archive")
         ])
     ],
     swiftLanguageModes: [.v5]
